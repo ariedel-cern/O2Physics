@@ -186,12 +186,35 @@ enum ParticleOriginMCTruth {
   kPrimary,   //! Primary track or V0
   kDaughter,  //! Particle from a decay
   kMaterial,  //! Particle from a material
-  kNotPrimary //! Particle from a material
 };
 
 DECLARE_SOA_INDEX_COLUMN(FemtoDreamParticle, femtoDreamParticle);
 DECLARE_SOA_COLUMN(PartOriginMCTruth, partOriginMCTruth, uint8_t); //! Origin of the particle, according to femtodreamparticle::ParticleOriginMCTruth
 DECLARE_SOA_COLUMN(PDGMCTruth, pdgMCTruth, int);                   //! Particle PDG
+DECLARE_SOA_COLUMN(Pt, pt, float);                                 //! p_T (GeV/c)
+DECLARE_SOA_COLUMN(Eta, eta, float);                               //! Eta
+DECLARE_SOA_COLUMN(Phi, phi, float);                               //! Phi
+DECLARE_SOA_COLUMN(PartType, partType, uint8_t);                   //! Type of the particle, according to femtodreamparticle::ParticleType
+DECLARE_SOA_DYNAMIC_COLUMN(Theta, theta,                           //! Compute the theta of the track
+                           [](float eta) -> float {
+                             return 2.f * std::atan(std::exp(-eta));
+                           });
+DECLARE_SOA_DYNAMIC_COLUMN(Px, px, //! Compute the momentum in x in GeV/c
+                           [](float pt, float phi) -> float {
+                             return pt * std::sin(phi);
+                           });
+DECLARE_SOA_DYNAMIC_COLUMN(Py, py, //! Compute the momentum in y in GeV/c
+                           [](float pt, float phi) -> float {
+                             return pt * std::cos(phi);
+                           });
+DECLARE_SOA_DYNAMIC_COLUMN(Pz, pz, //! Compute the momentum in z in GeV/c
+                           [](float pt, float eta) -> float {
+                             return pt * std::sinh(eta);
+                           });
+DECLARE_SOA_DYNAMIC_COLUMN(P, p, //! Compute the overall momentum in GeV/c
+                           [](float pt, float eta) -> float {
+                             return pt * std::cosh(eta);
+                           });
 
 // debug variables
 DECLARE_SOA_COLUMN(MotherPDG, motherPDG, int); //! Checks mother PDG, where mother is the primary particle for that decay chain
@@ -201,7 +224,16 @@ DECLARE_SOA_TABLE(FemtoDreamParticlesMC, "AOD", "FEMTODREAMPSMC",
                   o2::soa::Index<>,
                   femtodreamparticleMC::FemtoDreamParticleId,
                   femtodreamparticleMC::PartOriginMCTruth,
-                  femtodreamparticleMC::PDGMCTruth);
+                  femtodreamparticleMC::PDGMCTruth,
+                  femtodreamparticleMC::Pt,
+                  femtodreamparticleMC::Eta,
+                  femtodreamparticleMC::Phi,
+                  // femtodreamparticleMC::PartType,
+                  femtodreamparticleMC::Theta<femtodreamparticleMC::Eta>,
+                  femtodreamparticleMC::Px<femtodreamparticleMC::Pt, femtodreamparticleMC::Phi>,
+                  femtodreamparticleMC::Py<femtodreamparticleMC::Pt, femtodreamparticleMC::Phi>,
+                  femtodreamparticleMC::Pz<femtodreamparticleMC::Pt, femtodreamparticleMC::Eta>,
+                  femtodreamparticleMC::P<femtodreamparticleMC::Pt, femtodreamparticleMC::Eta>);
 using FemtoDreamParticleMC = FemtoDreamParticlesMC::iterator;
 
 DECLARE_SOA_TABLE(FemtoDreamDebugParticlesMC, "AOD", "FEMTODEBUGPMC",

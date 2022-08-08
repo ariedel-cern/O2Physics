@@ -320,19 +320,41 @@ struct femtoDreamProducerTask {
   void fillMCParticle(ParticleType const& particle)
   {
     if (particle.has_mcParticle()) {
+
       // get corresponding MC particle and its info
       auto particleMC = particle.mcParticle();
       auto pdgCode = particleMC.pdgCode();
-      bool isPrimary = particleMC.isPhysicalPrimary();
-      if (isPrimary) {
-        outputPartsMC(outputParts.lastIndex(), aod::femtodreamparticleMC::ParticleOriginMCTruth::kPrimary, pdgCode);
+      auto particleMCPt = particleMC.pt();
+      auto particleMCEta = particleMC.eta();
+      auto particleMCPhi = particleMC.phi();
+
+      // bool isPrimary = particleMC.isPhysicalPrimary();
+      if (particleMC.isPhysicalPrimary()) {
+        outputPartsMC(outputParts.lastIndex(),
+                      aod::femtodreamparticleMC::ParticleOriginMCTruth::kPrimary,
+                      pdgCode,
+                      particleMCPt,
+                      particleMCEta,
+                      particleMCPhi);
+      } else if (!particleMC.fromBackgroundEvent()) {
+        outputPartsMC(outputParts.lastIndex(),
+                      aod::femtodreamparticleMC::ParticleOriginMCTruth::kDaughter,
+                      pdgCode,
+                      particleMCPt,
+                      particleMCEta,
+                      particleMCPhi);
       } else {
-        outputPartsMC(outputParts.lastIndex(), aod::femtodreamparticleMC::ParticleOriginMCTruth::kNotPrimary, pdgCode);
+        outputPartsMC(outputParts.lastIndex(),
+                      aod::femtodreamparticleMC::ParticleOriginMCTruth::kMaterial,
+                      pdgCode,
+                      particleMCPt,
+                      particleMCEta,
+                      particleMCPhi);
       }
       // fill with correct values, this is currently placeholder
       outputDebugPartsMC(-999);
     } else {
-      outputPartsMC(outputParts.lastIndex(), -999, -999);
+      // outputPartsMC(outputParts.lastIndex(), -999, -999);
       outputDebugPartsMC(-999);
     }
   }
@@ -447,18 +469,62 @@ struct femtoDreamProducerTask {
             fillDebugParticle<false>(v0);      // QA for v0
           }
           if constexpr (isMC) {
-            // write code to fill lambdas!
-            // fill for lambda
-            outputPartsMC(outputParts.lastIndex(), -999, -999);
-            outputDebugPartsMC(-999);
+
+            if (postrack.has_mcParticle() && negtrack.has_mcParticle()) {
+              auto MCposTrack = postrack.template mcParticle_as<aod::McParticles>();
+              auto MCnegTrack = negtrack.template mcParticle_as<aod::McParticles>();
+
+              if (MCposTrack.has_mothers() && MCnegTrack.has_mothers()) {
+
+                for (auto& MCposTrackMother : MCposTrack.template mothers_as<aod::McParticles>()) {
+                  for (auto& MCnegTrackMother : MCnegTrack.template mothers_as<aod::McParticles>()) {
+                    if (MCposTrackMother.globalIndex() == MCnegTrackMother.globalIndex()) {
+
+                      auto pdgCode = MCposTrackMother.pdgCode();
+                      auto particleMCPt = MCposTrackMother.pt();
+                      auto particleMCEta = MCposTrackMother.eta();
+                      auto particleMCPhi = MCposTrackMother.phi();
+
+                      if (MCposTrackMother.isPhysicalPrimary()) {
+                        outputPartsMC(outputParts.lastIndex(),
+                                      aod::femtodreamparticleMC::ParticleOriginMCTruth::kPrimary,
+                                      pdgCode,
+                                      particleMCPt,
+                                      particleMCEta,
+                                      particleMCPhi);
+
+                      } else if (!MCposTrackMother.fromBackgroundEvent()) {
+                        outputPartsMC(outputParts.lastIndex(),
+                                      aod::femtodreamparticleMC::ParticleOriginMCTruth::kDaughter,
+                                      pdgCode,
+                                      particleMCPt,
+                                      particleMCEta,
+                                      particleMCPhi);
+                      } else {
+                        outputPartsMC(outputParts.lastIndex(),
+                                      aod::femtodreamparticleMC::ParticleOriginMCTruth::kMaterial,
+                                      pdgCode,
+                                      particleMCPt,
+                                      particleMCEta,
+                                      particleMCPhi);
+                      }
+                      if (ConfDebugOutput) {
+                        outputDebugPartsMC(MCposTrackMother.pdgCode());
+                      }
+                    }
+                  }
+                }
+              }
+            }
           }
         }
       }
     }
   }
 
-  void processData(aod::FemtoFullCollision const& col, aod::BCsWithTimestamps const&, aod::FemtoFullTracks const& tracks,
-                   o2::aod::V0Datas const& fullV0s) /// \todo with FilteredFullV0s
+  void
+    processData(aod::FemtoFullCollision const& col, aod::BCsWithTimestamps const&, aod::FemtoFullTracks const& tracks,
+                o2::aod::V0Datas const& fullV0s) /// \todo with FilteredFullV0s
   {
     // get magnetic field for run
     getMagneticFieldTesla(col.bc_as<aod::BCsWithTimestamps>());
