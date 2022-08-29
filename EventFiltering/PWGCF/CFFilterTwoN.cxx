@@ -90,13 +90,16 @@ struct CFFilterTwoN {
 
   Configurable<float> confProtonPtMin{"ProtonPtMin", 0.5, "Minimal Pt for Protons"};
   Configurable<float> confProtonPtMax{"ProtonPtMax", 4.0, "Maximal Pt for Protons"};
-  Configurable<float> confPIDThreshold{"PThreshold", 0.75f, "P threshold for TPC/TPC&TOF selection (Protons only)"};
+  Configurable<float> confPIDThresholdProton{"PIDThresholdProton", 0.75f, "P threshold for TPC/TPC&TOF selection (Protons only)"};
 
   Configurable<float> confDeuteronPtMin{"DeuteronPtMin", 0.5, "Minimal Pt for Deuterons"};
   Configurable<float> confDeuteronPtMax{"DeuteronPtMax", 1.4, "Maximal Pt for Deuterons"};
 
-  // Configurable<float> confnSigmaAcceptance{"PIDAcceptance",3.5,"nSigma for accepting Protons and Deuterons"};
-  Configurable<float> confPIDRejection{"PIDRejection", 3, "nSigma for rejection bogus Deuterons"};
+  Configurable<float> confnSigmaAccetance{"PIDAcceptance", 3., "nSigma for accepting Protons and Deuterons"};
+  Configurable<float> confPIDRejection{"PIDRejection", 3.5, "nSigma for rejection bogus Deuterons"};
+
+  Configurable<std::vector<float>> confnSigmaReduced{"ReducedNSigma", {1.0, 0.5, 0.3}, "reduce nSigma as a function of pt for Deuteron acceptance"};
+  Configurable<std::vector<float>> confnSigmaReducedPt{"ReducedNSigmaPt", {1.1, 1.2, 1.3}, "pt values for reduce nSigma for Deuteron acceptance"};
 
   Configurable<float> ldeltaPhiMax{"ldeltaPhiMax", 0.010, "Max limit of delta phi"};
   Configurable<float> ldeltaEtaMax{"ldeltaEtaMax", 0.010, "Max limit of delta eta"};
@@ -124,7 +127,14 @@ struct CFFilterTwoN {
     bool pidSelection = false;
     if (vSpecies == o2::track::PID::Proton) {
       // use momentum dependend (TPC or TPC&TOF) pid selection for protons
-      pidSelection = isFullPIDSelected(pidCut, momentum, confPIDThreshold.value, std::vector<int>{2}, 4., std::vector<float>{3.5, 3., 2.5}, 3., 3.);
+      pidSelection = isFullPIDSelected(pidCut,
+                                       momentum,
+                                       confPIDThresholdProton.value,
+                                       std::vector<int>{2},
+                                       4.,
+                                       std::vector<float>{3.5, 3., 2.5},
+                                       confnSigmaAccetance.value,
+                                       confnSigmaAccetance);
     } else if (vSpecies == o2::track::PID::Deuteron) {
       // use additional rejection for deuterons
       if (confPIDRejection.value > 0.) {
@@ -132,10 +142,10 @@ struct CFFilterTwoN {
         if (!isPIDSelected(pidCut, std::vector<int>{0}, 4, confPIDRejection.value, std::vector<float>{3.5, 3., 2.5}, kDetector::kTPC) &&
             !isPIDSelected(pidCut, std::vector<int>{1}, 4, confPIDRejection.value, std::vector<float>{3.5, 3., 2.5}, kDetector::kTPC) &&
             !isPIDSelected(pidCut, std::vector<int>{2}, 4, confPIDRejection.value, std::vector<float>{3.5, 3., 2.5}, kDetector::kTPC)) {
-          pidSelection = isPIDSelected(pidCut, std::vector<int>{3}, 4, 3., std::vector<float>{3.5, 3., 2.5}, kDetector::kTPC);
+          pidSelection = isPIDSelected(pidCut, std::vector<int>{3}, 4, confnSigmaAccetance.value, std::vector<float>{3.5, 3., 2.5}, kDetector::kTPC);
         }
       } else {
-        pidSelection = isPIDSelected(pidCut, std::vector<int>{3}, 4, 3., std::vector<float>{3.5, 3., 2.5}, kDetector::kTPC);
+        pidSelection = isPIDSelected(pidCut, std::vector<int>{3}, 4, confnSigmaAccetance.value, std::vector<float>{3.5, 3., 2.5}, kDetector::kTPC);
       }
     } else {
       LOG(fatal) << "Other PID's are not supported by this trigger" << std::endl;

@@ -29,7 +29,10 @@ namespace o2::analysis::femtoDream
 enum kPIDselection {
   k3d5sigma = 0,
   k3sigma = 1,
-  k2d5sigma = 2
+  k2d5sigma = 2,
+  k1sigma = 3,
+  k0d5sigma = 4,
+  k0d3sigma = 5
 };
 
 enum kDetector {
@@ -85,7 +88,7 @@ bool isPIDSelected(aod::femtodreamparticle::cutContainerType const& pidcut, std:
 /// \param nSigmaTPC Number of TPC sigmas for selection
 /// \param nSigmaTPCTOF Number of TPC+TOF sigmas for selection (circular selection)
 /// \return Whether the PID selection is fulfilled
-bool isFullPIDSelected(aod::femtodreamparticle::cutContainerType const& pidCut, float const momentum, float const pidThresh, std::vector<int> const& vSpecies, int nSpecies, const std::vector<float>& vNsigma = {3.5, 3., 2.5}, const float nSigmaTPC = 3.5, const float nSigmaTPCTOF = 3.5)
+bool isFullPIDSelected(aod::femtodreamparticle::cutContainerType const& pidCut, float const momentum, float const pidThresh, std::vector<int> const& vSpecies, int nSpecies, const std::vector<float>& vNsigma = {3.5, 3., 2.5, 1.0, 0.5, 0.3}, const float nSigmaTPC = 3.5, const float nSigmaTPCTOF = 3.5)
 {
   bool pidSelection = true;
   if (momentum < pidThresh) {
