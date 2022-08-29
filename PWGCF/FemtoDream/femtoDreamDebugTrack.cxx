@@ -38,7 +38,7 @@ static constexpr int nCuts = 5;
 static const std::vector<std::string> cutNames{"MaxPt", "PIDthr", "nSigmaTPC", "nSigmaTPCTOF", "MaxP"};
 static const float cutsTable[1][nCuts] = {{4.05f, 0.75f, 3.5f, 3.5f, 100.f}};
 
-static const std::vector<float> kNsigma = {3.5f, 3.f, 2.5f};
+static const std::vector<float> kNsigma = {3.5f, 3.f, 2.5f, 1.0f, 0.5f, 0.3f};
 } // namespace
 
 struct femtoDreamDebugTrack {

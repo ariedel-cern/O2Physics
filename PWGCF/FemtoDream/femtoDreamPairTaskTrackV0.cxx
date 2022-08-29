@@ -44,7 +44,7 @@ static const float cutsTable[nPart][nCuts]{
   {4.05f, 1.f, 3.f, 3.f, 100.f},
   {4.05f, 1.f, 5.f, 5.f, 100.f}};
 
-static const std::vector<float> kNsigma = {3.5f, 3.f, 2.5f};
+static const std::vector<float> kNsigma = {3.5f, 3.f, 2.5f, 1.0f, 0.5f, 0.3f};
 
 } // namespace
 
