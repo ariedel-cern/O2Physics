@@ -274,7 +274,7 @@ struct femtoDreamPairTaskTrackTrack {
     auto slicedPartsTwo = partsTwoMC->sliceByCached(aod::femtodreamparticle::femtoDreamCollisionId, col.globalIndex());
     doSameEvent<true>(col, parts, slicedPartsOne, slicedPartsTwo);
   }
-  PROCESS_SWITCH(femtoDreamPairTaskTrackTrack, processSameEventMC, "Enable processing same event for Monte Carlo", true);
+  PROCESS_SWITCH(femtoDreamPairTaskTrackTrack, processSameEventMC, "Enable processing same event for Monte Carlo", false);
 
   /// This function processes the mixed event
   /// \todo the trivial loops over the collisions and tracks should be factored out since they will be common to all combinations of T-T, T-V0, V0-V0, ...
@@ -360,7 +360,7 @@ struct femtoDreamPairTaskTrackTrack {
       doMixedEvent<true>(magFieldTesla1, col1.multNtrPV(), parts, slicedPartsOne, slicedPartsTwo);
     }
   }
-  PROCESS_SWITCH(femtoDreamPairTaskTrackTrack, processMixedEventMC, "Enable processing mixed events MC", true);
+  PROCESS_SWITCH(femtoDreamPairTaskTrackTrack, processMixedEventMC, "Enable processing mixed events MC", false);
 };
 
 WorkflowSpec defineDataProcessing(ConfigContext const& cfgc)

@@ -112,10 +112,13 @@ class FemtoDreamContainer
   {
     float femtoObs;
     if constexpr (mFemtoObs == femtoDreamContainer::Observable::kstar) {
-      femtoObs = FemtoDreamMath::getkstar(part1, mMassOne, part2, mMassTwo);
+      femtoObs = FemtoDreamMath::getkstar(part1.pt(), part1.eta(), part1.phi(), mMassOne,
+                                          part2.pt(), part1.eta(), part2.phi(), mMassTwo);
     }
-    const float kT = FemtoDreamMath::getkT(part1, mMassOne, part2, mMassTwo);
-    const float mT = FemtoDreamMath::getmT(part1, mMassOne, part2, mMassTwo);
+    const float kT = FemtoDreamMath::getkT(part1.pt(), part1.eta(), part1.phi(), mMassOne,
+                                           part2.pt(), part1.eta(), part2.phi(), mMassTwo);
+    const float mT = FemtoDreamMath::getmT(part1.pt(), part1.eta(), part1.phi(), mMassOne,
+                                           part2.pt(), part1.eta(), part2.phi(), mMassTwo);
 
     if (mHistogramRegistry) {
       mHistogramRegistry->fill(HIST(mFolderSuffix[mEventType]) + HIST("relPairDist"), femtoObs);
@@ -162,8 +165,10 @@ class FemtoDreamContainer
   {
     float femtoObs, femtoObsMC;
     if constexpr (mFemtoObs == femtoDreamContainer::Observable::kstar) {
-      femtoObs = FemtoDreamMath::getkstar(part1, mMassOne, part2, mMassTwo);
-      femtoObsMC = FemtoDreamMath::getkstarMC(part1, mMassOne, part2, mMassTwo);
+      femtoObs = FemtoDreamMath::getkstar(part1.pt(), part1.eta(), part1.phi(), mMassOne,
+                                          part2.pt(), part1.eta(), part2.phi(), mMassTwo);
+      femtoObsMC = FemtoDreamMath::getkstar(part1.ptTruth(), part1.etaTruth(), part1.phiTruth(), mMassOne,
+                                            part2.ptTruth(), part2.etaTruth(), part2.phiTruth(), mMassTwo);
     }
     if (mHistogramRegistry) {
       mHistogramRegistry->fill(HIST(mFolderSuffix[mEventType]) + HIST("relPairDist_truth"), femtoObsMC);

@@ -15,7 +15,9 @@
 /// \author Anton Riedel, TU München, anton.riedel@cern.ch
 
 #include <Framework/Configurable.h>
+#include <vector>
 #include <TMath.h>
+
 #include "Framework/runDataProcessing.h"
 #include "Framework/AnalysisDataModel.h"
 #include "Framework/AnalysisTask.h"
@@ -30,15 +32,11 @@
 #include "PWGCF/FemtoDream/FemtoDreamPairCleaner.h"
 #include "PWGCF/FemtoDream/FemtoDreamContainer.h"
 #include "PWGCF/FemtoDream/FemtoDreamMath.h"
-#include "PWGCF/FemtoDream/FemtoDreamPairCleaner.h"
 #include "PWGCF/FemtoDream/FemtoDreamDetaDphiStar.h"
-#include "PWGCF/FemtoDream/FemtoDreamContainer.h"
 
 #include "Common/DataModel/EventSelection.h"
 #include "Common/DataModel/Multiplicity.h"
 #include "CommonConstants/PhysicsConstants.h"
-
-#include <vector>
 
 namespace
 {
@@ -357,7 +355,7 @@ struct CFFilterTwoN {
 
     bool pdPair = false;
     bool dpPair = false;
-    double kStar = 0.;
+    float kStar = 0.;
 
     // trigger for pd pairs
     if (KstarTrigger.value == 0 || KstarTrigger.value == 10) {
@@ -405,9 +403,11 @@ struct CFFilterTwoN {
 
           // compute kstar depending on the pairing
           if (pdPair) {
-            kStar = FemtoDreamMath::getkstar(p1, mMassProton, p2, mMassDeuteron);
+            kStar = FemtoDreamMath::getkstar(p1.pt(), p1.eta(), p1.phi(), mMassProton,
+                                             p2.pt(), p2.eta(), p2.phi(), mMassDeuteron);
           } else if (dpPair) {
-            kStar = FemtoDreamMath::getkstar(p1, mMassDeuteron, p2, mMassProton);
+            kStar = FemtoDreamMath::getkstar(p1.pt(), p1.eta(), p1.phi(), mMassDeuteron,
+                                             p2.pt(), p2.eta(), p2.phi(), mMassProton);
           } else {
             kStar = confKstarTriggerLimit;
           }
@@ -463,9 +463,11 @@ struct CFFilterTwoN {
 
           // compute kstar depending on the pairing
           if (pdPair) {
-            kStar = FemtoDreamMath::getkstar(p1, mMassProton, p2, mMassDeuteron);
+            kStar = FemtoDreamMath::getkstar(p1.pt(), p1.eta(), p1.phi(), mMassProton,
+                                             p2.pt(), p2.eta(), p2.phi(), mMassDeuteron);
           } else if (dpPair) {
-            kStar = FemtoDreamMath::getkstar(p1, mMassDeuteron, p2, mMassProton);
+            kStar = FemtoDreamMath::getkstar(p1.pt(), p1.eta(), p1.phi(), mMassDeuteron,
+                                             p2.pt(), p2.eta(), p2.phi(), mMassProton);
           } else {
             kStar = confKstarTriggerLimit;
           }
@@ -492,7 +494,8 @@ struct CFFilterTwoN {
           if (ConfClosePairRejection.value && closePairRejectionTV0.isClosePair(p1, p2, partsFemto, magneticField)) {
             continue;
           }
-          kStar = FemtoDreamMath::getkstar(p1, mMassDeuteron, p2, mMassLambda);
+          kStar = FemtoDreamMath::getkstar(p1.pt(), p1.eta(), p1.phi(), mMassDeuteron,
+                                           p2.pt(), p2.eta(), p2.phi(), mMassLambda);
           // check if kstar is below threshold
           if (kStar < confKstarTriggerLimit.value) {
             lowKstarPairs[1]++;
@@ -509,7 +512,8 @@ struct CFFilterTwoN {
           if (ConfClosePairRejection.value && closePairRejectionTV0.isClosePair(p1, p2, partsFemto, magneticField)) {
             continue;
           }
-          auto kstar = FemtoDreamMath::getkstar(p1, mMassDeuteron, p2, mMassLambda);
+          auto kstar = FemtoDreamMath::getkstar(p1.pt(), p1.eta(), p1.phi(), mMassDeuteron,
+                                                p2.pt(), p2.eta(), p2.phi(), mMassLambda);
           // check if kstar is below threshold
           if (kStar < confKstarTriggerLimit.value) {
             lowKstarPairs[1]++;
