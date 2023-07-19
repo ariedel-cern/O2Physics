@@ -227,18 +227,18 @@ class FemtoDreamParticleHisto
   {
     float momentum;
     switch (MomemtumType) {
-      case 0:
+      case aod::femtodreamparticle::kPt:
         momentum = part.pt();
         break;
-      case 1:
+      case aod::femtodreamparticle::kPreco:
         momentum = part.p();
         break;
-      case 2:
+      case aod::femtodreamparticle::kPtpc:
         LOG(warn) << "Mometum at TPC inner wall is only available if the Producer Task generates debug information.";
         momentum = part.tpcInnerParam();
         break;
       default:
-        LOG(warn) << "MomentumType " << momentum << " no implemented. Use pT of the Track for debug Histograms.";
+        LOG(warn) << "MomentumType " << MomemtumType << " no implemented. Use pT of the Track for debug Histograms.";
         momentum = part.pt();
     }
 
