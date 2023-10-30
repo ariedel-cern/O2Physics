@@ -285,6 +285,7 @@ struct femtoDreamProducerReducedTask {
                          track.tpcNClsFindable(),
                          (uint8_t)track.tpcNClsCrossedRows(),
                          track.tpcNClsShared(),
+                         track.tpcChi2NCl(),
                          track.tpcInnerParam(),
                          track.itsNCls(),
                          track.itsNClsInnerBarrel(),

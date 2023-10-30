@@ -282,6 +282,7 @@ struct femtoDreamProducerTask {
                        particle.tpcNClsFindable(),
                        (uint8_t)particle.tpcNClsCrossedRows(),
                        particle.tpcNClsShared(),
+                       particle.tpcChi2NCl(),
                        particle.tpcInnerParam(),
                        particle.itsNCls(),
                        particle.itsNClsInnerBarrel(),
@@ -302,7 +303,7 @@ struct femtoDreamProducerTask {
     } else {
       outputDebugParts(-999., -999., -999., -999., -999., -999., -999., -999.,
                        -999., -999., -999., -999., -999., -999., -999., -999.,
-                       -999., -999., -999., -999., -999.,
+                       -999., -999., -999., -999., -999., -999.,
                        particle.dcaV0daughters(),
                        particle.v0radius(),
                        particle.x(),
