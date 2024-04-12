@@ -552,6 +552,7 @@ struct femtoDreamProducerTask {
     getMagneticFieldTesla(col.bc_as<aod::BCsWithTimestamps>());
     // fill the tables
     fillCollisionsAndTracksAndV0<true, false>(col, tracks, fullV0s);
+		 LOG(info) << "Hello";
   }
   PROCESS_SWITCH(femtoDreamProducerTask, processMC_noCentrality, "Provide MC data without requiring a centrality calibration", false);
 };
