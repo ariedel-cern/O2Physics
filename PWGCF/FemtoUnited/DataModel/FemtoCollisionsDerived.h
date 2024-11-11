@@ -29,23 +29,22 @@ DECLARE_SOA_COLUMN(Sphericity, sphericity, float); //! Sphericity of the event
 } // namespace femtocollisions
 
 // table for basic collision information
-DECLARE_SOA_TABLE_VERSIONED(FCols_001, "AOD", "FCOLS", 1,
+DECLARE_SOA_TABLE_VERSIONED(FUCols_001, "AOD", "FUCOLS", 1,
                             o2::soa::Index<>,           //! Index
                             o2::aod::collision::PosZ,   //! z coordinate of vertex
                             femtocollisions::Mult,      //! multiplicity
                             femtocollisions::Cent,      //! centrality
                             femtocollisions::MagField); //! magnetic field
-using FCols = FCols_001;
+using FUCols = FUCols_001;
 
 // table for for primary vertex location
-DECLARE_SOA_TABLE_VERSIONED(FColPos_001, "AOD", "FCOLPOS", 1,
+DECLARE_SOA_TABLE_VERSIONED(FUColPos_001, "AOD", "FUCOLPOS", 1,
                             collision::PosX,  //! x coordinate of vertex
                             collision::PosY); //! y coordindate of vertex
-using FColPos = FColPos_001;
+using FUColPos = FUColPos_001;
 
 // table for different multiplicity estimators
-DECLARE_SOA_TABLE_VERSIONED(FColMults_001, "AOD", "FCOLMULTS", 1,
-                            evsel::Sel8, evsel::Selection,                  //! event selection: sel8
+DECLARE_SOA_TABLE_VERSIONED(FUColMults_001, "AOD", "FUCOLMULTS", 1,
                             mult::MultFT0A, mult::MultFT0C, mult::MultFV0A, //! FIT detectors
                             mult::MultNTracksPVeta1,                        //! track multiplicities with eta cut for INEL>0
                             mult::MultPVTotalContributors,                  //! number of PV contribs total
@@ -53,23 +52,20 @@ DECLARE_SOA_TABLE_VERSIONED(FColMults_001, "AOD", "FCOLMULTS", 1,
                             mult::MultNTracksITSTPC,                        //! track multiplicities, PV contribs, no eta cut
                             mult::MultAllTracksTPCOnly,                     //! TPConly track multiplicities, all, no eta cut
                             mult::MultAllTracksITSTPC,                      //! ITSTPC track multiplicities, all, no eta cut
-                            mult::MultZNA, mult::MultZNC, mult::MultZEM1,   //! ZDC signals
-                            mult::MultZEM2, mult::MultZPA, mult::MultZPC,
-                            evsel::NumTracksInTimeRange); //! add occupancy as extra
-using FColMults = FColMults_001;
+                            evsel::NumTracksInTimeRange);                   //! occupancy
+using FUColMults = FUColMults_001;
 
 // table for different centrality (multiplicity percentile) estimators
-DECLARE_SOA_TABLE_VERSIONED(FColCents_001, "AOD", "FCOLCENTS", 1,
-                            cent::CentFT0M, //! centrality from FT0M
-                            cent::CentFT0A, //! centrality from FT0A
-                            cent::CentFT0C, //! centrality from FT0c
-                            cent::CentFV0A);
-using FColCents = FColCents_001;
+DECLARE_SOA_TABLE_VERSIONED(FUColCents_001, "AOD", "FUCOLCENTS", 1,
+                            cent::CentFT0M,  //! centrality from FT0M
+                            cent::CentFT0A,  //! centrality from FT0A
+                            cent::CentFT0C); //! centrality from FT0C
+using FUColCents = FUColCents_001;
 
 // table for collision sphericity
-DECLARE_SOA_TABLE_VERSIONED(FColSph_001, "AOD", "FCOLSPH", 1,
+DECLARE_SOA_TABLE_VERSIONED(FUColSph_001, "AOD", "FUCOLSPH", 1,
                             femtocollisions::Sphericity); //! collision sphericity
-using FColSph = FColSph_001;
+using FUColSph = FUColSph_001;
 
 } // namespace o2::aod
 

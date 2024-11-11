@@ -24,9 +24,9 @@ namespace femtobase
 {
 // Basic information need for all types of particles
 DECLARE_SOA_INDEX_COLUMN(Collision, collision); //! collision index
-DECLARE_SOA_COLUMN(Pt, pt, float);              //! pt
-DECLARE_SOA_COLUMN(Eta, eta, float);            //! eta
-DECLARE_SOA_COLUMN(Phi, phi, float);            //! phi
+DECLARE_SOA_COLUMN(Pt, pt, float);   //! pt
+DECLARE_SOA_COLUMN(Eta, eta, float); //! eta
+DECLARE_SOA_COLUMN(Phi, phi, float); //! phi
 
 // dynamic columns
 DECLARE_SOA_DYNAMIC_COLUMN(Theta, theta, //! Theta

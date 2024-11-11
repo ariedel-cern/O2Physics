@@ -1,5 +1,5 @@
 // Copyright 2019-2024 CERN and copyright holders of ALICE O2.
-// See https://alice-o2.web.cern.ch/copyright for details of the copyright holders.
+// See https://alice-o2.web.cern.ch/copyright for details of the copyright holders.femtobaseder
 // All rights not expressly granted are reserved.
 //
 // This software is distributed under the terms of the GNU General Public
@@ -22,7 +22,6 @@ namespace o2::aod
 {
 namespace femtovzeros
 {
-
 // columns for Vzero
 DECLARE_SOA_COLUMN(VzeroMass, vzeroMass, float);                         //! Mass of Vzero
 DECLARE_SOA_COLUMN(VzeroMask, vzeroMask, femtodatatypes::VzeroMaskType); //! Bitmask for Vzero selections
@@ -36,14 +35,24 @@ DECLARE_SOA_COLUMN(DecayVtxZ, decayVtxZ, float);     //! z coordinate of Vzero d
 DECLARE_SOA_COLUMN(KaonMass, kaonMass, float);       //! Vzero mass using Kaon hypothesis
 
 // columns for Vzero daughter tracks
-DECLARE_SOA_INDEX_COLUMN(Track, track);                                                //! Index in track table
-DECLARE_SOA_COLUMN(DauTrackMask, dauTrackMask, femtodatatypes::VzeroDauTrackMaskType); //! Bitmask for Vzero daughter track selections
-DECLARE_SOA_COLUMN(DauTPCMask, dauTPCMask, femtodatatypes::VzeroDauTPCMaskType);       //! Bitmask for Vzero daughter TPC PID selections
+DECLARE_SOA_INDEX_COLUMN_FULL(PosDau, posDau, int, FUTracks, "_Pos");                        //!
+DECLARE_SOA_COLUMN(PosDauPt, posDauPt, float);                                               //! Positive daughter pt
+DECLARE_SOA_COLUMN(PosDauEta, posDauEta, float);                                             //! Positive daughter eta
+DECLARE_SOA_COLUMN(PosDauPhi, posDauPhi, float);                                             //! Positive daughter phi
+DECLARE_SOA_COLUMN(PosDauTrackMask, posDauTrackMask, femtodatatypes::VzeroDauTrackMaskType); //! Positive daughter bitmask for track selections
+DECLARE_SOA_COLUMN(PosDauTPCMask, posDauTPCMask, femtodatatypes::VzeroDauTPCMaskType);       //! Positive daughter bitmaks for PID TPC selection
+
+DECLARE_SOA_INDEX_COLUMN_FULL(NegDau, negDau, int, FUTracks, "_Neg");                        //!
+DECLARE_SOA_COLUMN(NegDauPt, negDauPt, float);                                               //! Negative daughter pt
+DECLARE_SOA_COLUMN(NegDauEta, negDauEta, float);                                             //! Negative daughter eta
+DECLARE_SOA_COLUMN(NegDauPhi, negDauPhi, float);                                             //! Negative daughter phi
+DECLARE_SOA_COLUMN(NegDauTrackMask, negDauTrackMask, femtodatatypes::VzeroDauTrackMaskType); //! Negative daughter bitmask for track selections
+DECLARE_SOA_COLUMN(NegDauTPCMask, negDauTPCMask, femtodatatypes::VzeroDauTPCMaskType);       //! Negative daughter bitmaks for PID TPC selection
 
 } // namespace femtovzeros
 
 // table for basic vzero information
-DECLARE_SOA_TABLE_VERSIONED(FVzeros_001, "AOD", "FVZEROS", 1,
+DECLARE_SOA_TABLE_VERSIONED(FUVzeros_001, "AOD", "FUVZEROS", 1,
                             o2::soa::Index<>,
                             femtobase::CollisionId,
                             femtobase::Pt,
@@ -55,38 +64,34 @@ DECLARE_SOA_TABLE_VERSIONED(FVzeros_001, "AOD", "FVZEROS", 1,
                             femtobase::Py<femtobase::Pt, femtobase::Eta>,
                             femtobase::Pz<femtobase::Pt, femtobase::Eta>,
                             femtobase::P<femtobase::Pt, femtobase::Eta>);
-using FVzeros = FVzeros_001;
+using FUVzeros = FUVzeros_001;
 
-DECLARE_SOA_TABLE_VERSIONED(FVzeroMasks_001, "AOD", "FVZEROMASKS", 1,
+DECLARE_SOA_TABLE_VERSIONED(FUVzeroMasks_001, "AOD", "FUVZEROMASKS", 1,
                             femtovzeros::VzeroMask);
-using FVzeroMasks = FVzeroMasks_001;
+using FUVzeroMasks = FUVzeroMasks_001;
 
-DECLARE_SOA_TABLE_VERSIONED(FVzeroExtras_001, "AOD", "FVZEROEXTRAS", 1,
+DECLARE_SOA_TABLE_VERSIONED(FUVzeroExtras_001, "AOD", "FUVZEROEXTRAS", 1,
                             femtovzeros::DauDCA,
                             femtovzeros::DecayVtxX,
                             femtovzeros::DecayVtxY,
                             femtovzeros::DecayVtxZ,
                             femtovzeros::TransRadius);
-using FVzeroExtras = FVzeroExtras_001;
+using FUVzeroExtras = FUVzeroExtras_001;
 
-DECLARE_SOA_TABLE_VERSIONED(FVzeroPosDaus_001, "AOD", "FVZEROPOSDAUS", 1,
-                            femtovzeros::TrackId,
-                            femtobase::Pt,
-                            femtobase::Eta,
-                            femtobase::Phi,
-                            femtovzeros::DauTrackMask,
-                            femtovzeros::DauTPCMask);
-using FVzeroPosDaus = FVzeroPosDaus_001;
-
-DECLARE_SOA_TABLE_VERSIONED(FVzeroNegDaus_001, "AOD", "FVZERONEGDAUS", 1,
-                            femtovzeros::TrackId,
-                            femtobase::Pt,
-                            femtobase::Eta,
-                            femtobase::Phi,
-                            femtovzeros::DauTrackMask,
-                            femtovzeros::DauTPCMask);
-using FVzeroNegDaus = FVzeroNegDaus_001;
-
+DECLARE_SOA_TABLE_VERSIONED(FUVzeroDaus_001, "AOD", "FUVZERODAUS", 1,
+                            femtovzeros::PosDauId,
+                            femtovzeros::PosDauPt,
+                            femtovzeros::PosDauEta,
+                            femtovzeros::PosDauPhi,
+                            femtovzeros::PosDauTrackMask,
+                            femtovzeros::PosDauTPCMask,
+                            femtovzeros::NegDauId,
+                            femtovzeros::NegDauPt,
+                            femtovzeros::NegDauEta,
+                            femtovzeros::NegDauPhi,
+                            femtovzeros::NegDauTrackMask,
+                            femtovzeros::NegDauTPCMask);
+using FUVzeroDaus = FUVzeroDaus_001;
 } // namespace o2::aod
 
 #endif // PWGCF_FEMTOUNITED_DATAMODEL_FEMTOVZEROSDERIVED_H_

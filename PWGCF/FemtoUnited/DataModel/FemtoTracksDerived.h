@@ -55,7 +55,6 @@ DECLARE_SOA_COLUMN(TPCNClsShared, tpcNClsShared, uint8_t); //! Number of shared 
 DECLARE_SOA_COLUMN(TPCChi2NCl, tpcChi2NCl, float);         //! TPC chi2 / findable clusters
 
 // tof related information
-DECLARE_SOA_COLUMN(HasTOF, hasTOF, bool);    //! True if track is PV contributer
 DECLARE_SOA_COLUMN(TOFBeta, tofbeta, float); //! TOF beta
 
 // TPC PID information
@@ -78,7 +77,7 @@ DECLARE_SOA_COLUMN(TOFNSigmaHe3, tofNSigmaHe3, float); //! Nsigma separation wit
 } // namespace femtotracks
 
 // table for basic track information
-DECLARE_SOA_TABLE_VERSIONED(FTracks_001, "AOD", "FTRACKS", 1,
+DECLARE_SOA_TABLE_VERSIONED(FUTracks_001, "AOD", "FUTRACKS", 1,
                             o2::soa::Index<>,
                             femtobase::CollisionId,
                             femtobase::Pt,
@@ -89,25 +88,25 @@ DECLARE_SOA_TABLE_VERSIONED(FTracks_001, "AOD", "FTRACKS", 1,
                             femtobase::Py<femtobase::Pt, femtobase::Eta>,
                             femtobase::Pz<femtobase::Pt, femtobase::Eta>,
                             femtobase::P<femtobase::Pt, femtobase::Eta>);
-using FTracks = FTracks_001;
+using FUTracks = FUTracks_001;
 
 // table for track selections and PID selections
-DECLARE_SOA_TABLE_VERSIONED(FTrackMasks_001, "AOD", "FTRACKMASKS", 1,
+DECLARE_SOA_TABLE_VERSIONED(FUTrackMasks_001, "AOD", "FUTRACKMASKS", 1,
                             femtotracks::TrackMask,
                             femtotracks::TpcMask,
                             femtotracks::TofMask,
                             femtotracks::TpcTofMask);
-using FTrackMasks = FTrackMasks_001;
+using FUTrackMasks = FUTrackMasks_001;
 
 // table for track DCA
-DECLARE_SOA_TABLE_VERSIONED(FTrackDCAs_001, "AOD", "FTRACKDCAS", 1,
+DECLARE_SOA_TABLE_VERSIONED(FUTrackDCAs_001, "AOD", "FUTRACKDCAS", 1,
                             femtotracks::DcaXY,
                             femtotracks::DcaZ,
                             femtotracks::Dca<femtotracks::DcaXY, femtotracks::DcaZ>);
-using FTrackDCAs = FTrackDCAs_001;
+using FUTrackDCAs = FUTrackDCAs_001;
 
 // table for extra track information
-DECLARE_SOA_TABLE_VERSIONED(FTrackExtras_001, "AOD", "FTRACKEXTRAS", 1,
+DECLARE_SOA_TABLE_VERSIONED(FUTrackExtras_001, "AOD", "FUTRACKEXTRAS", 1,
                             femtotracks::Sign,
                             femtotracks::IsPVContributor,
                             femtotracks::ITSNCls,
@@ -119,13 +118,12 @@ DECLARE_SOA_TABLE_VERSIONED(FTrackExtras_001, "AOD", "FTRACKEXTRAS", 1,
                             femtotracks::TPCNClsFindable,
                             femtotracks::TPCNClsCrossedRows,
                             femtotracks::TPCNClsShared,
-                            femtotracks::HasTOF,
                             femtotracks::TOFBeta,
                             femtotracks::TPCCrossedRowsOverFindable<femtotracks::TPCNClsFindable, femtotracks::TPCNClsCrossedRows>);
-using FTrackExtras = FTrackExtras_001;
+using FUTrackExtras = FUTrackExtras_001;
 
 // table for extra PID information
-DECLARE_SOA_TABLE_VERSIONED(FTrackPids_001, "AOD", "FTRACKPIDS", 1,
+DECLARE_SOA_TABLE_VERSIONED(FUTrackPids_001, "AOD", "FUTRACKPIDS", 1,
                             femtotracks::TPCNSigmaEl,
                             femtotracks::TPCNSigmaPi,
                             femtotracks::TPCNSigmaKa,
@@ -140,7 +138,7 @@ DECLARE_SOA_TABLE_VERSIONED(FTrackPids_001, "AOD", "FTRACKPIDS", 1,
                             femtotracks::TOFNSigmaDe,
                             femtotracks::TOFNSigmaTr,
                             femtotracks::TOFNSigmaHe3);
-using FTrackPids = FTrackPids_001;
+using FUTrackPids = FUTrackPids_001;
 
 } // namespace o2::aod
 
