@@ -24,10 +24,10 @@ namespace femtotracks
 {
 
 // columns for track selections
-DECLARE_SOA_COLUMN(TrackMask, trackMask, femtodatatypes::TrackMaskType);    //! Bitmask for track selections
-DECLARE_SOA_COLUMN(TpcMask, tpcMask, femtodatatypes::TPCMaskType);          //! Bitmask for TPC PID selections
-DECLARE_SOA_COLUMN(TofMask, tofMask, femtodatatypes::TOFMaskType);          //! Bitmask for TOF PID selections
-DECLARE_SOA_COLUMN(TpcTofMask, tpctofMask, femtodatatypes::TPCTOFMaskType); //! Bitmask for combined TPC+TOF PID selections
+DECLARE_SOA_COLUMN(TrackMask, trackMask, femtodatatypes::TrackMaskType);         //! Bitmask for track selections
+DECLARE_SOA_COLUMN(TpcMask, tpcMask, femtodatatypes::TrackTPCMaskType);          //! Bitmask for TPC PID selections
+DECLARE_SOA_COLUMN(TofMask, tofMask, femtodatatypes::TrackTOFMaskType);          //! Bitmask for TOF PID selections
+DECLARE_SOA_COLUMN(TpcTofMask, tpctofMask, femtodatatypes::TrackTPCTOFMaskType); //! Bitmask for combined TPC+TOF PID selections
 
 // columns for DCA
 DECLARE_SOA_COLUMN(DcaXY, dcaXY, float);                                                                                       //! Dca in XY plane

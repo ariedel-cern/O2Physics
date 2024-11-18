@@ -22,6 +22,7 @@ namespace o2::aod
 {
 namespace femtocollisions
 {
+DECLARE_SOA_COLUMN(PosZ, posZ, float);             //! z coordinate of vertex
 DECLARE_SOA_COLUMN(Mult, mult, float);             //! Multiplicity estimator set by producer
 DECLARE_SOA_COLUMN(Cent, cent, float);             //! Centrality estimator (or multiplicity percentile estimator) set by producer
 DECLARE_SOA_COLUMN(MagField, magField, float);     //! Magnetic field of the event
@@ -31,7 +32,7 @@ DECLARE_SOA_COLUMN(Sphericity, sphericity, float); //! Sphericity of the event
 // table for basic collision information
 DECLARE_SOA_TABLE_VERSIONED(FUCols_001, "AOD", "FUCOLS", 1,
                             o2::soa::Index<>,           //! Index
-                            o2::aod::collision::PosZ,   //! z coordinate of vertex
+                            femtocollisions::PosZ,      //! z coordinate of vertex
                             femtocollisions::Mult,      //! multiplicity
                             femtocollisions::Cent,      //! centrality
                             femtocollisions::MagField); //! magnetic field

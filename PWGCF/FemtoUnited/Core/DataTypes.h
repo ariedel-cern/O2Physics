@@ -22,9 +22,9 @@ namespace femtodatatypes
 
 // Bitmaks for tracks
 using TrackMaskType = uint32_t;
-using TPCMaskType = uint16_t;
-using TOFMaskType = uint16_t;
-using TPCTOFMaskType = uint16_t;
+using TrackTPCMaskType = uint16_t;
+using TrackTOFMaskType = uint16_t;
+using TrackTPCTOFMaskType = uint16_t;
 
 // Bitmaks for vzeros and daughters
 using VzeroMaskType = uint16_t;
