@@ -33,6 +33,8 @@ using VzeroDauTPCMaskType = uint8_t;
 
 // Bitmaks for cascades, vzero daughter and bachelor
 using CascadeMaskType = uint16_t;
+using CascadeBachelorMaskType = uint16_t;
+using CascadeBachelorTPCMaskType = uint16_t;
 // using VzeroDauTrackMaskType = uint8_t;
 // using VzeroDauTPCMaskType = uint8_t;
 
