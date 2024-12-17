@@ -19,44 +19,49 @@
 #include <string>
 #include <vector>
 #include <array>
-#include <utility>
 #include <map>
 
 #include "Framework/HistogramRegistry.h"
 
+#include "PWGCF/FemtoUnited/Core/HistManager.h"
+#include "PWGCF/FemtoUnited/Core/Modes.h"
+
 using namespace o2::framework;
 
-namespace femtounitedcolhistmanager
+namespace colhistmanager
 {
 
-enum EventVariable {
-  kPosZ,
+enum ColHist {
+  kPosz,
   kMult,
   kCent,
   kMagField,
-  kPosX,
-  kPosY,
-  kEventVariableLast
+  kSphericity,
+  // 2d qa
+  kPoszVsMult,
+  kPoszVsCent,
+  kCentVsMult,
+  kColHistLast
 };
 
-constexpr std::string_view OutputDir = "CollisionHistograms/";
+constexpr std::string_view AnalysisDir = "CollisionHistograms/Analysis/";
+constexpr std::string_view QaDir = "CollisionHistograms/QA/";
 
-constexpr std::array<std::pair<std::string_view, std::string_view>, kEventVariableLast> HistogramNames = {
-  {{"VertexZ", "Vertex Z; V_{Z} (cm); Entries"},
-   {"Multiplicity", "Multiplicity; mult; Entries"},
-   {"Centrality", "Centrality; cent (%); Entries"},
-   {"MagneticField", "Magnetic Field; B (T); Entries"},
-   {"VertexX", ""}}};
-
-enum class Mode {
-  kANALYSIS,
-  kQA,
-  kMC,
-  kLAST_MODE
-};
+constexpr std::array<Histmanager::HistInfo<ColHist>, kColHistLast> HistTable = {
+  {
+    {kPosz, kTH1F, "hPosz", "Vertex Z; V_{Z} (cm); Entries"},
+    {kMult, kTH1F, "hMult", "Multiplicity; Multiplicity; Entries"},
+    {kCent, kTH1F, "hCent", "Centrality; Centrality (%); Entries"},
+    {kMagField, kTH1F, "hMagField", "Magnetic Field; B (T); Entries"},
+    {kSphericity, kTH1F, "hSphericity", "Sphericity; Sphericity; Entries"},
+    {kPoszVsMult, kTH2F, "hPoszVsMult", "Vertex Z vs Multiplicity; V_{Z} (cm); Multiplicity"},
+    {kPoszVsCent, kTH2F, "hPoszVsCent", "Vertex Z vs Centrality; V_{Z} (cm); Centrality (%)"},
+    {kCentVsMult, kTH2F, "kCentVsMult", "Centrality vs Multiplicity; Centrality (%); Multiplicity"},
+  }};
 
 /// \class FemtoDreamEventHisto
 /// \brief Class for histogramming event properties
+template <femtomodes::Mode mode>
 class CollisionHistManager
 {
  public:
@@ -64,34 +69,46 @@ class CollisionHistManager
   virtual ~CollisionHistManager() = default;
   /// Initializes histograms for the task
   /// \param registry Histogram registry to be passed
-  template <Mode mode>
-  void init(HistogramRegistry* registry, std::map<EventVariable, std::vector<o2::framework::AxisSpec>> Specs)
+  void init(HistogramRegistry* registry, std::map<ColHist, std::vector<o2::framework::AxisSpec>> Specs)
   {
     mHistogramRegistry = registry;
-    std::string Dir = std::string(OutputDir);
-
-    if constexpr (mode == Mode::kANALYSIS || mode == Mode::kQA) {
-      mHistogramRegistry->add((Dir + std::string(HistogramNames[kPosZ].first)).c_str(), HistogramNames[kPosZ].second.data(), HistType::kTH1F, {Specs[kPosZ]});
-      mHistogramRegistry->add((Dir + std::string(HistogramNames[kMult].first)).c_str(), HistogramNames[kMult].second.data(), HistType::kTH1F, {Specs[kMult]});
-      mHistogramRegistry->add((Dir + std::string(HistogramNames[kCent].first)).c_str(), HistogramNames[kCent].second.data(), HistType::kTH1F, {Specs[kCent]});
-      mHistogramRegistry->add((Dir + std::string(HistogramNames[kMagField].first)).c_str(), HistogramNames[kMagField].second.data(), HistType::kTH1F, {Specs[kMagField]});
+    if constexpr (femtomodes::isModeSet(mode, femtomodes::Mode::kANALYSIS)) {
+      std::string analysisDir = std::string(AnalysisDir);
+      mHistogramRegistry->add(analysisDir + GetHistNamev2(kPosz, HistTable), GetHistDesc(kPosz, HistTable), GetHistType(kPosz, HistTable), {Specs[kPosz]});
+      mHistogramRegistry->add(analysisDir + GetHistNamev2(kMult, HistTable), GetHistDesc(kMult, HistTable), GetHistType(kMult, HistTable), {Specs[kMult]});
+      mHistogramRegistry->add(analysisDir + GetHistNamev2(kCent, HistTable), GetHistDesc(kCent, HistTable), GetHistType(kCent, HistTable), {Specs[kCent]});
+      mHistogramRegistry->add(analysisDir + GetHistNamev2(kMagField, HistTable), GetHistDesc(kMagField, HistTable), GetHistType(kMagField, HistTable), {Specs[kMagField]});
     }
+
+    if constexpr (femtomodes::isModeSet(mode, femtomodes::Mode::kQA)) {
+
+      std::string qaDir = std::string(QaDir);
+      mHistogramRegistry->add(qaDir + GetHistNamev2(kPoszVsMult, HistTable), GetHistDesc(kPoszVsMult, HistTable), GetHistType(kPoszVsMult, HistTable), {Specs[kPoszVsMult]});
+      mHistogramRegistry->add(qaDir + GetHistNamev2(kPoszVsCent, HistTable), GetHistDesc(kPoszVsCent, HistTable), GetHistType(kPoszVsCent, HistTable), {Specs[kPoszVsCent]});
+      mHistogramRegistry->add(qaDir + GetHistNamev2(kCentVsMult, HistTable), GetHistDesc(kCentVsMult, HistTable), GetHistType(kCentVsMult, HistTable), {Specs[kCentVsMult]});
+    };
   }
 
-  template <Mode mode, typename T>
+  template <typename T>
   void fill(T const& col)
   {
-    if constexpr (mode == Mode::kANALYSIS) {
-      mHistogramRegistry->fill(HIST(OutputDir) + HIST(HistogramNames[kPosZ].first), col.posZ());
-      mHistogramRegistry->fill(HIST(OutputDir) + HIST(HistogramNames[kMult].first), col.mult());
-      mHistogramRegistry->fill(HIST(OutputDir) + HIST(HistogramNames[kCent].first), col.cent());
-      mHistogramRegistry->fill(HIST(OutputDir) + HIST(HistogramNames[kMagField].first), col.magField());
+    if constexpr (femtomodes::isModeSet(mode, femtomodes::Mode::kANALYSIS)) {
+      mHistogramRegistry->fill(HIST(AnalysisDir) + HIST(GetHistName(kPosz, HistTable)), col.posZ());
+      mHistogramRegistry->fill(HIST(AnalysisDir) + HIST(GetHistName(kMult, HistTable)), col.mult());
+      mHistogramRegistry->fill(HIST(AnalysisDir) + HIST(GetHistName(kCent, HistTable)), col.cent());
+      mHistogramRegistry->fill(HIST(AnalysisDir) + HIST(GetHistName(kMagField, HistTable)), col.magField());
     }
+
+    if constexpr (femtomodes::isModeSet(mode, femtomodes::Mode::kQA)) {
+      mHistogramRegistry->fill(HIST(QaDir) + HIST(GetHistName(kPoszVsMult, HistTable)), col.posZ(), col.mult());
+      mHistogramRegistry->fill(HIST(QaDir) + HIST(GetHistName(kPoszVsCent, HistTable)), col.posZ(), col.cent());
+      mHistogramRegistry->fill(HIST(QaDir) + HIST(GetHistName(kCentVsMult, HistTable)), col.cent(), col.mult());
+    };
   }
 
  private:
   HistogramRegistry* mHistogramRegistry;
 }; // namespace femtounitedcolhistmanager
-} // namespace femtounitedcolhistmanager
+} // namespace colhistmanager
 
 #endif // PWGCF_FEMTOUNITED_CORE_COLLISIONHISTMANAGER_H_

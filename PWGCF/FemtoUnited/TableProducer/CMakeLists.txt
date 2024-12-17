@@ -13,3 +13,8 @@ o2physics_add_dpl_workflow(femtodream-converter
 	  SOURCES FemtoDreamConverter.cxx
           PUBLIC_LINK_LIBRARIES O2::Framework O2Physics::AnalysisCore
           COMPONENT_NAME Analysis)
+
+o2physics_add_dpl_workflow(femtounited-producer
+	  SOURCES Producer.cxx
+          PUBLIC_LINK_LIBRARIES O2::Framework O2Physics::AnalysisCore
+          COMPONENT_NAME Analysis)

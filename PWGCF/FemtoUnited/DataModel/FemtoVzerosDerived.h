@@ -52,45 +52,45 @@ DECLARE_SOA_COLUMN(NegDauTPCMask, negDauTPCMask, femtodatatypes::VzeroDauTPCMask
 } // namespace femtovzeros
 
 // table for basic vzero information
-DECLARE_SOA_TABLE_VERSIONED(FUVzeros_001, "AOD", "FUVZEROS", 1,
-                            o2::soa::Index<>,
-                            femtobase::CollisionId,
-                            femtobase::Pt,
-                            femtobase::Eta,
-                            femtobase::Phi,
-                            femtovzeros::VzeroMass,
-                            femtobase::Theta<femtobase::Eta>,
-                            femtobase::Px<femtobase::Pt, femtobase::Eta>,
-                            femtobase::Py<femtobase::Pt, femtobase::Eta>,
-                            femtobase::Pz<femtobase::Pt, femtobase::Eta>,
-                            femtobase::P<femtobase::Pt, femtobase::Eta>);
+DECLARE_SOA_TABLE_STAGED_VERSIONED(FUVzeros_001, "FUVZEROS", 1,
+                                   o2::soa::Index<>,
+                                   femtobase::CollisionId,
+                                   femtobase::Pt,
+                                   femtobase::Eta,
+                                   femtobase::Phi,
+                                   femtovzeros::VzeroMass,
+                                   femtobase::Theta<femtobase::Eta>,
+                                   femtobase::Px<femtobase::Pt, femtobase::Eta>,
+                                   femtobase::Py<femtobase::Pt, femtobase::Eta>,
+                                   femtobase::Pz<femtobase::Pt, femtobase::Eta>,
+                                   femtobase::P<femtobase::Pt, femtobase::Eta>);
 using FUVzeros = FUVzeros_001;
 
-DECLARE_SOA_TABLE_VERSIONED(FUVzeroMasks_001, "AOD", "FUVZEROMASKS", 1,
-                            femtovzeros::VzeroMask);
+DECLARE_SOA_TABLE_STAGED_VERSIONED(FUVzeroMasks_001, "FUVZEROMASKS", 1,
+                                   femtovzeros::VzeroMask);
 using FUVzeroMasks = FUVzeroMasks_001;
 
-DECLARE_SOA_TABLE_VERSIONED(FUVzeroExtras_001, "AOD", "FUVZEROEXTRAS", 1,
-                            femtovzeros::DauDCA,
-                            femtovzeros::DecayVtxX,
-                            femtovzeros::DecayVtxY,
-                            femtovzeros::DecayVtxZ,
-                            femtovzeros::TransRadius);
+DECLARE_SOA_TABLE_STAGED_VERSIONED(FUVzeroExtras_001, "FUVZEROEXTRAS", 1,
+                                   femtovzeros::DauDCA,
+                                   femtovzeros::DecayVtxX,
+                                   femtovzeros::DecayVtxY,
+                                   femtovzeros::DecayVtxZ,
+                                   femtovzeros::TransRadius);
 using FUVzeroExtras = FUVzeroExtras_001;
 
-DECLARE_SOA_TABLE_VERSIONED(FUVzeroDaus_001, "AOD", "FUVZERODAUS", 1,
-                            femtovzeros::PosDauId,
-                            femtovzeros::PosDauPt,
-                            femtovzeros::PosDauEta,
-                            femtovzeros::PosDauPhi,
-                            femtovzeros::PosDauTrackMask,
-                            femtovzeros::PosDauTPCMask,
-                            femtovzeros::NegDauId,
-                            femtovzeros::NegDauPt,
-                            femtovzeros::NegDauEta,
-                            femtovzeros::NegDauPhi,
-                            femtovzeros::NegDauTrackMask,
-                            femtovzeros::NegDauTPCMask);
+DECLARE_SOA_TABLE_STAGED_VERSIONED(FUVzeroDaus_001, "FUVZERODAUS", 1,
+                                   femtovzeros::PosDauId,
+                                   femtovzeros::PosDauPt,
+                                   femtovzeros::PosDauEta,
+                                   femtovzeros::PosDauPhi,
+                                   femtovzeros::PosDauTrackMask,
+                                   femtovzeros::PosDauTPCMask,
+                                   femtovzeros::NegDauId,
+                                   femtovzeros::NegDauPt,
+                                   femtovzeros::NegDauEta,
+                                   femtovzeros::NegDauPhi,
+                                   femtovzeros::NegDauTrackMask,
+                                   femtovzeros::NegDauTPCMask);
 using FUVzeroDaus = FUVzeroDaus_001;
 } // namespace o2::aod
 

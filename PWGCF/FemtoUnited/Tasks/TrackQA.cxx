@@ -19,10 +19,12 @@
 #include "Framework/runDataProcessing.h"
 #include "Framework/HistogramRegistry.h"
 #include "Framework/Expressions.h"
+#include "CommonConstants/MathConstants.h"
 
 #include "PWGCF/FemtoUnited/DataModel/FemtoCollisionsDerived.h"
 #include "PWGCF/FemtoUnited/DataModel/FemtoTracksDerived.h"
 #include "PWGCF/FemtoUnited/Core/DataTypes.h"
+#include "PWGCF/FemtoUnited/Core/Modes.h"
 
 #include "PWGCF/FemtoUnited/Core/CollisionHistManager.h"
 #include "PWGCF/FemtoUnited/Core/TrackHistManager.h"
@@ -88,7 +90,7 @@ struct femtounitedtrackqa {
 
   SliceCache cache;
 
-  using Tracks = o2::soa::Join<FUTracks, FUTrackMasks>; // , FUTrackDCAs, FUTrackExtras, FUTrackPids>;
+  using Tracks = o2::soa::Join<FUTracks, FUTrackMasks, FUTrackDCAs, FUTrackExtras, FUTrackPids>;
 
   Partition<Tracks> TrackPartition =
     (femtobase::pt > TrackSelections.PtMin) &&
@@ -104,39 +106,94 @@ struct femtounitedtrackqa {
 
   struct : ConfigurableGroup {
     std::string prefix = std::string("TrackBinning");
-    ConfigurableAxis Pt{"Pt", {{600, 0, 6}}, "Pt binning"};
-    ConfigurableAxis Eta{"Eta", {{300, -1.5, 1.5}}, "Eta binning"};
-    ConfigurableAxis Phi{"Phi", {{720, 0, TMath::TwoPi()}}, "Phi binning"};
+    ConfigurableAxis Pt{"Pt", {{600, 0, 6}}, "Pt"};
+    ConfigurableAxis Eta{"Eta", {{300, -1.5, 1.5}}, "Eta"};
+    ConfigurableAxis Phi{"Phi", {{720, 0, 1.f * o2::constants::math::TwoPI}}, "Phi"};
+    ConfigurableAxis Sign{"Sign", {{3, -1.5, 1.5}}, "Sign"};
+    ConfigurableAxis ItsCluster{"ItsCluster", {{8, -0.5, 7.5}}, "ITS cluster"};
+    ConfigurableAxis ItsClusterIb{"ItsClusterIb", {{4, -0.5, 3.5}}, "ITS cluster in inner barrel"};
+    ConfigurableAxis TpcCluster{"TpcCluster", {{153, -0.5, 152.5}}, "TPC cluster"};
+    ConfigurableAxis TpcClusterShared{"TpcClusterShared", {{153, -0.5, 152.5}}, "TPC cluster shared"};
+    ConfigurableAxis TpcPidProton{"TpcProtonPid", {{600, -3, 3}}, "TPC PID for proton"};
+    ConfigurableAxis TofPidProton{"TofProtonPid", {{600, -3, 3}}, "TPC PID for proton"};
   } TrackBinning;
 
+  struct : ConfigurableGroup {
+    std::string prefix = std::string("TrackPidBinning");
+    ConfigurableAxis P{"P", {{300, 0, 6}}, "Momentum axis"};
+    ConfigurableAxis TpcPidElectron{"TpcElectronPid", {{300, -3, 3}}, "TPC PID for proton"};
+    ConfigurableAxis TpcPidPion{"TpcPionPid", {{300, -3, 3}}, "TPC PID for proton"};
+    ConfigurableAxis TpcPidKaon{"TpcKaonPid", {{300, -3, 3}}, "TPC PID for proton"};
+    ConfigurableAxis TpcPidProton{"TpcProtonPid", {{300, -3, 3}}, "TPC PID for proton"};
+    ConfigurableAxis TpcPidDeuteron{"TpcDeuteronPid", {{300, -3, 3}}, "TPC PID for proton"};
+    ConfigurableAxis TpcPidTriton{"TpcTritonPid", {{300, -3, 3}}, "TPC PID for proton"};
+    ConfigurableAxis TpcPidHelium{"TpcHeliumPid", {{300, -3, 3}}, "TPC PID for proton"};
+    ConfigurableAxis TofPidElectron{"TofElectronPid", {{300, -3, 3}}, "TOF PID for proton"};
+    ConfigurableAxis TofPidPion{"TofPionPid", {{300, -3, 3}}, "TOF PID for proton"};
+    ConfigurableAxis TofPidKaon{"TofKaonPid", {{300, -3, 3}}, "TOF PID for proton"};
+    ConfigurableAxis TofPidProton{"TofProtonPid", {{300, -3, 3}}, "TOF PID for proton"};
+    ConfigurableAxis TofPidDeuteron{"TofDeuteronPid", {{300, -3, 3}}, "TOF PID for proton"};
+    ConfigurableAxis TofPidTriton{"TofTritonPid", {{300, -3, 3}}, "TOF PID for proton"};
+    ConfigurableAxis TofPidHelium{"TofHeliumPid", {{300, -3, 3}}, "TOF PID for proton"};
+  } TrackPidBinning;
+
   HistogramRegistry HRegistry{"TrackQA", {}, OutputObjHandlingPolicy::AnalysisObject};
-  femtounitedcolhistmanager::CollisionHistManager ColHists;
-  femtounitedtrackhistmanager::TrackHistManager TrackHists;
+  colhistmanager::CollisionHistManager<femtomodes::Mode::kANALYSIS_QA> ColHists;
+  trackhistmanager::TrackHistManager<femtomodes::Mode::kANALYSIS_QA> TrackHists;
 
   void init(InitContext&)
   {
     // create a map for histogram specs
-    std::map<femtounitedcolhistmanager::EventVariable, std::vector<framework::AxisSpec>> CollisionHistogramSpec = {
-      {femtounitedcolhistmanager::kPosZ, {CollisionBinning.VtZ}},
-      {femtounitedcolhistmanager::kMult, {CollisionBinning.Mult}},
-      {femtounitedcolhistmanager::kCent, {CollisionBinning.Cent}},
-      {femtounitedcolhistmanager::kMagField, {CollisionBinning.MagField}}};
-    ColHists.init<femtounitedcolhistmanager::Mode::kANALYSIS>(&HRegistry, CollisionHistogramSpec);
+    std::map<colhistmanager::ColHist, std::vector<framework::AxisSpec>> CollisionHistogramSpec = {
+      {colhistmanager::kPosz, {CollisionBinning.VtZ}},
+      {colhistmanager::kMult, {CollisionBinning.Mult}},
+      {colhistmanager::kCent, {CollisionBinning.Cent}},
+      {colhistmanager::kMagField, {CollisionBinning.MagField}},
+      {colhistmanager::kPoszVsMult, {CollisionBinning.VtZ, CollisionBinning.Mult}},
+      {colhistmanager::kPoszVsCent, {CollisionBinning.VtZ, CollisionBinning.Cent}},
+      {colhistmanager::kCentVsMult, {CollisionBinning.Cent, CollisionBinning.Mult}}};
+    ColHists.init(&HRegistry, CollisionHistogramSpec);
 
-    std::map<femtounitedtrackhistmanager::TrackVariable, std::vector<framework::AxisSpec>> TrackHistogramSpec = {
-      {femtounitedtrackhistmanager::kPt, {TrackBinning.Pt}},
-      {femtounitedtrackhistmanager::kEta, {TrackBinning.Eta}},
-      {femtounitedtrackhistmanager::kPhi, {TrackBinning.Phi}}};
-    TrackHists.init<femtounitedtrackhistmanager::Mode::kANALYSIS>(&HRegistry, TrackHistogramSpec);
+    std::map<trackhistmanager::TrackHist, std::vector<framework::AxisSpec>> TrackHistogramSpec = {
+      {trackhistmanager::kPt, {TrackBinning.Pt}},
+      {trackhistmanager::kEta, {TrackBinning.Eta}},
+      {trackhistmanager::kPhi, {TrackBinning.Phi}},
+      {trackhistmanager::kSign, {TrackBinning.Sign}},
+      {trackhistmanager::kItsCluster, {TrackBinning.ItsCluster}},
+      {trackhistmanager::kItsClusterIb, {TrackBinning.ItsClusterIb}},
+      {trackhistmanager::kPtVsEta, {TrackBinning.Pt, TrackBinning.Eta}},
+      {trackhistmanager::kPtVsPhi, {TrackBinning.Pt, TrackBinning.Phi}},
+      {trackhistmanager::kPhiVsEta, {TrackBinning.Phi, TrackBinning.Eta}},
+      {trackhistmanager::kPtVsItsCluster, {TrackBinning.Pt, TrackBinning.ItsCluster}},
+      {trackhistmanager::kPtVsTpcCluster, {TrackBinning.Pt, TrackBinning.TpcCluster}},
+      {trackhistmanager::kPtVsTpcClusterShared, {TrackBinning.Pt, TrackBinning.TpcClusterShared}},
+      {trackhistmanager::kTpcClusterVsTpcClusterShared, {TrackBinning.TpcCluster, TrackBinning.TpcClusterShared}},
+      {trackhistmanager::kTpcCluster, {TrackBinning.TpcCluster}},
+      {trackhistmanager::kTpcClusterShared, {TrackBinning.TpcClusterShared}},
+      {trackhistmanager::kTpcElectron, {TrackPidBinning.P, TrackPidBinning.TpcPidElectron}},
+      {trackhistmanager::kTpcPion, {TrackPidBinning.P, TrackPidBinning.TpcPidPion}},
+      {trackhistmanager::kTpcKaon, {TrackPidBinning.P, TrackPidBinning.TpcPidKaon}},
+      {trackhistmanager::kTpcProton, {TrackPidBinning.P, TrackPidBinning.TpcPidProton}},
+      {trackhistmanager::kTpcDeuteron, {TrackPidBinning.P, TrackPidBinning.TpcPidDeuteron}},
+      {trackhistmanager::kTpcTriton, {TrackPidBinning.P, TrackPidBinning.TpcPidTriton}},
+      {trackhistmanager::kTpcHelium, {TrackPidBinning.P, TrackPidBinning.TpcPidHelium}},
+      {trackhistmanager::kTofElectron, {TrackPidBinning.P, TrackPidBinning.TofPidElectron}},
+      {trackhistmanager::kTofPion, {TrackPidBinning.P, TrackPidBinning.TofPidPion}},
+      {trackhistmanager::kTofKaon, {TrackPidBinning.P, TrackPidBinning.TofPidKaon}},
+      {trackhistmanager::kTofProton, {TrackPidBinning.P, TrackPidBinning.TofPidProton}},
+      {trackhistmanager::kTofDeuteron, {TrackPidBinning.P, TrackPidBinning.TofPidDeuteron}},
+      {trackhistmanager::kTofTriton, {TrackPidBinning.P, TrackPidBinning.TofPidTriton}},
+      {trackhistmanager::kTofHelium, {TrackPidBinning.P, TrackPidBinning.TofPidHelium}}};
+
+    TrackHists.init(&HRegistry, TrackHistogramSpec);
   };
 
   void process(FilteredCollision const& col, Tracks const& /*tracks*/)
   {
-    ColHists.fill<femtounitedcolhistmanager::Mode::kANALYSIS>(col);
+    ColHists.fill(col);
     auto TrackSlice = TrackPartition->sliceByCached(femtobase::collisionId, col.globalIndex(), cache);
-
     for (auto const& track : TrackSlice) {
-      TrackHists.fill<femtounitedtrackhistmanager::Mode::kANALYSIS>(track);
+      TrackHists.fill(track);
     };
   }
 };

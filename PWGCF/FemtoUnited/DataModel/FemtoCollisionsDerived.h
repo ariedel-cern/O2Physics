@@ -30,42 +30,42 @@ DECLARE_SOA_COLUMN(Sphericity, sphericity, float); //! Sphericity of the event
 } // namespace femtocollisions
 
 // table for basic collision information
-DECLARE_SOA_TABLE_VERSIONED(FUCols_001, "AOD", "FUCOLS", 1,
-                            o2::soa::Index<>,           //! Index
-                            femtocollisions::PosZ,      //! z coordinate of vertex
-                            femtocollisions::Mult,      //! multiplicity
-                            femtocollisions::Cent,      //! centrality
-                            femtocollisions::MagField); //! magnetic field
+DECLARE_SOA_TABLE_STAGED_VERSIONED(FUCols_001, "FUCOLS", 1,
+                                   o2::soa::Index<>,           //! Index
+                                   femtocollisions::PosZ,      //! z coordinate of vertex
+                                   femtocollisions::Mult,      //! multiplicity
+                                   femtocollisions::Cent,      //! centrality
+                                   femtocollisions::MagField); //! magnetic field
 using FUCols = FUCols_001;
 
 // table for for primary vertex location
-DECLARE_SOA_TABLE_VERSIONED(FUColPos_001, "AOD", "FUCOLPOS", 1,
-                            collision::PosX,  //! x coordinate of vertex
-                            collision::PosY); //! y coordindate of vertex
+DECLARE_SOA_TABLE_STAGED_VERSIONED(FUColPos_001, "FUCOLPOS", 1,
+                                   collision::PosX,  //! x coordinate of vertex
+                                   collision::PosY); //! y coordindate of vertex
 using FUColPos = FUColPos_001;
 
 // table for different multiplicity estimators
-DECLARE_SOA_TABLE_VERSIONED(FUColMults_001, "AOD", "FUCOLMULTS", 1,
-                            mult::MultFT0A, mult::MultFT0C, mult::MultFV0A, //! FIT detectors
-                            mult::MultNTracksPVeta1,                        //! track multiplicities with eta cut for INEL>0
-                            mult::MultPVTotalContributors,                  //! number of PV contribs total
-                            mult::MultNTracksGlobal,                        //! global track multiplicities
-                            mult::MultNTracksITSTPC,                        //! track multiplicities, PV contribs, no eta cut
-                            mult::MultAllTracksTPCOnly,                     //! TPConly track multiplicities, all, no eta cut
-                            mult::MultAllTracksITSTPC,                      //! ITSTPC track multiplicities, all, no eta cut
-                            evsel::NumTracksInTimeRange);                   //! occupancy
+DECLARE_SOA_TABLE_STAGED_VERSIONED(FUColMults_001, "FUCOLMULTS", 1,
+                                   mult::MultFT0A, mult::MultFT0C, mult::MultFV0A, //! FIT detectors
+                                   mult::MultNTracksPVeta1,                        //! track multiplicities with eta cut for INEL>0
+                                   mult::MultPVTotalContributors,                  //! number of PV contribs total
+                                   mult::MultNTracksGlobal,                        //! global track multiplicities
+                                   mult::MultNTracksITSTPC,                        //! track multiplicities, PV contribs, no eta cut
+                                   mult::MultAllTracksTPCOnly,                     //! TPConly track multiplicities, all, no eta cut
+                                   mult::MultAllTracksITSTPC,                      //! ITSTPC track multiplicities, all, no eta cut
+                                   evsel::NumTracksInTimeRange);                   //! occupancy
 using FUColMults = FUColMults_001;
 
 // table for different centrality (multiplicity percentile) estimators
-DECLARE_SOA_TABLE_VERSIONED(FUColCents_001, "AOD", "FUCOLCENTS", 1,
-                            cent::CentFT0M,  //! centrality from FT0M
-                            cent::CentFT0A,  //! centrality from FT0A
-                            cent::CentFT0C); //! centrality from FT0C
+DECLARE_SOA_TABLE_STAGED_VERSIONED(FUColCents_001, "FUCOLCENTS", 1,
+                                   cent::CentFT0M,  //! centrality from FT0M
+                                   cent::CentFT0A,  //! centrality from FT0A
+                                   cent::CentFT0C); //! centrality from FT0C
 using FUColCents = FUColCents_001;
 
 // table for collision sphericity
-DECLARE_SOA_TABLE_VERSIONED(FUColSph_001, "AOD", "FUCOLSPH", 1,
-                            femtocollisions::Sphericity); //! collision sphericity
+DECLARE_SOA_TABLE_STAGED_VERSIONED(FUColSph_001, "FUCOLSPH", 1,
+                                   femtocollisions::Sphericity); //! collision sphericity
 using FUColSph = FUColSph_001;
 
 } // namespace o2::aod

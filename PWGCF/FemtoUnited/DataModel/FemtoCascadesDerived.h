@@ -41,56 +41,56 @@ DECLARE_SOA_INDEX_COLUMN_FULL(Vzero, vzero, int, FUVzeros, "_V0"); //!
 } // namespace femtocascades
 
 // table for basic cascade information
-DECLARE_SOA_TABLE_VERSIONED(FUCascades_001, "AOD", "FUCASCADES", 1,
-                            o2::soa::Index<>,
-                            femtobase::CollisionId,
-                            femtobase::Pt,
-                            femtobase::Eta,
-                            femtobase::Phi,
-                            femtocascades::CascadeMass,
-                            femtobase::Theta<femtobase::Eta>,
-                            femtobase::Px<femtobase::Pt, femtobase::Eta>,
-                            femtobase::Py<femtobase::Pt, femtobase::Eta>,
-                            femtobase::Pz<femtobase::Pt, femtobase::Eta>,
-                            femtobase::P<femtobase::Pt, femtobase::Eta>);
+DECLARE_SOA_TABLE_STAGED_VERSIONED(FUCascades_001, "FUCASCADES", 1,
+                                   o2::soa::Index<>,
+                                   femtobase::CollisionId,
+                                   femtobase::Pt,
+                                   femtobase::Eta,
+                                   femtobase::Phi,
+                                   femtocascades::CascadeMass,
+                                   femtobase::Theta<femtobase::Eta>,
+                                   femtobase::Px<femtobase::Pt, femtobase::Eta>,
+                                   femtobase::Py<femtobase::Pt, femtobase::Eta>,
+                                   femtobase::Pz<femtobase::Pt, femtobase::Eta>,
+                                   femtobase::P<femtobase::Pt, femtobase::Eta>);
 using FUCascades = FUCascades_001;
 
-DECLARE_SOA_TABLE_VERSIONED(FUCasMasks_001, "AOD", "FUCASMASK", 1,
-                            femtocascades::CascadeMask);
+DECLARE_SOA_TABLE_STAGED_VERSIONED(FUCasMasks_001, "FUCASMASK", 1,
+                                   femtocascades::CascadeMask);
 using FUCasMasks = FUCasMasks_001;
 
-DECLARE_SOA_TABLE_VERSIONED(FUCasBacs_001, "AOD", "FUCASBACS", 1,
-                            femtocascades::BachelorId,
-                            femtocascades::BachelorPt,
-                            femtocascades::BachelorEta,
-                            femtocascades::BachelorPhi,
-                            femtocascades::BachelorMask,
-                            femtocascades::BachelorTPCMask,
-                            femtobase::Theta<femtobase::Eta>,
-                            femtobase::Px<femtobase::Pt, femtobase::Eta>,
-                            femtobase::Py<femtobase::Pt, femtobase::Eta>,
-                            femtobase::Pz<femtobase::Pt, femtobase::Eta>,
-                            femtobase::P<femtobase::Pt, femtobase::Eta>)
+DECLARE_SOA_TABLE_STAGED_VERSIONED(FUCasBacs_001, "FUCASBACS", 1,
+                                   femtocascades::BachelorId,
+                                   femtocascades::BachelorPt,
+                                   femtocascades::BachelorEta,
+                                   femtocascades::BachelorPhi,
+                                   femtocascades::BachelorMask,
+                                   femtocascades::BachelorTPCMask,
+                                   femtobase::Theta<femtobase::Eta>,
+                                   femtobase::Px<femtobase::Pt, femtobase::Eta>,
+                                   femtobase::Py<femtobase::Pt, femtobase::Eta>,
+                                   femtobase::Pz<femtobase::Pt, femtobase::Eta>,
+                                   femtobase::P<femtobase::Pt, femtobase::Eta>)
 using FUCasBacs = FUCasBacs_001;
 
-DECLARE_SOA_TABLE_VERSIONED(FUCasVzeros_001, "AOD", "FUCASVZEROS", 1,
-                            femtocascades::VzeroId,
-                            femtobase::Pt,
-                            femtobase::Eta,
-                            femtobase::Phi,
-                            femtovzeros::VzeroMass,
-                            femtovzeros::PosDauId,
-                            femtovzeros::PosDauPt,
-                            femtovzeros::PosDauEta,
-                            femtovzeros::PosDauPhi,
-                            femtovzeros::PosDauTrackMask,
-                            femtovzeros::PosDauTPCMask,
-                            femtovzeros::NegDauId,
-                            femtovzeros::NegDauPt,
-                            femtovzeros::NegDauEta,
-                            femtovzeros::NegDauPhi,
-                            femtovzeros::NegDauTrackMask,
-                            femtovzeros::NegDauTPCMask);
+DECLARE_SOA_TABLE_STAGED_VERSIONED(FUCasVzeros_001, "FUCASVZEROS", 1,
+                                   femtocascades::VzeroId,
+                                   femtobase::Pt,
+                                   femtobase::Eta,
+                                   femtobase::Phi,
+                                   femtovzeros::VzeroMass,
+                                   femtovzeros::PosDauId,
+                                   femtovzeros::PosDauPt,
+                                   femtovzeros::PosDauEta,
+                                   femtovzeros::PosDauPhi,
+                                   femtovzeros::PosDauTrackMask,
+                                   femtovzeros::PosDauTPCMask,
+                                   femtovzeros::NegDauId,
+                                   femtovzeros::NegDauPt,
+                                   femtovzeros::NegDauEta,
+                                   femtovzeros::NegDauPhi,
+                                   femtovzeros::NegDauTrackMask,
+                                   femtovzeros::NegDauTPCMask);
 using FUCasVzeros = FUCasVzeros_001;
 
 } // namespace o2::aod
