@@ -16,19 +16,20 @@
 #ifndef PWGCF_FEMTOUNITED_CORE_SELECTIONCONTAINER_H_
 #define PWGCF_FEMTOUNITED_CORE_SELECTIONCONTAINER_H_
 
-#include "fairlogger/Logger.h"
 #include <cmath>
 #include <bitset>
 #include <vector>
 #include <algorithm>
+
+#include "fairlogger/Logger.h"
 #include "CommonConstants/MathConstants.h"
 
 namespace o2::analysis::femtounited
 {
 
-namespace Limits
-{
 /// Limit type for selections
+namespace limits
+{
 enum LimitType { kUpperLimit,    ///< simple upper limit for the value, e.g. p_T < 1 GeV/c
                  kAbsUpperLimit, ///< upper limit of the absolute value, e.g. |eta| < 0.8
                  kLowerLimit,    ///< simple lower limit for the value, e.g. p_T > 0.2 GeV/c
@@ -37,9 +38,7 @@ enum LimitType { kUpperLimit,    ///< simple upper limit for the value, e.g. p_T
                  // kAbsUpperFunctionLimit, ///< upper limit of an absolute value given by a function, e.g. |DCA_xy| > f(pt)
                  kEqual ///< values need to be equal, e.g. sign = 1
 };
-
-} // namespace Limits
-
+}
 // bitsets need number of bits at compile time. Set reasonable limit here
 // This limits the number of selections for ONE observable
 constexpr size_t BitmaskMaxSize = 16;
@@ -51,12 +50,12 @@ class SelectionContainer
 {
  public:
   /// Default constructor
-  SelectionContainer() {};
+  SelectionContainer() {}
 
   /// Constructor
   /// \param values Values for the selection
   /// \param limitType Type of limit of the selection
-  SelectionContainer(std::vector<T> values, Limits::LimitType limitType, bool SkipLastBit)
+  SelectionContainer(std::vector<T> values, limits::LimitType limitType, bool SkipLastBit)
     : mValues(values),
       mLimitType(limitType),
       mSkipLastBit(SkipLastBit)
@@ -64,7 +63,7 @@ class SelectionContainer
     if (mValues.size() > BitmaskMaxSize) {
       LOG(fatal) << "Too many selections for single a observable. Current limit is " << BitmaskMaxSize;
     }
-    if (limitType == Limits::kEqual) {
+    if (limitType == limits::kEqual) {
       mSkipLastBit = false;
     }
     // values for selection are not necessarily ordered correctly
@@ -78,13 +77,13 @@ class SelectionContainer
   void sortSelections()
   {
     switch (mLimitType) {
-      case (Limits::LimitType::kUpperLimit):
-      case (Limits::LimitType::kAbsUpperLimit):
+      case (limits::kUpperLimit):
+      case (limits::kAbsUpperLimit):
         std::sort(mValues.begin(), mValues.end(), [](T a, T b) { return a >= b; });
         break;
-      case (Limits::LimitType::kLowerLimit):
-      case (Limits::LimitType::kAbsLowerLimit):
-      case (Limits::LimitType::kEqual):
+      case (limits::kLowerLimit):
+      case (limits::kAbsLowerLimit):
+      case (limits::kEqual):
         std::sort(mValues.begin(), mValues.end(), [](T a, T b) { return a <= b; });
         break;
     }
@@ -101,34 +100,35 @@ class SelectionContainer
     // iterate over all limits and set the corresponding bit if we pass the selection, otherwise break out as soon as we can
     for (size_t i = 0; i < mValues.size(); i++) {
       switch (mLimitType) {
-        case (Limits::LimitType::kUpperLimit):
+        case (limits::kUpperLimit):
           if (variable <= mValues.at(i)) {
             mBitmask.set(i);
           } else {
             breakLoop = true;
           }
           break;
-        case (Limits::LimitType::kAbsUpperLimit):
+        case (limits::kAbsUpperLimit):
           if (std::abs(variable) <= mValues.at(i)) {
             mBitmask.set(i);
           } else {
             breakLoop = true;
           }
           break;
-        case (Limits::LimitType::kLowerLimit):
+        case (limits::kLowerLimit):
           if (variable >= mValues.at(i)) {
             mBitmask.set(i);
-          } else
+          } else {
             breakLoop = true;
+          }
           break;
-        case (Limits::LimitType::kAbsLowerLimit):
+        case (limits::kAbsLowerLimit):
           if (std::abs(variable) >= mValues.at(i)) {
             mBitmask.set(i);
           } else {
             breakLoop = true;
           }
           break;
-        case (Limits::LimitType::kEqual):
+        case (limits::kEqual):
           // special case for kEqual since here we cannot really establish an order so we need to check all cases explicitly
           if (std::abs(variable - mValues.at(i)) < constants::math::Epsilon) {
             mBitmask.set(i);
@@ -153,7 +153,7 @@ class SelectionContainer
     }
 
     // if we do, we also need to check for kEqual first
-    if (Limits::kEqual == mLimitType) {
+    if (limits::kEqual == mLimitType) {
       // if the limit is equal, return all the bits
       return mBitmask;
     } else {
@@ -181,7 +181,7 @@ class SelectionContainer
 
  private:
   std::vector<T> mValues{};             ///< Values used for the selection
-  Limits::LimitType mLimitType;         ///< Limit type of selection
+  limits::LimitType mLimitType;         ///< Limit type of selection
   std::bitset<BitmaskMaxSize> mBitmask; ///< bitmask for a given observable
   bool mSkipLastBit = false;
 };

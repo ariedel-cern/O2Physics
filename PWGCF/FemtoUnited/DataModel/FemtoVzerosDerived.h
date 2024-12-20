@@ -9,6 +9,10 @@
 // granted to it by virtue of its status as an Intergovernmental Organization
 // or submit itself to any jurisdiction.
 
+/// \file FemtoVzerosDerived.h
+/// \brief v0 tables tables
+/// \author Anton Riedel, TU München, anton.riedel@cern.ch
+
 #ifndef PWGCF_FEMTOUNITED_DATAMODEL_FEMTOVZEROSDERIVED_H_
 #define PWGCF_FEMTOUNITED_DATAMODEL_FEMTOVZEROSDERIVED_H_
 

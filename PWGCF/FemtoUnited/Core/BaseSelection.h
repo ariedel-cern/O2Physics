@@ -25,7 +25,6 @@
 
 namespace o2::analysis::femtounited
 {
-
 /// \class BaseSelection
 /// \brief Base class to contain all cuts and assemble bitmask
 /// \tparam valueType Data type used for the selection (float/int/...)
@@ -35,7 +34,7 @@ class BaseSelection
 {
  public:
   /// Constructor
-  BaseSelection() {};
+  BaseSelection() {}
 
   /// Destructor
   virtual ~BaseSelection() = default;
@@ -44,7 +43,7 @@ class BaseSelection
   /// \param configSelection Vector from configurable containing the values employed for the selection
   /// \param observableType Observable to be employed for the selection
   /// \param limitType Type of the selection limit
-  void addSelection(std::vector<T>& configSelections, int Observable, Limits::LimitType limitType, bool SkipLastBit)
+  void addSelection(std::vector<T>& configSelections, int Observable, limits::LimitType limitType, bool SkipLastBit)
   {
     if (static_cast<size_t>(Observable) >= NObservables) {
       LOG(fatal) << "Observable is not valid. Observable (index) has to be smaller than " << NObservables;
@@ -56,9 +55,9 @@ class BaseSelection
     mSelections.at(Observable) = SelectionContainer<T>(configSelections, limitType, SkipLastBit);
   }
 
-  void resetMinimalSelection() { mMinimalSelected = true; };
+  void resetMinimalSelection() { mMinimalSelected = true; }
 
-  void setCheckMinimalSelection(bool checkMinimalSelection) { mCheckMinimalSelection = checkMinimalSelection; };
+  void setCheckMinimalSelection(bool checkMinimalSelection) { mCheckMinimalSelection = checkMinimalSelection; }
 
   /// set bitmask for a given observable
   /// \param observable Observable to be checked
@@ -130,4 +129,4 @@ class BaseSelection
 
 } // namespace o2::analysis::femtounited
 
-#endif // PWGCF_FEMTOUNITED_CORE_ASESELECTION_H_
+#endif // PWGCF_FEMTOUNITED_CORE_BASESELECTION_H_

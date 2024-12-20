@@ -15,8 +15,11 @@
 #ifndef PWGCF_FEMTOUNITED_CORE_HISTMANAGER_H_
 #define PWGCF_FEMTOUNITED_CORE_HISTMANAGER_H_
 
+#include <string>
 #include "Framework/HistogramRegistry.h"
 
+namespace o2::analysis::femtounited
+{
 namespace Histmanager
 {
 
@@ -73,5 +76,5 @@ constexpr const char* GetHistDesc(EnumType variable, const ArrayType& array)
 }
 
 } // namespace Histmanager
-
-#endif
+} // namespace o2::analysis::femtounited
+#endif // PWGCF_FEMTOUNITED_CORE_HISTMANAGER_H_

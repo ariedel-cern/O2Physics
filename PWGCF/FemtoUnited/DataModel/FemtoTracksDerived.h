@@ -9,12 +9,17 @@
 // granted to it by virtue of its status as an Intergovernmental Organization
 // or submit itself to any jurisdiction.
 
+/// \file FemtoTracksDerived.h
+/// \brief track tables
+/// \author Anton Riedel, TU München, anton.riedel@cern.ch
+
 #ifndef PWGCF_FEMTOUNITED_DATAMODEL_FEMTOTRACKSDERIVED_H_
 #define PWGCF_FEMTOUNITED_DATAMODEL_FEMTOTRACKSDERIVED_H_
 
 #include <cmath>
 #include "Framework/ASoA.h"
 #include "Framework/Expressions.h"
+#include "PWGCF/FemtoUnited/Utils/FemtoUtils.h"
 #include "PWGCF/FemtoUnited/Core/DataTypes.h"
 #include "PWGCF/FemtoUnited/DataModel/FemtoBaseDerived.h"
 
@@ -27,7 +32,7 @@ namespace femtotracks
 DECLARE_SOA_COLUMN(TrackMask, trackMask, femtodatatypes::TrackMaskType);         //! Bitmask for track selections
 DECLARE_SOA_COLUMN(TpcMask, tpcMask, femtodatatypes::TrackTPCMaskType);          //! Bitmask for TPC PID selections
 DECLARE_SOA_COLUMN(TofMask, tofMask, femtodatatypes::TrackTOFMaskType);          //! Bitmask for TOF PID selections
-DECLARE_SOA_COLUMN(TpcTofMask, tpctofMask, femtodatatypes::TrackTPCTOFMaskType); //! Bitmask for combined TPC+TOF PID selections
+DECLARE_SOA_COLUMN(TpctofMask, tpctofMask, femtodatatypes::TrackTPCTOFMaskType); //! Bitmask for combined TPC+TOF PID selections
 
 // columns for DCA
 DECLARE_SOA_COLUMN(DcaXY, dcaXY, float);                                                                                       //! Dca in XY plane
@@ -39,41 +44,50 @@ DECLARE_SOA_COLUMN(Sign, sign, int8_t); //! Sign (charge)
 
 // its related information
 DECLARE_SOA_COLUMN(IsPVContributor, isPVContributor, bool);          //! True if track is PV contributer
-DECLARE_SOA_COLUMN(ITSNCls, itsNCls, uint8_t);                       //! Number of ITS clusters (max 7)
-DECLARE_SOA_COLUMN(ITSNClsInnerBarrel, itsNClsInnerBarrel, uint8_t); //! Number of ITS clusters in the inner barrel (max 3)
-DECLARE_SOA_COLUMN(ITSChi2NCl, itsChi2NCl, float);                   //! ITS chi2 / cluster
-DECLARE_SOA_COLUMN(ITSClusterSizes, itsclusterSizes, uint32_t);      //! ITS cluster sizes (4 bits per layer)
+DECLARE_SOA_COLUMN(ItsNCls, itsNCls, uint8_t);                       //! Number of Its clusters (max 7)
+DECLARE_SOA_COLUMN(ItsNClsInnerBarrel, itsNClsInnerBarrel, uint8_t); //! Number of Its clusters in the inner barrel (max 3)
+DECLARE_SOA_COLUMN(ItsChi2NCl, itsChi2NCl, float);                   //! Its chi2 / cluster
+DECLARE_SOA_COLUMN(ItsClusterSizes, itsClusterSizes, uint32_t);      //! Its cluster sizes (4 bits per layer)
 
 // tpc related information
-DECLARE_SOA_COLUMN(TPCSignal, tpcSignal, float);                             //! TPC signal
-DECLARE_SOA_COLUMN(TPCInnerParam, tpcInnerParam, bool);                      //! Momentum at inner wall of TPC
-DECLARE_SOA_COLUMN(TPCNClsFound, tpcNClsFound, uint8_t);                     //! Number of TPC clusters
-DECLARE_SOA_COLUMN(TPCNClsCrossedRows, tpcNClsCrossedRows, uint8_t);         //! Number of TPC crossed rows
-DECLARE_SOA_DYNAMIC_COLUMN(TPCCrossedRowsOverFound, tpcCrossedRowsOverFound, //! Number of crossed rows over found TPC clusters
+DECLARE_SOA_COLUMN(TpcSignal, tpcSignal, float);                             //! Tpc signal
+DECLARE_SOA_COLUMN(TpcInnerParam, tpcInnerParam, bool);                      //! Momentum at inner wall of Tpc
+DECLARE_SOA_COLUMN(TpcNClsFound, tpcNClsFound, uint8_t);                     //! Number of Tpc clusters
+DECLARE_SOA_COLUMN(TpcNClsCrossedRows, tpcNClsCrossedRows, uint8_t);         //! Number of Tpc crossed rows
+DECLARE_SOA_DYNAMIC_COLUMN(TpcCrossedRowsOverFound, tpcCrossedRowsOverFound, //! Number of crossed rows over found Tpc clusters
                            [](uint8_t tpcNClsFindable, uint8_t tpcNClsCrossedRows) -> float { return (float)tpcNClsCrossedRows / (float)tpcNClsFindable; });
-DECLARE_SOA_COLUMN(TPCNClsShared, tpcNClsShared, uint8_t); //! Number of shared TPC clusters
-DECLARE_SOA_COLUMN(TPCChi2NCl, tpcChi2NCl, float);         //! TPC chi2 / findable clusters
+DECLARE_SOA_COLUMN(TpcNClsShared, tpcNClsShared, uint8_t); //! Number of shared Tpc clusters
+DECLARE_SOA_COLUMN(TpcChi2NCl, tpcChi2NCl, float);         //! Tpc chi2 / findable clusters
 
 // tof related information
-DECLARE_SOA_COLUMN(TOFBeta, tofbeta, float); //! TOF beta
+DECLARE_SOA_COLUMN(TofBeta, tofBeta, float); //! Tof beta
 
 // TPC PID information
-DECLARE_SOA_COLUMN(TPCNSigmaEl, tpcNSigmaEl, float); //! Nsigma separation with the TPC detector for electron
-DECLARE_SOA_COLUMN(TPCNSigmaPi, tpcNSigmaPi, float); //! Nsigma separation with the TPC detector for pion
-DECLARE_SOA_COLUMN(TPCNSigmaKa, tpcNSigmaKa, float); //! Nsigma separation with the TPC detector for kaon
-DECLARE_SOA_COLUMN(TPCNSigmaPr, tpcNSigmaPr, float); //! Nsigma separation with the TPC detector for proton
-DECLARE_SOA_COLUMN(TPCNSigmaDe, tpcNSigmaDe, float); //! Nsigma separation with the TPC detector for deuteron
-DECLARE_SOA_COLUMN(TPCNSigmaTr, tpcNSigmaTr, float); //! Nsigma separation with the TPC detector for triton
-DECLARE_SOA_COLUMN(TPCNSigmaHe, tpcNSigmaHe, float); //! Nsigma separation with the TPC detector for helium3
+DECLARE_SOA_COLUMN(TpcNSigmaEl, tpcNSigmaEl, float); //! Nsigma separation with the Tpc detector for electron
+DECLARE_SOA_COLUMN(TpcNSigmaPi, tpcNSigmaPi, float); //! Nsigma separation with the Tpc detector for pion
+DECLARE_SOA_COLUMN(TpcNSigmaKa, tpcNSigmaKa, float); //! Nsigma separation with the Tpc detector for kaon
+DECLARE_SOA_COLUMN(TpcNSigmaPr, tpcNSigmaPr, float); //! Nsigma separation with the Tpc detector for proton
+DECLARE_SOA_COLUMN(TpcNSigmaDe, tpcNSigmaDe, float); //! Nsigma separation with the Tpc detector for deuteron
+DECLARE_SOA_COLUMN(TpcNSigmaTr, tpcNSigmaTr, float); //! Nsigma separation with the Tpc detector for triton
+DECLARE_SOA_COLUMN(TpcNSigmaHe, tpcNSigmaHe, float); //! Nsigma separation with the Tpc detector for helium3
 
 // TOF PID information
-DECLARE_SOA_COLUMN(TOFNSigmaEl, tofNSigmaEl, float); //! Nsigma separation with the TOF detector for electron
-DECLARE_SOA_COLUMN(TOFNSigmaPi, tofNSigmaPi, float); //! Nsigma separation with the TOF detector for pion
-DECLARE_SOA_COLUMN(TOFNSigmaKa, tofNSigmaKa, float); //! Nsigma separation with the TOF detector for kaon
-DECLARE_SOA_COLUMN(TOFNSigmaPr, tofNSigmaPr, float); //! Nsigma separation with the TOF detector for proton
-DECLARE_SOA_COLUMN(TOFNSigmaDe, tofNSigmaDe, float); //! Nsigma separation with the TOF detector for deuteron
-DECLARE_SOA_COLUMN(TOFNSigmaTr, tofNSigmaTr, float); //! Nsigma separation with the TOF detector for triton
-DECLARE_SOA_COLUMN(TOFNSigmaHe, tofNSigmaHe, float); //! Nsigma separation with the TOF detector for helium3
+DECLARE_SOA_COLUMN(TofNSigmaEl, tofNSigmaEl, float); //! Nsigma separation with the Tof detector for electron
+DECLARE_SOA_COLUMN(TofNSigmaPi, tofNSigmaPi, float); //! Nsigma separation with the Tof detector for pion
+DECLARE_SOA_COLUMN(TofNSigmaKa, tofNSigmaKa, float); //! Nsigma separation with the Tof detector for kaon
+DECLARE_SOA_COLUMN(TofNSigmaPr, tofNSigmaPr, float); //! Nsigma separation with the Tof detector for proton
+DECLARE_SOA_COLUMN(TofNSigmaDe, tofNSigmaDe, float); //! Nsigma separation with the Tof detector for deuteron
+DECLARE_SOA_COLUMN(TofNSigmaTr, tofNSigmaTr, float); //! Nsigma separation with the Tof detector for triton
+DECLARE_SOA_COLUMN(TofNSigmaHe, tofNSigmaHe, float); //! Nsigma separation with the Tof detector for helium3
+
+DECLARE_SOA_DYNAMIC_COLUMN(TpctofNSigmaEl, tpctofNSigmaEl, [](float tpc, float tof) -> float { return o2::analysis::femtounited::utils::geometricMean(tpc, tof); }); //!
+DECLARE_SOA_DYNAMIC_COLUMN(TpctofNSigmaPi, tpctofNSigmaPi, [](float tpc, float tof) -> float { return o2::analysis::femtounited::utils::geometricMean(tpc, tof); }); //!
+DECLARE_SOA_DYNAMIC_COLUMN(TpctofNSigmaKa, tpctofNSigmaKa, [](float tpc, float tof) -> float { return o2::analysis::femtounited::utils::geometricMean(tpc, tof); }); //!
+DECLARE_SOA_DYNAMIC_COLUMN(TpctofNSigmaPr, tpctofNSigmaPr, [](float tpc, float tof) -> float { return o2::analysis::femtounited::utils::geometricMean(tpc, tof); }); //!
+DECLARE_SOA_DYNAMIC_COLUMN(TpctofNSigmaDe, tpctofNSigmaDe, [](float tpc, float tof) -> float { return o2::analysis::femtounited::utils::geometricMean(tpc, tof); }); //!
+DECLARE_SOA_DYNAMIC_COLUMN(TpctofNSigmaTr, tpctofNSigmaTr, [](float tpc, float tof) -> float { return o2::analysis::femtounited::utils::geometricMean(tpc, tof); }); //!
+DECLARE_SOA_DYNAMIC_COLUMN(TpctofNSigmaHe, tpctofNSigmaHe, [](float tpc, float tof) -> float { return o2::analysis::femtounited::utils::geometricMean(tpc, tof); }); //!
+
 } // namespace femtotracks
 
 // table for basic track information
@@ -95,7 +109,7 @@ DECLARE_SOA_TABLE_STAGED_VERSIONED(FUTrackMasks_001, "FUTRACKMASKS", 1,
                                    femtotracks::TrackMask,
                                    femtotracks::TpcMask,
                                    femtotracks::TofMask,
-                                   femtotracks::TpcTofMask);
+                                   femtotracks::TpctofMask);
 using FUTrackMasks = FUTrackMasks_001;
 
 // table for track DCA
@@ -109,35 +123,43 @@ using FUTrackDCAs = FUTrackDCAs_001;
 DECLARE_SOA_TABLE_STAGED_VERSIONED(FUTrackExtras_001, "FUTRACKEXTRAS", 1,
                                    femtotracks::Sign,
                                    femtotracks::IsPVContributor,
-                                   femtotracks::ITSNCls,
-                                   femtotracks::ITSNClsInnerBarrel,
-                                   femtotracks::ITSChi2NCl,
-                                   femtotracks::ITSClusterSizes,
-                                   femtotracks::TPCSignal,
-                                   femtotracks::TPCInnerParam,
-                                   femtotracks::TPCNClsFound,
-                                   femtotracks::TPCNClsCrossedRows,
-                                   femtotracks::TPCNClsShared,
-                                   femtotracks::TOFBeta,
-                                   femtotracks::TPCCrossedRowsOverFound<femtotracks::TPCNClsFound, femtotracks::TPCNClsCrossedRows>);
+                                   femtotracks::ItsNCls,
+                                   femtotracks::ItsNClsInnerBarrel,
+                                   femtotracks::ItsChi2NCl,
+                                   femtotracks::ItsClusterSizes,
+                                   femtotracks::TpcSignal,
+                                   femtotracks::TpcInnerParam,
+                                   femtotracks::TpcNClsFound,
+                                   femtotracks::TpcNClsCrossedRows,
+                                   femtotracks::TpcNClsShared,
+                                   femtotracks::TofBeta,
+                                   femtotracks::TpcCrossedRowsOverFound<femtotracks::TpcNClsFound, femtotracks::TpcNClsCrossedRows>);
 using FUTrackExtras = FUTrackExtras_001;
 
 // table for extra PID information
 DECLARE_SOA_TABLE_STAGED_VERSIONED(FUTrackPids_001, "FUTRACKPIDS", 1,
-                                   femtotracks::TPCNSigmaEl,
-                                   femtotracks::TPCNSigmaPi,
-                                   femtotracks::TPCNSigmaKa,
-                                   femtotracks::TPCNSigmaPr,
-                                   femtotracks::TPCNSigmaDe,
-                                   femtotracks::TPCNSigmaTr,
-                                   femtotracks::TPCNSigmaHe,
-                                   femtotracks::TOFNSigmaEl,
-                                   femtotracks::TOFNSigmaPi,
-                                   femtotracks::TOFNSigmaKa,
-                                   femtotracks::TOFNSigmaPr,
-                                   femtotracks::TOFNSigmaDe,
-                                   femtotracks::TOFNSigmaTr,
-                                   femtotracks::TOFNSigmaHe);
+                                   femtotracks::TpcNSigmaEl,
+                                   femtotracks::TpcNSigmaPi,
+                                   femtotracks::TpcNSigmaKa,
+                                   femtotracks::TpcNSigmaPr,
+                                   femtotracks::TpcNSigmaDe,
+                                   femtotracks::TpcNSigmaTr,
+                                   femtotracks::TpcNSigmaHe,
+                                   femtotracks::TofNSigmaEl,
+                                   femtotracks::TofNSigmaPi,
+                                   femtotracks::TofNSigmaKa,
+                                   femtotracks::TofNSigmaPr,
+                                   femtotracks::TofNSigmaDe,
+                                   femtotracks::TofNSigmaTr,
+                                   femtotracks::TofNSigmaHe,
+                                   femtotracks::TpctofNSigmaEl<femtotracks::TpcNSigmaEl, femtotracks::TofNSigmaEl>,
+                                   femtotracks::TpctofNSigmaPi<femtotracks::TpcNSigmaPi, femtotracks::TofNSigmaPi>,
+                                   femtotracks::TpctofNSigmaKa<femtotracks::TpcNSigmaKa, femtotracks::TofNSigmaKa>,
+                                   femtotracks::TpctofNSigmaPr<femtotracks::TpcNSigmaPr, femtotracks::TofNSigmaPr>,
+                                   femtotracks::TpctofNSigmaDe<femtotracks::TpcNSigmaDe, femtotracks::TofNSigmaDe>,
+                                   femtotracks::TpctofNSigmaTr<femtotracks::TpcNSigmaTr, femtotracks::TofNSigmaTr>,
+                                   femtotracks::TpctofNSigmaHe<femtotracks::TpcNSigmaHe, femtotracks::TofNSigmaHe>);
+
 using FUTrackPids = FUTrackPids_001;
 
 } // namespace o2::aod

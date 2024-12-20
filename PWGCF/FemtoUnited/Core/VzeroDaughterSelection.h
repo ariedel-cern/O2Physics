@@ -14,8 +14,8 @@
 /// \author Andi Mathis, TU München, andreas.mathis@ph.tum.de
 /// \author Luca Barioglio, TU München, luca.barioglio@cern.ch
 
-#ifndef PWGCF_FEMTOUNITED_CORE_VZEROSELECTION_H_
-#define PWGCF_FEMTOUNITED_CORE_VZEROSELECTION_H_
+#ifndef PWGCF_FEMTOUNITED_CORE_VZERODAUGHTERSELECTION_H_
+#define PWGCF_FEMTOUNITED_CORE_VZERODAUGHTERSELECTION_H_
 
 #include <cmath>
 #include "PWGCF/FemtoUnited/Core/BaseSelection.h"
@@ -23,36 +23,33 @@
 
 namespace o2::analysis::femtounited
 {
-namespace vzeroselection
+namespace vzerodaughterselection
 {
 /// The different selections this task is capable of doing
-enum VzeroSels {
-  kDcaDaughMax, ///< Max. DCA of the daughers at decay vertex
-  kCpaMin,      ///< Min. CPA (cosine pointing angle)
-  kTransRadMin, ///< Min. transverse radius
-  kTransRadMax, ///< max. transverse radius
+enum VzeroDaughterSels {
+  kDcaMin,      ///< Min. DCA of the daughers at primary vertex
+  kTpcClsMin,   ///< Min. transverse radius
   kDecayVtxMax, ///< Max. distance of decay vertex
   kVzeroSelsMax
 };
 
 /// \class FemtoDreamTrackCuts
 /// \brief Cut class to contain and execute all cuts applied to tracks
-class VzeroSelection : public BaseSelection<float, o2::aod::femtodatatypes::VzeroMaskType, VzeroSels::kVzeroSelsMax>
+class VzeroDaughterSelection : public BaseSelection<float, o2::aod::femtodatatypes::VzeroDauTrackMaskType, VzeroDaughterSels::kVzeroSelsMax>
 {
  public:
-  VzeroSelection() {}
-  virtual ~VzeroSelection() = default;
-  template <class V0>
-  void ApplySelections(V0 v0)
-  {
-    this->resetMinimalSelection();
-    this->setBitmaskForObservable(VzeroSels::kDcaDaughMax, v0.dcaV0daughters());
-    this->setBitmaskForObservable(VzeroSels::kCpaMin, v0.v0cosPA());
-    this->setBitmaskForObservable(VzeroSels::kTransRadMin, v0.v0radius());
-    this->setBitmaskForObservable(VzeroSels::kTransRadMax, v0.v0radius());
-    this->assembleBismask();
-  };
+  VzeroDaughterSelection() {}
+  virtual ~VzeroDaughterSelection() = default;
+  // template <class V0>
+  // void ApplySelections(V0 v0) {
+  // this->resetMinimalSelection();
+  // this->setBitmaskForObservable(VzeroSels::kDcaDaughMax, v0.dcaV0daughters());
+  // this->setBitmaskForObservable(VzeroSels::kCpaMin, v0.v0cosPA());
+  // this->setBitmaskForObservable(VzeroSels::kTransRadMin, v0.v0radius());
+  // this->setBitmaskForObservable(VzeroSels::kTransRadMax, v0.v0radius());
+  // this->assembleBismask();
+  // };
 };
-} // namespace vzeroselection
+} // namespace vzerodaughterselection
 } // namespace o2::analysis::femtounited
 #endif // PWGCF_FEMTOUNITED_CORE_VZEROSELECTION_H_

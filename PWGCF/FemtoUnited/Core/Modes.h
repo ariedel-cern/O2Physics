@@ -14,7 +14,9 @@
 
 #include <cstdint>
 
-namespace femtomodes
+namespace o2::analysis::femtounited
+{
+namespace modes
 {
 
 enum class Mode : uint32_t {
@@ -34,15 +36,24 @@ constexpr bool isModeSet(Mode mode, Mode flag)
 
 enum class System : uint32_t {
   kPP = 0x1,
-  kPbPb = 0x2
+  kPbPb = 0x2,
+  kMC = 0x4,
+  kRun3 = 0x8,
+  kRun2 = 0x10,
+  kNoCentCal = 0x20,
+  kPP_Run3 = kPP | kRun3,
+  kPP_Run2 = kPP | kRun2,
+  kPP_NoCentCal_Run3 = kPP | kRun3| kNoCentCal ,
+  kPbPb_Run3 = kPbPb | kRun3,
+  kPbPb_Run2 = kPbPb | kRun2,
 };
 
 // Function to check if a mode is activated
-constexpr bool isSystemSet(System mode, System flag)
+constexpr bool isSystemSet(System sys, System flag)
 {
-  return static_cast<uint32_t>(mode) & static_cast<uint32_t>(flag);
+  return static_cast<uint32_t>(sys) & static_cast<uint32_t>(flag);
 }
 
-} // namespace femtomodes
-
+}; // namespace modes
+}; // namespace o2::analysis::femtounited
 #endif // PWGCF_FEMTOUNITED_CORE_MODES_H_

@@ -9,6 +9,10 @@
 // granted to it by virtue of its status as an Intergovernmental Organization
 // or submit itself to any jurisdiction.
 
+/// \file FemtoCollisionsDerived.h
+/// \brief collision tables
+/// \author Anton Riedel, TU München, anton.riedel@cern.ch
+
 #ifndef PWGCF_FEMTOUNITED_DATAMODEL_FEMTOCOLLISIONSDERIVED_H_
 #define PWGCF_FEMTOUNITED_DATAMODEL_FEMTOCOLLISIONSDERIVED_H_
 
@@ -31,11 +35,12 @@ DECLARE_SOA_COLUMN(Sphericity, sphericity, float); //! Sphericity of the event
 
 // table for basic collision information
 DECLARE_SOA_TABLE_STAGED_VERSIONED(FUCols_001, "FUCOLS", 1,
-                                   o2::soa::Index<>,           //! Index
-                                   femtocollisions::PosZ,      //! z coordinate of vertex
-                                   femtocollisions::Mult,      //! multiplicity
-                                   femtocollisions::Cent,      //! centrality
-                                   femtocollisions::MagField); //! magnetic field
+                                   o2::soa::Index<>,            //! Index
+                                   femtocollisions::PosZ,       //! z coordinate of vertex
+                                   femtocollisions::Mult,       //! multiplicity
+                                   femtocollisions::Cent,       //! centrality
+                                   femtocollisions::Sphericity, //! sphericity
+                                   femtocollisions::MagField);  //! magnetic field
 using FUCols = FUCols_001;
 
 // table for for primary vertex location
@@ -64,9 +69,9 @@ DECLARE_SOA_TABLE_STAGED_VERSIONED(FUColCents_001, "FUCOLCENTS", 1,
 using FUColCents = FUColCents_001;
 
 // table for collision sphericity
-DECLARE_SOA_TABLE_STAGED_VERSIONED(FUColSph_001, "FUCOLSPH", 1,
-                                   femtocollisions::Sphericity); //! collision sphericity
-using FUColSph = FUColSph_001;
+// DECLARE_SOA_TABLE_STAGED_VERSIONED(FUColSph_001, "FUCOLSPH", 1,
+//                                    femtocollisions::Sphericity); //! collision sphericity
+// using FUColSph = FUColSph_001;
 
 } // namespace o2::aod
 

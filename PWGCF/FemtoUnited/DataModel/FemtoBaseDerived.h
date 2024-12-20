@@ -10,10 +10,15 @@
 // granted to it by virtue of its status as an Intergovernmental Organization
 // or submit itself to any jurisdiction.
 
+/// \file FemtoBaseDerived.h
+/// \brief base tables
+/// \author Anton Riedel, TU München, anton.riedel@cern.ch
+
 #ifndef PWGCF_FEMTOUNITED_DATAMODEL_FEMTOBASEDERIVED_H_
 #define PWGCF_FEMTOUNITED_DATAMODEL_FEMTOBASEDERIVED_H_
 
 #include <cmath>
+
 #include "Framework/ASoA.h"
 #include "Framework/Expressions.h"
 
@@ -23,7 +28,7 @@ namespace o2::aod
 namespace femtobase
 {
 // Basic information need for all types of particles
-DECLARE_SOA_INDEX_COLUMN(Collision, collision); //! collision index
+DECLARE_SOA_INDEX_COLUMN(Collision, collision); //! collision index                                                        
 DECLARE_SOA_COLUMN(Pt, pt, float);   //! pt
 DECLARE_SOA_COLUMN(Eta, eta, float); //! eta
 DECLARE_SOA_COLUMN(Phi, phi, float); //! phi

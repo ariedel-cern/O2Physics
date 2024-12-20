@@ -44,7 +44,7 @@ struct femtoDreamConverter {
 
   void process(FDCollision const& col, FDParticles const& parts)
   {
-    outputCollisions(col.posZ(), col.multNtr(), col.multV0M(), col.magField());
+    outputCollisions(col.posZ(), col.multNtr(), col.multV0M(), col.sphericity(), col.magField());
     for (auto const& part : parts) {
       // fill tracks
       if (part.partType() == femtodreamparticle::ParticleType::kTrack) {

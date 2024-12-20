@@ -22,40 +22,40 @@
 
 namespace o2::analysis::femtounited
 {
-namespace TrackTpcSel
+namespace tracktpcselection
 {
 /// The different selections this task is capable of doing
-enum TrackTpcSel { kElectron, ///< Electon PID
-                   kPion,     ///< Pion PID
-                   kKaon,     ///< Kaon PID
-                   kProton,   ///< Proton PID
-                   kDeuteron, ///< Deuteron PID
-                   kTriton,   ///< Triton PID
-                   kHelium3,  ///< He3 PID
-                   kTrackTpcSelMax
+enum TrackTpcSels { kElectron, ///< Electon PID
+                    kPion,     ///< Pion PID
+                    kKaon,     ///< Kaon PID
+                    kProton,   ///< Proton PID
+                    kDeuteron, ///< Deuteron PID
+                    kTriton,   ///< Triton PID
+                    kHelium,   ///< He3 PID
+                    kTrackTpcSelMax
 };
-} // namespace TrackTpcSel
 
 /// \class FemtoDreamTrackCuts
 /// \brief Cut class to contain and execute all cuts applied to tracks
-class TrackTpcSelection : public BaseSelection<float, o2::aod::femtodatatypes::TrackTPCMaskType, TrackTpcSel::kTrackTpcSelMax>
+class TrackTpcSelection : public BaseSelection<float, o2::aod::femtodatatypes::TrackTPCMaskType, TrackTpcSels::kTrackTpcSelMax>
 {
  public:
-  TrackTpcSelection() {};
+  TrackTpcSelection() {}
   virtual ~TrackTpcSelection() = default;
   template <class track>
   void ApplySelections(track Track)
   {
-    this->setBitmaskForObservable(TrackTpcSel::kElectron, Track.tpcNSigmaEl());
-    this->setBitmaskForObservable(TrackTpcSel::kPion, Track.tpcNSigmaPi());
-    this->setBitmaskForObservable(TrackTpcSel::kKaon, Track.tpcNSigmaKa());
-    this->setBitmaskForObservable(TrackTpcSel::kProton, Track.tpcNSigmaPr());
-    this->setBitmaskForObservable(TrackTpcSel::kDeuteron, Track.tpcNSigmaDe());
-    this->setBitmaskForObservable(TrackTpcSel::kTriton, Track.tpcNSigmaTr());
-    this->setBitmaskForObservable(TrackTpcSel::kHelium3, Track.tpcNSigmaHe());
+    this->setBitmaskForObservable(TrackTpcSels::kElectron, Track.tpcNSigmaEl());
+    this->setBitmaskForObservable(TrackTpcSels::kPion, Track.tpcNSigmaPi());
+    this->setBitmaskForObservable(TrackTpcSels::kKaon, Track.tpcNSigmaKa());
+    this->setBitmaskForObservable(TrackTpcSels::kProton, Track.tpcNSigmaPr());
+    this->setBitmaskForObservable(TrackTpcSels::kDeuteron, Track.tpcNSigmaDe());
+    this->setBitmaskForObservable(TrackTpcSels::kTriton, Track.tpcNSigmaTr());
+    this->setBitmaskForObservable(TrackTpcSels::kHelium, Track.tpcNSigmaHe());
     this->assembleBismask();
   };
 }; // namespace femtoDream
-} // namespace o2::analysis::femtounited
+}; // namespace tracktpcselection
+}; // namespace o2::analysis::femtounited
 
-#endif // PWGCF_FEMTOUNITED_CORE_TRACKSELECTION_H_
+#endif // PWGCF_FEMTOUNITED_CORE_TRACKTPCSELECTION_H_

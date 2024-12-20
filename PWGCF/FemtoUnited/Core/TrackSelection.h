@@ -23,41 +23,42 @@
 
 namespace o2::analysis::femtounited
 {
-namespace TrackSel
+namespace trackselection
 {
 /// The different selections this task is capable of doing
-enum TrackSel { kSign,         ///< Sign of the track
-                kTPCnClsMin,   ///< Min. number of TPC clusters
-                kTPCcRowsMin,  ///< Min. number of crossed TPC rows
-                kTPCsClsMax,   ///< Max. number of shared TPC clusters
-                kITSnClsMin,   ///< Min. number of ITS clusters
-                kITSnClsIbMin, ///< Min. number of ITS clusters in the inner barrel
-                kDCAxyMax,     ///< Max. DCA_xy (cm)
-                kDCAzMax,      ///< Max. DCA_z (cm)
-                kTrackselMax
+enum TrackSels {
+  kSign,         ///< Sign of the track
+  kTPCnClsMin,   ///< Min. number of TPC clusters
+  kTPCcRowsMin,  ///< Min. number of crossed TPC rows
+  kTPCsClsMax,   ///< Max. number of shared TPC clusters
+  kITSnClsMin,   ///< Min. number of ITS clusters
+  kITSnClsIbMin, ///< Min. number of ITS clusters in the inner barrel
+  kDCAxyMax,     ///< Max. DCA_xy (cm)
+  kDCAzMax,      ///< Max. DCA_z (cm)
+  kTrackselMax
 };
-} // namespace TrackSel
 
 /// \class FemtoDreamTrackCuts
 /// \brief Cut class to contain and execute all cuts applied to tracks
-class TrackSelection : public BaseSelection<float, o2::aod::femtodatatypes::TrackMaskType, TrackSel::kTrackselMax>
+class TrackSelection : public BaseSelection<float, o2::aod::femtodatatypes::TrackMaskType, TrackSels::kTrackselMax>
 {
  public:
-  TrackSelection() {};
+  TrackSelection() {}
   virtual ~TrackSelection() = default;
   template <class track>
   void ApplySelections(track Track)
   {
     this->resetMinimalSelection();
-    this->setBitmaskForObservable(TrackSel::kSign, Track.sign());
-    this->setBitmaskForObservable(TrackSel::kTPCnClsMin, Track.tpcNClsFound());
-    this->setBitmaskForObservable(TrackSel::kTPCcRowsMin, Track.tpcNClsCrossedRows());
-    this->setBitmaskForObservable(TrackSel::kTPCsClsMax, Track.tpcNClsShared());
-    this->setBitmaskForObservable(TrackSel::kITSnClsMin, Track.itsNCls());
-    this->setBitmaskForObservable(TrackSel::kITSnClsIbMin, Track.itsNClsInnerBarrel());
+    this->setBitmaskForObservable(TrackSels::kSign, Track.sign());
+    this->setBitmaskForObservable(TrackSels::kTPCnClsMin, Track.tpcNClsFound());
+    this->setBitmaskForObservable(TrackSels::kTPCcRowsMin, Track.tpcNClsCrossedRows());
+    this->setBitmaskForObservable(TrackSels::kTPCsClsMax, Track.tpcNClsShared());
+    this->setBitmaskForObservable(TrackSels::kITSnClsMin, Track.itsNCls());
+    this->setBitmaskForObservable(TrackSels::kITSnClsIbMin, Track.itsNClsInnerBarrel());
     this->assembleBismask();
   };
 }; // namespace femtoDream
-} // namespace o2::analysis::femtounited
+}; // namespace TrackSelection
+}; // namespace o2::analysis::femtounited
 
 #endif // PWGCF_FEMTOUNITED_CORE_TRACKSELECTION_H_
