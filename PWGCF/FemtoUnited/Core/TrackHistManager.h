@@ -50,6 +50,14 @@ enum TrackHist {
   kPtVsTpcCluster,
   kPtVsTpcClusterShared,
   kTpcClusterVsTpcClusterShared,
+  // its pid
+  kItsElectron,
+  kItsPion,
+  kItsKaon,
+  kItsProton,
+  kItsDeuteron,
+  kItsTriton,
+  kItsHelium,
   // tpc pid
   kTpcSignal,
   kTpcElectron,
@@ -101,6 +109,13 @@ constexpr std::array<Histmanager::HistInfo<TrackHist>, kTrackHistogramLast> Hist
    {kPtVsTpcCluster, kTH2F, "hPtVsTpcCluster", "p_{T} vs TPC cluster found; p_{T} (GeV/#it{c}) ; TPC cluster found"},
    {kPtVsTpcClusterShared, kTH2F, "hPtVsTpcClusterShared", "p_{T} vs TPC cluster shared; p_{T} (GeV/#it{c}) ; TPC cluster shared"},
    {kTpcClusterVsTpcClusterShared, kTH2F, "hTpcClusterVsTpcClusterShared", "TPC cluster found vs TPC cluster shared; TPC cluster found; TPC cluster shared"},
+   {kItsElectron, kTH2F, "hItsPidElectron", "TPC PID Electron; p (GeV/#it{c}) ; n#sigma_{TPC,el}"},
+   {kItsPion, kTH2F, "hItsPidPion", "ITS PID Pion; p (GeV/#it{c}) ; n#sigma_{ITS,pi}"},
+   {kItsKaon, kTH2F, "hItsPidKaon", "ITS PID Kaon; p (GeV/#it{c}) ; n#sigma_{ITS,ka}"},
+   {kItsProton, kTH2F, "hItsPidProton", "ITS PID Proton; p (GeV/#it{c}) ; n#sigma_{ITS,pr}"},
+   {kItsDeuteron, kTH2F, "hItsPidDeuteron", "ITS PID Deuteron; p (GeV/#it{c}) ; n#sigma_{ITS,de}"},
+   {kItsTriton, kTH2F, "hItsPidTriton", "ITS PID Triton; p (GeV/#it{c}) ; n#sigma_{ITS,tr}"},
+   {kItsHelium, kTH2F, "hItsPidHelium", "ITS PID Helium; p (GeV/#it{c}) ; n#sigma_{ITS,he}"},
    {kTpcSignal, kTH2F, "hTpcSignal", "TPC Signal; p (GeV/#it{c}) ; TPC Signal"},
    {kTpcElectron, kTH2F, "hTpcPidElectron", "TPC PID Electron; p (GeV/#it{c}) ; n#sigma_{TPC,el}"},
    {kTpcPion, kTH2F, "hTpcPidPion", "TPC PID Pion; p (GeV/#it{c}) ; n#sigma_{TPC,pi}"},
@@ -169,6 +184,14 @@ class TrackHistManager
 
       std::string pidDir = std::string(PidDir);
 
+      mHistogramRegistry->add(pidDir + GetHistNamev2(kItsElectron, HistTable), GetHistDesc(kItsElectron, HistTable), GetHistType(kItsElectron, HistTable), {Specs[kItsElectron]});
+      mHistogramRegistry->add(pidDir + GetHistNamev2(kItsPion, HistTable), GetHistDesc(kItsPion, HistTable), GetHistType(kItsPion, HistTable), {Specs[kItsPion]});
+      mHistogramRegistry->add(pidDir + GetHistNamev2(kItsKaon, HistTable), GetHistDesc(kItsKaon, HistTable), GetHistType(kItsKaon, HistTable), {Specs[kItsKaon]});
+      mHistogramRegistry->add(pidDir + GetHistNamev2(kItsProton, HistTable), GetHistDesc(kItsProton, HistTable), GetHistType(kItsProton, HistTable), {Specs[kItsProton]});
+      mHistogramRegistry->add(pidDir + GetHistNamev2(kItsDeuteron, HistTable), GetHistDesc(kItsDeuteron, HistTable), GetHistType(kItsDeuteron, HistTable), {Specs[kItsDeuteron]});
+      mHistogramRegistry->add(pidDir + GetHistNamev2(kItsTriton, HistTable), GetHistDesc(kItsTriton, HistTable), GetHistType(kItsTriton, HistTable), {Specs[kItsTriton]});
+      mHistogramRegistry->add(pidDir + GetHistNamev2(kItsHelium, HistTable), GetHistDesc(kItsHelium, HistTable), GetHistType(kItsHelium, HistTable), {Specs[kItsHelium]});
+
       mHistogramRegistry->add(pidDir + GetHistNamev2(kTpcSignal, HistTable), GetHistDesc(kTpcSignal, HistTable), GetHistType(kTpcSignal, HistTable), {Specs[kTpcSignal]});
       mHistogramRegistry->add(pidDir + GetHistNamev2(kTpcElectron, HistTable), GetHistDesc(kTpcElectron, HistTable), GetHistType(kTpcElectron, HistTable), {Specs[kTpcElectron]});
       mHistogramRegistry->add(pidDir + GetHistNamev2(kTpcPion, HistTable), GetHistDesc(kTpcPion, HistTable), GetHistType(kTpcPion, HistTable), {Specs[kTpcPion]});
@@ -220,6 +243,14 @@ class TrackHistManager
       mHistogramRegistry->fill(HIST(QaDir) + HIST(GetHistName(kPtVsTpcCluster, HistTable)), track.pt(), static_cast<float>(track.tpcNClsFound()));
       mHistogramRegistry->fill(HIST(QaDir) + HIST(GetHistName(kPtVsTpcClusterShared, HistTable)), track.pt(), static_cast<float>(track.tpcNClsShared()));
       mHistogramRegistry->fill(HIST(QaDir) + HIST(GetHistName(kTpcClusterVsTpcClusterShared, HistTable)), static_cast<float>(track.tpcNClsFound()), static_cast<float>(track.tpcNClsShared()));
+
+      mHistogramRegistry->fill(HIST(PidDir) + HIST(GetHistName(kItsElectron, HistTable)), track.p(), track.itsNSigmaEl());
+      mHistogramRegistry->fill(HIST(PidDir) + HIST(GetHistName(kItsPion, HistTable)), track.p(), track.itsNSigmaPi());
+      mHistogramRegistry->fill(HIST(PidDir) + HIST(GetHistName(kItsKaon, HistTable)), track.p(), track.itsNSigmaKa());
+      mHistogramRegistry->fill(HIST(PidDir) + HIST(GetHistName(kItsProton, HistTable)), track.p(), track.itsNSigmaPr());
+      mHistogramRegistry->fill(HIST(PidDir) + HIST(GetHistName(kItsDeuteron, HistTable)), track.p(), track.itsNSigmaDe());
+      mHistogramRegistry->fill(HIST(PidDir) + HIST(GetHistName(kItsTriton, HistTable)), track.p(), track.itsNSigmaTr());
+      mHistogramRegistry->fill(HIST(PidDir) + HIST(GetHistName(kItsHelium, HistTable)), track.p(), track.itsNSigmaHe());
 
       mHistogramRegistry->fill(HIST(PidDir) + HIST(GetHistName(kTpcSignal, HistTable)), track.p(), track.tpcSignal());
       mHistogramRegistry->fill(HIST(PidDir) + HIST(GetHistName(kTpcElectron, HistTable)), track.p(), track.tpcNSigmaEl());

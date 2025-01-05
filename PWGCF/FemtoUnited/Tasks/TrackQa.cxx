@@ -82,16 +82,16 @@ struct TrackQa {
   struct : ConfigurableGroup {
     std::string prefix = std::string("TrackSelection");
     Configurable<int> pdgCode{"pdgCode", 2212, "Track PDG code"};
-    Configurable<float> ptMin{"ptMin", 0.f, "Minimum pT"};
-    Configurable<float> ptMax{"ptMax", 999.f, "Maximum pT"};
+    Configurable<float> ptMin{"ptMin", 0.f, "Minimum pT (GeV/c)"};
+    Configurable<float> ptMax{"ptMax", 999.f, "Maximum pT (GeV/c)"};
     Configurable<float> etaMin{"etaMin", -10.f, "Minimum eta"};
     Configurable<float> etaMax{"etaMax", 10.f, "Maximum eta"};
+    Configurable<float> phiMin{"phiMin", 0.f, "Minimum phi"};
+    Configurable<float> phiMax{"phiMax", 1.f * o2::constants::math::TwoPI, "Maximum phi"};
     Configurable<femtodatatypes::TrackMaskType> mask{"mask", 0, "Bitmask for track selection"};
-    Configurable<femtodatatypes::TrackTPCMaskType> tpcMask{"tpcMask", 0, "Bitmask for TPC PID selection"};
-    Configurable<femtodatatypes::TrackTOFMaskType> tofMask{"tofMask", 0, "Bitmask for TOF PID selection"};
-    Configurable<femtodatatypes::TrackTPCTOFMaskType> tpctofMask{"tpctofMask", 0, "Bitmask for TPC+TOF selection"};
-    Configurable<float> pidThres{"pidThres", 10.f, "Momentum threshold for PID of tracks with large momentum"};
-    Configurable<bool> pidSwitch{"pidSwitch", true, "IF switch is true, use TPC+TOF PID for large momentum tracks and use only TOF PID when set to false"};
+    Configurable<femtodatatypes::TrackPidMaskType> pidMaskLowMomentum{"pidMaskLowMomentum", 1, "Bitmask for PID selection below momentum threshold"};
+    Configurable<femtodatatypes::TrackPidMaskType> pidMaskHighMomentum{"pidMaskHighMomentum", 2, "Bitmask for PID selection above momentum threshold"};
+    Configurable<float> pidThres{"pidThres", 1.f, "Momentum threshold for using TPCTOF/TOF pid for tracks with large momentum (GeV/c)"};
   } TrackSelections;
 
   SliceCache cache;
@@ -103,10 +103,11 @@ struct TrackQa {
     (femtobase::pt < TrackSelections.ptMax) &&
     (femtobase::eta > TrackSelections.etaMin) &&
     (femtobase::eta < TrackSelections.etaMax) &&
+    (femtobase::phi > TrackSelections.phiMin) &&
+    (femtobase::phi < TrackSelections.phiMax) &&
     ncheckbit(femtotracks::trackMask, TrackSelections.mask) &&
     ifnode(femtobase::pt * (nexp(femtobase::eta) + nexp(-1.f * femtobase::eta)) / 2.f <= TrackSelections.pidThres,
-           ncheckbit(femtotracks::tpcMask, TrackSelections.tpcMask),
-           ifnode(TrackSelections.pidSwitch, ncheckbit(femtotracks::tpctofMask, TrackSelections.tpctofMask), ncheckbit(femtotracks::tofMask, TrackSelections.tofMask)));
+           ncheckbit(femtotracks::trackPidMask, TrackSelections.pidMaskLowMomentum), ncheckbit(femtotracks::trackPidMask, TrackSelections.pidMaskHighMomentum));
 
   Preslice<Tracks> perColReco = aod::femtobase::collisionId;
 

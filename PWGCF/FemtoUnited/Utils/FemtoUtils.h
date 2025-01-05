@@ -33,6 +33,11 @@ inline float geometricMean(float a, float b)
   return std::sqrt(a * a + b * b);
 }
 
+inline float Dca(float dcaXY, float dcaZ)
+{
+  return std::sqrt(dcaXY * dcaXY + dcaZ * dcaZ);
+}
+
 template <typename T>
 float sphericity(T const& tracks)
 {

@@ -13,3 +13,8 @@ o2physics_add_dpl_workflow(femtounited-trackqa
 	  SOURCES TrackQa.cxx
           PUBLIC_LINK_LIBRARIES O2::Framework O2Physics::AnalysisCore
           COMPONENT_NAME Analysis)
+
+o2physics_add_dpl_workflow(femtounited-vzeroqa
+	  SOURCES VzeroQa.cxx
+          PUBLIC_LINK_LIBRARIES O2::Framework O2Physics::AnalysisCore
+          COMPONENT_NAME Analysis)

@@ -37,7 +37,7 @@ class CollisionSelection
   };
 
   template <modes::System system, typename T>
-  bool isSelected(T col)
+  bool isSelected(T const& col)
   {
     bool flag = false;
     if constexpr (modes::isSystemSet(system, modes::System::kRun3)) {

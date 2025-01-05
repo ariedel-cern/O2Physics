@@ -46,7 +46,7 @@ class TrackSelection : public BaseSelection<float, o2::aod::femtodatatypes::Trac
   TrackSelection() {}
   virtual ~TrackSelection() = default;
   template <class track>
-  void ApplySelections(track Track)
+  void ApplySelections(track const& Track)
   {
     this->resetMinimalSelection();
     this->setBitmaskForObservable(TrackSels::kSign, Track.sign());
@@ -58,7 +58,7 @@ class TrackSelection : public BaseSelection<float, o2::aod::femtodatatypes::Trac
     this->assembleBismask();
   };
 }; // namespace femtoDream
-}; // namespace TrackSelection
+}; // namespace trackselection
 }; // namespace o2::analysis::femtounited
 
 #endif // PWGCF_FEMTOUNITED_CORE_TRACKSELECTION_H_

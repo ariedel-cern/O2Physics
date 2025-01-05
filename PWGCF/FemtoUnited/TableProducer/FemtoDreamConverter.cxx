@@ -55,7 +55,7 @@ struct femtoDreamConverter {
         // in old format tpc and tpctof information is stored in the same bitmask
         // so we only fill the TPC mask in the FemtoUnited framework
         // for analysis the bitmask has to be computed with the old tools
-        outputTrackMasks(part.cut(), part.pidcut(), 0u, part.pidcut());
+        outputTrackMasks(part.cut(), part.pidcut());
 
         // fill Vzeros
         // when Vzeros are filled the daughters will also be filled, so they are skipped in the outer loop
@@ -66,8 +66,8 @@ struct femtoDreamConverter {
         const auto& posChild = parts.iteratorAt(part.index() - 2);
         const auto& negChild = parts.iteratorAt(part.index() - 1);
         outputVzeroDaus(
-          posChild.childrenIds()[0], posChild.pt(), posChild.eta(), posChild.phi(), posChild.cut(), posChild.pidcut(),
-          negChild.childrenIds()[1], negChild.pt(), negChild.eta(), negChild.phi(), negChild.cut(), negChild.pidcut());
+          posChild.childrenIds()[0], posChild.pt(), posChild.eta(), posChild.phi(),
+          negChild.childrenIds()[1], negChild.pt(), negChild.eta(), negChild.phi());
       }
     }
   };

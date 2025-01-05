@@ -29,10 +29,11 @@ namespace femtotracks
 {
 
 // columns for track selections
-DECLARE_SOA_COLUMN(TrackMask, trackMask, femtodatatypes::TrackMaskType);         //! Bitmask for track selections
-DECLARE_SOA_COLUMN(TpcMask, tpcMask, femtodatatypes::TrackTPCMaskType);          //! Bitmask for TPC PID selections
-DECLARE_SOA_COLUMN(TofMask, tofMask, femtodatatypes::TrackTOFMaskType);          //! Bitmask for TOF PID selections
-DECLARE_SOA_COLUMN(TpctofMask, tpctofMask, femtodatatypes::TrackTPCTOFMaskType); //! Bitmask for combined TPC+TOF PID selections
+DECLARE_SOA_COLUMN(TrackMask, trackMask, femtodatatypes::TrackMaskType);          //! Bitmask for track selections
+DECLARE_SOA_COLUMN(TrackPidMask, trackPidMask, femtodatatypes::TrackPidMaskType); //! Bitmask for track selections
+// DECLARE_SOA_COLUMN(TpcMask, tpcMask, femtodatatypes::TrackTPCMaskType);          //! Bitmask for TPC PID selections
+// DECLARE_SOA_COLUMN(TofMask, tofMask, femtodatatypes::TrackTOFMaskType);          //! Bitmask for TOF PID selections
+// DECLARE_SOA_COLUMN(TpctofMask, tpctofMask, femtodatatypes::TrackTPCTOFMaskType); //! Bitmask for combined TPC+TOF PID selections
 
 // columns for DCA
 DECLARE_SOA_COLUMN(DcaXY, dcaXY, float);                                                                                       //! Dca in XY plane
@@ -61,6 +62,15 @@ DECLARE_SOA_COLUMN(TpcChi2NCl, tpcChi2NCl, float);         //! Tpc chi2 / findab
 
 // tof related information
 DECLARE_SOA_COLUMN(TofBeta, tofBeta, float); //! Tof beta
+
+// ITS PID information
+DECLARE_SOA_COLUMN(ItsNSigmaEl, itsNSigmaEl, float); //! Nsigma separation with the Its detector for electron
+DECLARE_SOA_COLUMN(ItsNSigmaPi, itsNSigmaPi, float); //! Nsigma separation with the Its detector for pion
+DECLARE_SOA_COLUMN(ItsNSigmaKa, itsNSigmaKa, float); //! Nsigma separation with the Its detector for kaon
+DECLARE_SOA_COLUMN(ItsNSigmaPr, itsNSigmaPr, float); //! Nsigma separation with the Its detector for proton
+DECLARE_SOA_COLUMN(ItsNSigmaDe, itsNSigmaDe, float); //! Nsigma separation with the Its detector for deuteron
+DECLARE_SOA_COLUMN(ItsNSigmaTr, itsNSigmaTr, float); //! Nsigma separation with the Its detector for triton
+DECLARE_SOA_COLUMN(ItsNSigmaHe, itsNSigmaHe, float); //! Nsigma separation with the Its detector for helium3
 
 // TPC PID information
 DECLARE_SOA_COLUMN(TpcNSigmaEl, tpcNSigmaEl, float); //! Nsigma separation with the Tpc detector for electron
@@ -107,9 +117,10 @@ using FUTracks = FUTracks_001;
 // table for track selections and PID selections
 DECLARE_SOA_TABLE_STAGED_VERSIONED(FUTrackMasks_001, "FUTRACKMASKS", 1,
                                    femtotracks::TrackMask,
-                                   femtotracks::TpcMask,
-                                   femtotracks::TofMask,
-                                   femtotracks::TpctofMask);
+                                   femtotracks::TrackPidMask);
+// femtotracks::TpcMask,
+// femtotracks::TofMask,
+// femtotracks::TpctofMask);
 using FUTrackMasks = FUTrackMasks_001;
 
 // table for track DCA
@@ -138,6 +149,13 @@ using FUTrackExtras = FUTrackExtras_001;
 
 // table for extra PID information
 DECLARE_SOA_TABLE_STAGED_VERSIONED(FUTrackPids_001, "FUTRACKPIDS", 1,
+                                   femtotracks::ItsNSigmaEl,
+                                   femtotracks::ItsNSigmaPi,
+                                   femtotracks::ItsNSigmaKa,
+                                   femtotracks::ItsNSigmaPr,
+                                   femtotracks::ItsNSigmaDe,
+                                   femtotracks::ItsNSigmaTr,
+                                   femtotracks::ItsNSigmaHe,
                                    femtotracks::TpcNSigmaEl,
                                    femtotracks::TpcNSigmaPi,
                                    femtotracks::TpcNSigmaKa,

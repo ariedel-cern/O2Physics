@@ -55,7 +55,7 @@ class SelectionContainer
   /// Constructor
   /// \param values Values for the selection
   /// \param limitType Type of limit of the selection
-  SelectionContainer(std::vector<T> values, limits::LimitType limitType, bool SkipLastBit)
+  SelectionContainer(std::vector<T>& values, limits::LimitType limitType, bool SkipLastBit)
     : mValues(values),
       mLimitType(limitType),
       mSkipLastBit(SkipLastBit)
@@ -165,6 +165,11 @@ class SelectionContainer
   /// Check whether the minimal selection is fulfilled or not
   /// \return Whether the selection is fulfilled or not
   bool getMinimalSelection() { return mBitmask.any(); }
+
+  /// Return loosest selection value
+  ///  The values are ordered, the loosest value will be the first one
+  /// \return loosest selection
+  T getLoosestSelection() { return mValues.at(0); }
 
   /// Check whether selections are empty
   bool empty() { return mValues.empty(); }
