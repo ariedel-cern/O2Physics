@@ -81,7 +81,7 @@ struct TrackQa {
 
   struct : ConfigurableGroup {
     std::string prefix = std::string("TrackSelection");
-    Configurable<int> pdgCode{"pdgCode", 2212, "Track PDG code"};
+    // Configurable<int> pdgCode{"pdgCode", 2212, "Track PDG code"};
     Configurable<float> ptMin{"ptMin", 0.f, "Minimum pT (GeV/c)"};
     Configurable<float> ptMax{"ptMax", 999.f, "Maximum pT (GeV/c)"};
     Configurable<float> etaMin{"etaMin", -10.f, "Minimum eta"};
@@ -121,34 +121,45 @@ struct TrackQa {
     ConfigurableAxis itsClusterIb{"itsClusterIb", {{4, -0.5, 3.5}}, "ITS cluster in inner barrel"};
     ConfigurableAxis tpcCluster{"tpcCluster", {{153, -0.5, 152.5}}, "TPC cluster"};
     ConfigurableAxis tpcClusterShared{"tpcClusterShared", {{153, -0.5, 152.5}}, "TPC cluster shared"};
+    ConfigurableAxis dcaXy{"dcaXy", {{300, -0.3, 0.3}}, "DCA_xy"};
+    ConfigurableAxis dcaZ{"dcaZ", {{300, -0.3, 0.3}}, "DCA_Z"};
+    ConfigurableAxis dca{"dca", {{300, 0, 0.3}}, "DCA"};
   } TrackBinning;
 
   struct : ConfigurableGroup {
     std::string prefix = std::string("TrackPidBinning");
     ConfigurableAxis p{"p", {{300, 0, 6}}, "Momentum axis"};
+    ConfigurableAxis itsSignal{"itsSignal", {{150, 0, 15}}, "its Signal"};
+    ConfigurableAxis itsElectron{"itsElectron", {{300, -3, 3}}, "ITS PID for electron"};
+    ConfigurableAxis itsPion{"itsPion", {{300, -3, 3}}, "ITS PID for pion"};
+    ConfigurableAxis itsKaon{"itsKaon", {{300, -3, 3}}, "ITS PID for kaon"};
+    ConfigurableAxis itsProton{"itsProton", {{300, -3, 3}}, "ITS PID for proton"};
+    ConfigurableAxis itsDeuteron{"itsDeuteron", {{300, -3, 3}}, "ITS PID for deuteron"};
+    ConfigurableAxis itsTriton{"itsTriton", {{300, -3, 3}}, "ITS PID for triton"};
+    ConfigurableAxis itsHelium{"itsHelium", {{300, -3, 3}}, "ITS PID for helium"};
     ConfigurableAxis tpcSignal{"tpcSignal", {{150, 0, 150}}, "TPC Signal"};
-    ConfigurableAxis tpcElectron{"tpcElectron", {{300, -3, 3}}, "TPC PID for proton"};
-    ConfigurableAxis tpcPion{"tpcPion", {{300, -3, 3}}, "TPC PID for proton"};
-    ConfigurableAxis tpcKaon{"tpcKaon", {{300, -3, 3}}, "TPC PID for proton"};
+    ConfigurableAxis tpcElectron{"tpcElectron", {{300, -3, 3}}, "TPC PID for electron"};
+    ConfigurableAxis tpcPion{"tpcPion", {{300, -3, 3}}, "TPC PID for pion"};
+    ConfigurableAxis tpcKaon{"tpcKaon", {{300, -3, 3}}, "TPC PID for kaon"};
     ConfigurableAxis tpcProton{"tpcProton", {{300, -3, 3}}, "TPC PID for proton"};
-    ConfigurableAxis tpcDeuteron{"tpcDeuteron", {{300, -3, 3}}, "TPC PID for proton"};
-    ConfigurableAxis tpcTriton{"tpcTriton", {{300, -3, 3}}, "TPC PID for proton"};
-    ConfigurableAxis tpcHelium{"tpcHelium", {{300, -3, 3}}, "TPC PID for proton"};
+    ConfigurableAxis tpcDeuteron{"tpcDeuteron", {{300, -3, 3}}, "TPC PID for deuteron"};
+    ConfigurableAxis tpcTriton{"tpcTriton", {{300, -3, 3}}, "TPC PID for triton"};
+    ConfigurableAxis tpcHelium{"tpcHelium", {{300, -3, 3}}, "TPC PID for helium"};
     ConfigurableAxis tofBeta{"tofBeta", {{150, 0, 1.5}}, "TPC Signal"};
-    ConfigurableAxis tofElectron{"tofElectron", {{300, -3, 3}}, "TOF PID for proton"};
-    ConfigurableAxis tofPion{"tofPion", {{300, -3, 3}}, "TOF PID for proton"};
-    ConfigurableAxis tofKaon{"tofKaon", {{300, -3, 3}}, "TOF PID for proton"};
+    ConfigurableAxis tofElectron{"tofElectron", {{300, -3, 3}}, "TOF PID for electron"};
+    ConfigurableAxis tofPion{"tofPion", {{300, -3, 3}}, "TOF PID for pion"};
+    ConfigurableAxis tofKaon{"tofKaon", {{300, -3, 3}}, "TOF PID for kaon"};
     ConfigurableAxis tofProton{"tofProton", {{300, -3, 3}}, "TOF PID for proton"};
-    ConfigurableAxis tofDeuteron{"tofDeuteron", {{300, -3, 3}}, "TOF PID for proton"};
-    ConfigurableAxis tofTriton{"tofTriton", {{300, -3, 3}}, "TOF PID for proton"};
-    ConfigurableAxis tofHelium{"tofHelium", {{300, -3, 3}}, "TOF PID for proton"};
-    ConfigurableAxis tpctofElectron{"tpctofElectron", {{300, 0, 3}}, "tpctof PID for proton"};
-    ConfigurableAxis tpctofPion{"tpctofPion", {{300, 0, 3}}, "tpctof PID for proton"};
-    ConfigurableAxis tpctofKaon{"tpctofKaon", {{300, 0, 3}}, "tpctof PID for proton"};
+    ConfigurableAxis tofDeuteron{"tofDeuteron", {{300, -3, 3}}, "TOF PID for deuteron"};
+    ConfigurableAxis tofTriton{"tofTriton", {{300, -3, 3}}, "TOF PID for triton"};
+    ConfigurableAxis tofHelium{"tofHelium", {{300, -3, 3}}, "TOF PID for helium"};
+    ConfigurableAxis tpctofElectron{"tpctofElectron", {{300, 0, 3}}, "tpctof PID for electron"};
+    ConfigurableAxis tpctofPion{"tpctofPion", {{300, 0, 3}}, "tpctof PID for pion"};
+    ConfigurableAxis tpctofKaon{"tpctofKaon", {{300, 0, 3}}, "tpctof PID for kaon"};
     ConfigurableAxis tpctofProton{"tpctofProton", {{300, 0, 3}}, "tpctof PID for proton"};
-    ConfigurableAxis tpctofDeuteron{"tpctofDeuteron", {{300, 0, 3}}, "tpctof PID for proton"};
-    ConfigurableAxis tpctofTriton{"tpctofTriton", {{300, 0, 3}}, "tpctof PID for proton"};
-    ConfigurableAxis tpctofHelium{"tpctofHelium", {{300, 0, 3}}, "tpctof PID for proton"};
+    ConfigurableAxis tpctofDeuteron{"tpctofDeuteron", {{300, 0, 3}}, "tpctof PID for deuteron"};
+    ConfigurableAxis tpctofTriton{"tpctofTriton", {{300, 0, 3}}, "tpctof PID for triton"};
+    ConfigurableAxis tpctofHelium{"tpctofHelium", {{300, 0, 3}}, "tpctof PID for helium"};
   } TrackPidBinning;
 
   HistogramRegistry hRegistry{"TrackQA", {}, OutputObjHandlingPolicy::AnalysisObject};
@@ -187,6 +198,17 @@ struct TrackQa {
       {trackhistmanager::kTpcClusterVsTpcClusterShared, {TrackBinning.tpcCluster, TrackBinning.tpcClusterShared}},
       {trackhistmanager::kTpcCluster, {TrackBinning.tpcCluster}},
       {trackhistmanager::kTpcClusterShared, {TrackBinning.tpcClusterShared}},
+      {trackhistmanager::kPtVsDcaxy, {TrackBinning.pt, TrackBinning.dcaXy}},
+      {trackhistmanager::kPtVsDcaz, {TrackBinning.pt, TrackBinning.dcaZ}},
+      {trackhistmanager::kPtVsDca, {TrackBinning.pt, TrackBinning.dca}},
+      {trackhistmanager::kItsSignal, {TrackPidBinning.p, TrackPidBinning.itsSignal}},
+      {trackhistmanager::kItsElectron, {TrackPidBinning.p, TrackPidBinning.itsElectron}},
+      {trackhistmanager::kItsPion, {TrackPidBinning.p, TrackPidBinning.itsPion}},
+      {trackhistmanager::kItsKaon, {TrackPidBinning.p, TrackPidBinning.itsKaon}},
+      {trackhistmanager::kItsProton, {TrackPidBinning.p, TrackPidBinning.itsProton}},
+      {trackhistmanager::kItsDeuteron, {TrackPidBinning.p, TrackPidBinning.itsDeuteron}},
+      {trackhistmanager::kItsTriton, {TrackPidBinning.p, TrackPidBinning.itsTriton}},
+      {trackhistmanager::kItsHelium, {TrackPidBinning.p, TrackPidBinning.itsHelium}},
       {trackhistmanager::kTpcSignal, {TrackPidBinning.p, TrackPidBinning.tpcSignal}},
       {trackhistmanager::kTpcElectron, {TrackPidBinning.p, TrackPidBinning.tpcElectron}},
       {trackhistmanager::kTpcPion, {TrackPidBinning.p, TrackPidBinning.tpcPion}},

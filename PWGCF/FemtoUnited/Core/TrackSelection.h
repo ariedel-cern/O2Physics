@@ -33,8 +33,8 @@ enum TrackSels {
   kTPCsClsMax,   ///< Max. number of shared TPC clusters
   kITSnClsMin,   ///< Min. number of ITS clusters
   kITSnClsIbMin, ///< Min. number of ITS clusters in the inner barrel
-  kDCAxyMax,     ///< Max. DCA_xy (cm)
-  kDCAzMax,      ///< Max. DCA_z (cm)
+  kDCAxyMax,     ///< Max. DCA_xy (cm) as a function of pT
+  kDCAzMax,      ///< Max. DCA_z (cm) as a function of pT
   kTrackselMax
 };
 
@@ -48,13 +48,21 @@ class TrackSelection : public BaseSelection<float, o2::aod::femtodatatypes::Trac
   template <class track>
   void ApplySelections(track const& Track)
   {
-    this->resetMinimalSelection();
+    this->reset();
     this->setBitmaskForObservable(TrackSels::kSign, Track.sign());
     this->setBitmaskForObservable(TrackSels::kTPCnClsMin, Track.tpcNClsFound());
     this->setBitmaskForObservable(TrackSels::kTPCcRowsMin, Track.tpcNClsCrossedRows());
     this->setBitmaskForObservable(TrackSels::kTPCsClsMax, Track.tpcNClsShared());
     this->setBitmaskForObservable(TrackSels::kITSnClsMin, Track.itsNCls());
     this->setBitmaskForObservable(TrackSels::kITSnClsIbMin, Track.itsNClsInnerBarrel());
+
+    // evalue bitmask for pt dependent dca cuts
+    this->updateLimits(TrackSels::kDCAxyMax, Track.pt());
+    this->setBitmaskForObservable(TrackSels::kDCAxyMax, Track.dcaXY());
+
+    this->updateLimits(TrackSels::kDCAzMax, Track.pt());
+    this->setBitmaskForObservable(TrackSels::kDCAzMax, Track.dcaZ());
+
     this->assembleBismask();
   };
 }; // namespace femtoDream

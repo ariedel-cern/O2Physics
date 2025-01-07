@@ -1,3 +1,4 @@
+//
 // Copyright 2019-2022 CERN and copyright holders of ALICE O2.
 // See https://alice-o2.web.cern.ch/copyright for details of the copyright holders.
 // All rights not expressly granted are reserved.
@@ -23,6 +24,7 @@
 #include "Framework/HistogramRegistry.h"
 #include "PWGCF/FemtoUnited/Core/HistManager.h"
 #include "PWGCF/FemtoUnited/Core/Modes.h"
+#include "PWGCF/FemtoUnited/Utils/FemtoUtils.h"
 
 using namespace ::o2::framework;
 
@@ -42,6 +44,9 @@ enum TrackHist {
   kItsClusterIb,
   kTpcCluster,
   kTpcClusterShared,
+  // kDcaxy,
+  // kDcaz,
+  // kDca,
   // 2d qa
   kPtVsEta,
   kPtVsPhi,
@@ -50,7 +55,11 @@ enum TrackHist {
   kPtVsTpcCluster,
   kPtVsTpcClusterShared,
   kTpcClusterVsTpcClusterShared,
+  kPtVsDcaxy,
+  kPtVsDcaz,
+  kPtVsDca,
   // its pid
+  kItsSignal,
   kItsElectron,
   kItsPion,
   kItsKaon,
@@ -109,6 +118,10 @@ constexpr std::array<Histmanager::HistInfo<TrackHist>, kTrackHistogramLast> Hist
    {kPtVsTpcCluster, kTH2F, "hPtVsTpcCluster", "p_{T} vs TPC cluster found; p_{T} (GeV/#it{c}) ; TPC cluster found"},
    {kPtVsTpcClusterShared, kTH2F, "hPtVsTpcClusterShared", "p_{T} vs TPC cluster shared; p_{T} (GeV/#it{c}) ; TPC cluster shared"},
    {kTpcClusterVsTpcClusterShared, kTH2F, "hTpcClusterVsTpcClusterShared", "TPC cluster found vs TPC cluster shared; TPC cluster found; TPC cluster shared"},
+   {kPtVsDcaxy, kTH2F, "hPtVsDcaxy", "p_{T} vs DCA_{XY}; p_{T} (GeV/#it{c}); DCA_{XY} (cm)"},
+   {kPtVsDcaz, kTH2F, "hPtVsDcaz", "p_{T} vs DCA_{Z}; p_{T} (GeV/#it{c}); DCA_{Z} (cm)"},
+   {kPtVsDca, kTH2F, "hPtVsDca", "p_{T} vs DCA; p_{T} (GeV/#it{c}); DCA (cm)"},
+   {kItsSignal, kTH2F, "hItsSignal", "ITS Signal; p (GeV/#it{c}) ; <ITS Cluster Size> x <cos #lambda>"},
    {kItsElectron, kTH2F, "hItsPidElectron", "TPC PID Electron; p (GeV/#it{c}) ; n#sigma_{TPC,el}"},
    {kItsPion, kTH2F, "hItsPidPion", "ITS PID Pion; p (GeV/#it{c}) ; n#sigma_{ITS,pi}"},
    {kItsKaon, kTH2F, "hItsPidKaon", "ITS PID Kaon; p (GeV/#it{c}) ; n#sigma_{ITS,ka}"},
@@ -182,8 +195,14 @@ class TrackHistManager
       mHistogramRegistry->add(qaDir + GetHistNamev2(kPtVsTpcClusterShared, HistTable), GetHistDesc(kPtVsTpcClusterShared, HistTable), GetHistType(kPtVsTpcClusterShared, HistTable), {Specs[kPtVsTpcClusterShared]});
       mHistogramRegistry->add(qaDir + GetHistNamev2(kTpcClusterVsTpcClusterShared, HistTable), GetHistDesc(kTpcClusterVsTpcClusterShared, HistTable), GetHistType(kTpcClusterVsTpcClusterShared, HistTable), {Specs[kTpcClusterVsTpcClusterShared]});
 
+      // dca
+      mHistogramRegistry->add(qaDir + GetHistNamev2(kPtVsDcaxy, HistTable), GetHistDesc(kPtVsDcaxy, HistTable), GetHistType(kPtVsDcaxy, HistTable), {Specs[kPtVsDcaxy]});
+      mHistogramRegistry->add(qaDir + GetHistNamev2(kPtVsDcaz, HistTable), GetHistDesc(kPtVsDcaz, HistTable), GetHistType(kPtVsDcaz, HistTable), {Specs[kPtVsDcaz]});
+      mHistogramRegistry->add(qaDir + GetHistNamev2(kPtVsDca, HistTable), GetHistDesc(kPtVsDca, HistTable), GetHistType(kPtVsDca, HistTable), {Specs[kPtVsDca]});
+
       std::string pidDir = std::string(PidDir);
 
+      mHistogramRegistry->add(pidDir + GetHistNamev2(kItsSignal, HistTable), GetHistDesc(kItsSignal, HistTable), GetHistType(kItsSignal, HistTable), {Specs[kItsSignal]});
       mHistogramRegistry->add(pidDir + GetHistNamev2(kItsElectron, HistTable), GetHistDesc(kItsElectron, HistTable), GetHistType(kItsElectron, HistTable), {Specs[kItsElectron]});
       mHistogramRegistry->add(pidDir + GetHistNamev2(kItsPion, HistTable), GetHistDesc(kItsPion, HistTable), GetHistType(kItsPion, HistTable), {Specs[kItsPion]});
       mHistogramRegistry->add(pidDir + GetHistNamev2(kItsKaon, HistTable), GetHistDesc(kItsKaon, HistTable), GetHistType(kItsKaon, HistTable), {Specs[kItsKaon]});
@@ -244,6 +263,11 @@ class TrackHistManager
       mHistogramRegistry->fill(HIST(QaDir) + HIST(GetHistName(kPtVsTpcClusterShared, HistTable)), track.pt(), static_cast<float>(track.tpcNClsShared()));
       mHistogramRegistry->fill(HIST(QaDir) + HIST(GetHistName(kTpcClusterVsTpcClusterShared, HistTable)), static_cast<float>(track.tpcNClsFound()), static_cast<float>(track.tpcNClsShared()));
 
+      mHistogramRegistry->fill(HIST(QaDir) + HIST(GetHistName(kPtVsDcaxy, HistTable)), track.pt(), track.dcaXY());
+      mHistogramRegistry->fill(HIST(QaDir) + HIST(GetHistName(kPtVsDcaz, HistTable)), track.pt(), track.dcaZ());
+      mHistogramRegistry->fill(HIST(QaDir) + HIST(GetHistName(kPtVsDca, HistTable)), track.pt(), utils::geometricMean(track.dcaXY(), track.dcaZ()));
+
+      mHistogramRegistry->fill(HIST(PidDir) + HIST(GetHistName(kItsSignal, HistTable)), track.p(), o2::analysis::femtounited::utils::itsSignal(track));
       mHistogramRegistry->fill(HIST(PidDir) + HIST(GetHistName(kItsElectron, HistTable)), track.p(), track.itsNSigmaEl());
       mHistogramRegistry->fill(HIST(PidDir) + HIST(GetHistName(kItsPion, HistTable)), track.p(), track.itsNSigmaPi());
       mHistogramRegistry->fill(HIST(PidDir) + HIST(GetHistName(kItsKaon, HistTable)), track.p(), track.itsNSigmaKa());

@@ -39,6 +39,34 @@ inline float Dca(float dcaXY, float dcaZ)
 }
 
 template <typename T>
+T getDaughterIndex(T daugherIndex, std::vector<std::pair<T, T>> map)
+{
+  for (const auto& pair : map) {
+    if (pair.first == daugherIndex) {
+      return pair.second; // Return the second element of the found pair
+    }
+  }
+  return -1;
+};
+
+template <typename T>
+float itsSignal(T const& track)
+{
+  uint32_t clsizeflag = track.itsClusterSizes();
+  auto clSizeLayer0 = (clsizeflag >> (0 * 4)) & 0xf;
+  auto clSizeLayer1 = (clsizeflag >> (1 * 4)) & 0xf;
+  auto clSizeLayer2 = (clsizeflag >> (2 * 4)) & 0xf;
+  auto clSizeLayer3 = (clsizeflag >> (3 * 4)) & 0xf;
+  auto clSizeLayer4 = (clsizeflag >> (4 * 4)) & 0xf;
+  auto clSizeLayer5 = (clsizeflag >> (5 * 4)) & 0xf;
+  auto clSizeLayer6 = (clsizeflag >> (6 * 4)) & 0xf;
+  int numLayers = 7;
+  int sumClusterSizes = clSizeLayer1 + clSizeLayer2 + clSizeLayer3 + clSizeLayer4 + clSizeLayer5 + clSizeLayer6 + clSizeLayer0;
+  float cos_lambda = 1. / std::cosh(track.eta());
+  return (static_cast<float>(sumClusterSizes) / numLayers) * cos_lambda;
+};
+
+template <typename T>
 float sphericity(T const& tracks)
 {
   if (tracks.size() <= 2) {

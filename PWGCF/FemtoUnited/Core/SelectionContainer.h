@@ -21,6 +21,8 @@
 #include <vector>
 #include <algorithm>
 
+#include <TF1.h>
+
 #include "fairlogger/Logger.h"
 #include "CommonConstants/MathConstants.h"
 
@@ -30,13 +32,15 @@ namespace o2::analysis::femtounited
 /// Limit type for selections
 namespace limits
 {
-enum LimitType { kUpperLimit,    ///< simple upper limit for the value, e.g. p_T < 1 GeV/c
-                 kAbsUpperLimit, ///< upper limit of the absolute value, e.g. |eta| < 0.8
-                 kLowerLimit,    ///< simple lower limit for the value, e.g. p_T > 0.2 GeV/c
-                 kAbsLowerLimit, ///< lower limit of the absolute value, e.g. |DCA_xyz| > 0.05 cm
-                 // kUpperFunctionLimit,    ///< simple upper limit of a function value, e.g. DCA_xy > f(pt)
-                 // kAbsUpperFunctionLimit, ///< upper limit of an absolute value given by a function, e.g. |DCA_xy| > f(pt)
-                 kEqual ///< values need to be equal, e.g. sign = 1
+enum LimitType { kUpperLimit,            ///< simple upper limit for the value, e.g. p_T < 1 GeV/c
+                 kAbsUpperLimit,         ///< upper limit of the absolute value, e.g. |eta| < 0.8
+                 kLowerLimit,            ///< simple lower limit for the value, e.g. p_T > 0.2 GeV/c
+                 kAbsLowerLimit,         ///< lower limit of the absolute value, e.g. |DCA_xyz| > 0.05 cm
+                 kEqual,                 ///< values need to be equal, e.g. sign = 1
+                 kUpperFunctionLimit,    ///< simple upper limit of a function value, e.g. DCA_xy > f(pt)
+                 kAbsUpperFunctionLimit, ///< upper limit of an absolute value given by a function, e.g. |DCA_xy| > f(pt)
+                 kLowerFunctionLimit,    ///< simple upper limit of a function value, e.g. DCA_xy > f(pt)
+                 kAbsLowerFunctionLimit  ///< upper limit of an absolute value given by a function, e.g. |DCA_xy| > f(pt)
 };
 }
 // bitsets need number of bits at compile time. Set reasonable limit here
@@ -70,6 +74,26 @@ class SelectionContainer
     sortSelections();
   }
 
+  /// Constructor
+  /// \param values Values for the selection
+  /// \param limitType Type of limit of the selection
+  SelectionContainer(std::string baseName, T lowerLimit, T upperLimit, std::vector<std::string>& functions, limits::LimitType limitType, bool SkipLastBit)
+    : mLimitType(limitType), mSkipLastBit(SkipLastBit)
+  {
+    if (mValues.size() > BitmaskMaxSize) {
+      LOG(fatal) << "Too many selections for single a observable. Current limit is " << BitmaskMaxSize;
+    }
+    for (std::size_t i = 0; i < functions.size(); i++) {
+      mFunctions.emplace_back((baseName + std::to_string(i)).c_str(), functions.at(i).c_str(), lowerLimit, upperLimit);
+    }
+    // functions for selection are not necessarily ordered correctly
+    // use value at midpoint to order them
+    // here we rely on the user that the functions can be ordered like this over the whole interval
+    sortFunctions((lowerLimit + upperLimit) / 2);
+    // initialize the values also to the midpoint
+    this->updateLimits((lowerLimit + upperLimit) / 2);
+  }
+
   /// Destructor
   virtual ~SelectionContainer() = default;
 
@@ -86,6 +110,34 @@ class SelectionContainer
       case (limits::kEqual):
         std::sort(mValues.begin(), mValues.end(), [](T a, T b) { return a <= b; });
         break;
+      default:
+        break;
+    }
+  }
+
+  // sort limit functions
+  void sortFunctions(T value)
+  {
+    switch (mLimitType) {
+      case (limits::kUpperFunctionLimit):
+      case (limits::kAbsUpperFunctionLimit):
+        std::sort(mFunctions.begin(), mFunctions.end(), [value](TF1 a, TF1 b) { return a.Eval(value) >= b.Eval(value); });
+        break;
+      case (limits::kLowerFunctionLimit):
+      case (limits::kAbsLowerFunctionLimit):
+        std::sort(mFunctions.begin(), mFunctions.end(), [value](TF1 a, TF1 b) { return a.Eval(value) <= b.Eval(value); });
+        break;
+      default:
+        break;
+    }
+  }
+
+  // update the selection limits depending on the passed function
+  void updateLimits(T value)
+  {
+    // functions are ordered so just add the values in the same order
+    for (std::size_t i = 0; i < mValues.size(); i++) {
+      mValues.at(i) = mFunctions.at(i).Eval(value);
     }
   }
 
@@ -95,7 +147,7 @@ class SelectionContainer
   {
     // better safe than sorry and reset the bitmask before you evaluate a new observable
     mBitmask.reset();
-    // the values are order, as soon as one comparison is not true, we can break out of the loop
+    // the values are ordered, for most loost to  most tight, as soon as one comparison is not true, we can break out of the loop
     bool breakLoop = false;
     // iterate over all limits and set the corresponding bit if we pass the selection, otherwise break out as soon as we can
     for (size_t i = 0; i < mValues.size(); i++) {
@@ -177,6 +229,9 @@ class SelectionContainer
   /// Get shift for final bitmask
   int getShift()
   {
+    if (mValues.empty()) {
+      return 0;
+    }
     if (mSkipLastBit) {
       return static_cast<int>(mValues.size() - 1);
     } else {
@@ -186,6 +241,7 @@ class SelectionContainer
 
  private:
   std::vector<T> mValues{};             ///< Values used for the selection
+  std::vector<TF1> mFunctions{};        ///< Values used for the selection
   limits::LimitType mLimitType;         ///< Limit type of selection
   std::bitset<BitmaskMaxSize> mBitmask; ///< bitmask for a given observable
   bool mSkipLastBit = false;

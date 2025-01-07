@@ -54,6 +54,28 @@ class VzeroSelection : public BaseSelection<float, o2::aod::femtodatatypes::Vzer
   VzeroSelection() {}
   virtual ~VzeroSelection() = default;
 
+  void setKaonMassLimits(float lower, float upper)
+  {
+    if (lower < 0 || upper < 0) {
+      return;
+    }
+    mMassKaonLowerLimit = lower;
+    mMassKaonUpperLimit = upper;
+  }
+
+  template <typename T>
+  bool checkKaonMassLimit(T const& v0)
+  {
+    if (mMassKaonLowerLimit < 0 || mMassKaonUpperLimit < 0) {
+      return true;
+    }
+    if (v0.mK0Short() > mMassKaonLowerLimit && v0.mK0Short() < mMassKaonUpperLimit) {
+      return false;
+    } else {
+      return true;
+    }
+  }
+
   float getLoosestPosDauPidSelection()
   {
     return mSelections.at(kPosDauTpcNsigmaMax).getLoosestSelection();
@@ -120,14 +142,19 @@ class VzeroSelection : public BaseSelection<float, o2::aod::femtodatatypes::Vzer
 
   int getSign() { return mSign; };
   float getMass() { return mMass; };
+  float getPosDaughterTpcNsigma() { return mPosDaughterTpcNsigma; };
+  float getNegDaughterTpcNsigma() { return mNegDaughterTpcNsigma; };
 
   template <class V0, class Tracks>
   void ApplySelections(V0 const& v0, Tracks const& tracks)
   {
     // reset variables
-    mMass = 0;
+    mMass = 0.f;
     mSign = 0;
-    this->resetMinimalSelection();
+    mPosDaughterTpcNsigma = -99.f;
+    mNegDaughterTpcNsigma = -99.f;
+
+    this->reset();
     // vzero selections
     this->setBitmaskForObservable(VzeroSels::kDcaDaughMax, v0.dcaV0daughters());
     this->setBitmaskForObservable(VzeroSels::kCpaMin, v0.v0cosPA());
@@ -149,30 +176,32 @@ class VzeroSelection : public BaseSelection<float, o2::aod::femtodatatypes::Vzer
     this->setBitmaskForObservable(VzeroSels::kNegDauTpcClsMin, negDaughter.tpcNClsFound());
 
     // now we need to figure out if the v0 is a lambda or antilambda
-    // this information is stored int he sign (similar to tracks)
+    // this information is stored in the sign (similar to tracks)
     // +1 for particle and -1 for antiparticle
     this->setV0Type(v0, tracks);
     this->setBitmaskForObservable(VzeroSels::kSign, mSign);
-    float posDaughterNsigma = -99.;
-    float negDaughterNsigma = -99.;
     if (mSign == 1) {
-      posDaughterNsigma = posDaughter.tpcNSigmaPr();
-      negDaughterNsigma = negDaughter.tpcNSigmaPi();
+      mPosDaughterTpcNsigma = posDaughter.tpcNSigmaPr();
+      mNegDaughterTpcNsigma = negDaughter.tpcNSigmaPi();
     }
     if (mSign == -1) {
-      posDaughterNsigma = posDaughter.tpcNSigmaPi();
-      negDaughterNsigma = negDaughter.tpcNSigmaPr();
+      mPosDaughterTpcNsigma = posDaughter.tpcNSigmaPi();
+      mNegDaughterTpcNsigma = negDaughter.tpcNSigmaPr();
     }
 
-    this->setBitmaskForObservable(VzeroSels::kPosDauTpcNsigmaMax, posDaughterNsigma);
-    this->setBitmaskForObservable(VzeroSels::kPosDauTpcNsigmaMax, negDaughterNsigma);
+    this->setBitmaskForObservable(VzeroSels::kPosDauTpcNsigmaMax, mPosDaughterTpcNsigma);
+    this->setBitmaskForObservable(VzeroSels::kPosDauTpcNsigmaMax, mNegDaughterTpcNsigma);
 
     this->assembleBismask();
   };
 
  protected:
   int mSign = 0;
-  float mMass = 0;
+  float mMass = 0.f;
+  float mMassKaonLowerLimit = -1.f;
+  float mMassKaonUpperLimit = -1.f;
+  float mPosDaughterTpcNsigma = -99.f;
+  float mNegDaughterTpcNsigma = -99.f;
 };
 } // namespace vzeroselection
 } // namespace o2::analysis::femtounited

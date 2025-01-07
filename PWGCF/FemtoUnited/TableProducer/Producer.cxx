@@ -48,6 +48,7 @@
 // #include "PWGCF/FemtoUnited/Core/TrackTPCTOFSelection.h"
 #include "PWGCF/FemtoUnited/Core/TrackPidSelection.h"
 #include "PWGCF/FemtoUnited/Core/VzeroSelection.h"
+// #include "PWGCF/FemtoUnited/Core/VzeroDaughterSelection.h"
 
 #include "PWGCF/FemtoUnited/Utils/FemtoUtils.h"
 
@@ -64,15 +65,12 @@ namespace consumedData
 using Run3PpCollisions = soa::Join<aod::Collisions, aod::EvSels, aod::Mults, aod::CentFT0Ms>;
 using Run3PpWithoutCentCollisions = soa::Join<aod::Collisions, aod::EvSels, aod::Mults>;
 
-using Run3PpTracks =
-  soa::Join<FullTracks, TracksDCA,
-            pidits::ITSNSigmaEl, pidits::ITSNSigmaPi, pidits::ITSNSigmaKa, pidits::ITSNSigmaPr, pidits::ITSNSigmaTr, pidits::ITSNSigmaHe,
-            pidTPCEl, pidTPCPi, pidTPCKa, pidTPCPr, pidTPCDe, pidTPCTr, pidTPCHe,
-            pidTOFEl, pidTOFPi, pidTOFKa, pidTOFPr, pidTOFDe, pidTOFTr, pidTOFHe>;
+using Run3Tracks = soa::Join<Tracks, TracksExtra, TracksDCA,
+                             pidTPCEl, pidTPCPi, pidTPCKa, pidTPCPr, pidTPCDe, pidTPCTr, pidTPCHe,
+                             pidTOFEl, pidTOFPi, pidTOFKa, pidTOFPr, pidTOFDe, pidTOFTr, pidTOFHe>;
 
-using Run3PpQaFullPidTracks =
-  soa::Join<FullTracks, TracksDCA,
-            pidits::ITSNSigmaEl, pidits::ITSNSigmaPi, pidits::ITSNSigmaKa, pidits::ITSNSigmaPr, pidits::ITSNSigmaTr, pidits::ITSNSigmaHe,
+using Run3TracksFullPid =
+  soa::Join<Tracks, TracksExtra, TracksDCA,
             pidTPCFullEl, pidTPCFullPi, pidTPCFullKa, pidTPCFullPr, pidTPCFullDe, pidTPCFullTr, pidTPCFullHe,
             pidTOFFullEl, pidTOFFullPi, pidTOFFullKa, pidTOFFullPr, pidTOFFullDe, pidTOFFullTr, pidTOFFullHe,
             pidTOFbeta>;
@@ -97,6 +95,7 @@ struct femtounitedProducer {
   Produces<FUVzeroMasks> ProducedVzeroMasks;
   Produces<FUVzeroExtras> ProducedVzeroExtras;
   Produces<FUVzeroDaus> ProducedVzeroDaus;
+  Produces<FUVzeroDauExts> ProducedVzeroDauExts;
 
   // configurables
   struct : ConfigurableGroup {
@@ -137,6 +136,8 @@ struct femtounitedProducer {
     Configurable<std::vector<float>> TpcSharedClustersMax{"TpcSharedClustersMax", {2}, "Maximum number of shared clusters in TPC"};
     Configurable<std::vector<float>> ItsClustersMin{"ItsClustersMin", {7}, "Minimum number of clusters in ITS"};
     Configurable<std::vector<float>> ItsIbClustersMin{"ItsIbClustersMin", {3}, "Minimum number of clusters in inner barrel (max 3) of ITS"};
+    Configurable<std::vector<string>> DcaxyMax{"DcaxyMax", {"0.0105+(0.035/x^(1.1))"}, "Maximum |dca_xy| as a function of pT"};
+    Configurable<std::vector<string>> DcazMax{"DcazMax", {"0.0105+(0.035/x^(1.1))"}, "Maximum |dca_z| as a function of pT"};
   } ConfTrackBits;
   trackselection::TrackSelection TrackSel;
 
@@ -178,44 +179,7 @@ struct femtounitedProducer {
   } ConfTrackPidBits;
   trackpidselection::TrackPidSelection TrackPidSel;
 
-  // // track tpc bits
-  // struct : ConfigurableGroup {
-  //   std::string prefix = std::string("TrackTPCBits");
-  //   Configurable<std::vector<float>> Electron{"Electron", {}, "Maximum |nsigma| for electron PID"};
-  //   Configurable<std::vector<float>> Pion{"Pion", {}, "Maximum |nsigma| for pion PID"};
-  //   Configurable<std::vector<float>> Kaon{"Kaon", {}, "Maximum |nsigma| for kaon PID"};
-  //   Configurable<std::vector<float>> Proton{"Proton", {3}, "Maximum |nsigma| for proton PID"};
-  //   Configurable<std::vector<float>> Deuteron{"Deuteron", {}, "Maximum |nsigma| for deuteron PID"};
-  //   Configurable<std::vector<float>> Triton{"Triton", {}, "Maximum |nsigma| for trition PID"};
-  //   Configurable<std::vector<float>> Helium{"Helium", {}, "Maximum |nsigma| for helium PID"};
-  // } ConfTrackTPCBits;
-  // tracktpcselection::TrackTpcSelection TrackTpcSel;
-  //
-  // struct : ConfigurableGroup {
-  //   std::string prefix = std::string("TrackTOFBits");
-  //   Configurable<std::vector<float>> Electron{"Electron", {}, "Maximum |nsigma| for electron PID"};
-  //   Configurable<std::vector<float>> Pion{"Pion", {}, "Maximum |nsigma| for pion PID"};
-  //   Configurable<std::vector<float>> Kaon{"Kaon", {}, "Maximum |nsigma| for kaon PID"};
-  //   Configurable<std::vector<float>> Proton{"Proton", {3}, "Maximum |nsigma| for proton PID"};
-  //   Configurable<std::vector<float>> Deuteron{"Deuteron", {}, "Maximum |nsigma| for deuteron PID"};
-  //   Configurable<std::vector<float>> Triton{"Triton", {}, "Maximum |nsigma| for trition PID"};
-  //   Configurable<std::vector<float>> Helium{"Helium", {}, "Maximum |nsigma| for helium3 PID"};
-  // } ConfTrackTOFBits;
-  // tracktofselection::TrackTofSelection TrackTofSel;
-  //
-  // struct : ConfigurableGroup {
-  //   std::string prefix = std::string("TrackTPCTOFBits");
-  //   Configurable<std::vector<float>> Electron{"Electron", {}, "Maximum (nsigma_TPC^2+nsigma_TOF^2)^(1/2) for electron PID"};
-  //   Configurable<std::vector<float>> Pion{"Pion", {}, "Maximum (nsigma_TPC^2+nsigma_TOF^2)^(1/2) for pion PID"};
-  //   Configurable<std::vector<float>> Kaon{"Kaon", {}, "Maximum (nsigma_TPC^2+nsigma_TOF^2)^(1/2) for kaon PID"};
-  //   Configurable<std::vector<float>> Proton{"Proton", {3}, "Maximum (nsigma_TPC^2+nsigma_TOF^2)^(1/2) for proton PID"};
-  //   Configurable<std::vector<float>> Deuteron{"Deuteron", {}, "Maximum (nsigma_TPC^2+nsigma_TOF^2)^(1/2) for deuteron PID"};
-  //   Configurable<std::vector<float>> Triton{"Triton", {}, "Maximum (nsigma_TPC^2+nsigma_TOF^2)^(1/2) for trition PID"};
-  //   Configurable<std::vector<float>> Helium{"Helium", {}, "Maximum (nsigma_TPC^2+nsigma_TOF^2)^(1/2) for helium PID"};
-  // } ConfTrackTPCTOFBits;
-  // tracktpctofselection::TrackTpcTofSelection TrackTpcTofSel;
-
-  // v0 bits
+  // v0 filters
   struct : ConfigurableGroup {
     std::string prefix = std::string("V0Filters");
     Configurable<float> PtMin{"PtMin", 0, "Minimum pT"};
@@ -238,15 +202,16 @@ struct femtounitedProducer {
     Configurable<std::vector<float>> TransRadMin{"TransRadMin", {0.2}, "Minimum transverse radius (cm)"};
     Configurable<std::vector<float>> TransRadMax{"TransRadMax", {100}, "Maximum transverse radius (cm)"};
     Configurable<std::vector<float>> DecayVtxMax{"DecayVtxMax", {100}, "Maximum distance in x,y,z of the decay vertex from primary vertex (cm)"};
+    Configurable<float> KaonMassRejecionLow{"KaonMassRejecionLow", 0.48, "Lower limit of kaon mass (GeV/c^2) rejection (set negative to deactivate)"};
+    Configurable<float> KaonMassRejecionHigh{"KaonMassRejecionUp", 0.515, "Upper limit of kaon mass (GeV/c^2) rejection (set negative to deactivate)"};
   } ConfVzeroBits;
-  vzeroselection::VzeroSelection VzeroSel;
-
   struct : ConfigurableGroup {
     std::string prefix = std::string("V0DaughterBits");
     Configurable<std::vector<float>> DcaMin{"DcaMin", {0.05}, "Minimum DCA of the daughters from primary vertex (cm)"};
     Configurable<std::vector<float>> TpcClustersMin{"TpcClustersMin", {70}, "Minimum number of TPC clusters for daughter tracks"};
     Configurable<std::vector<float>> TpcNsigmaMax{"TpcNsigmaMax", {5}, "Maximum |nsimga| TPC for daughter tracks"};
   } ConfVzeroDaughterBits;
+  vzeroselection::VzeroSelection VzeroSel;
 
   // histogramming
   HistogramRegistry hRegistry{"Producer", {}, OutputObjHandlingPolicy::AnalysisObject};
@@ -254,7 +219,8 @@ struct femtounitedProducer {
   // data members
   int RunNumber = -1;
   float MagField = 0.f;
-  Service<o2::ccdb::BasicCCDBManager> ccdb; /// Accessing the CCDB
+  Service<o2::ccdb::BasicCCDBManager> ccdb;          /// Accessing the CCDB
+  std::vector<std::pair<int64_t, int64_t>> indexMap; // for mapping tracks to vzeros and more
 
   // functions
   void initFromCcdb(o2::aod::BCsWithTimestamps::iterator const bc)
@@ -294,27 +260,20 @@ struct femtounitedProducer {
   }
 
   template <modes::Mode mode, typename T>
-  void fillTracks(T const& tracks)
+  void fillTracks(T const& tracks, std::vector<std::pair<int64_t, int64_t>>& map)
   {
-    for (const auto& track : tracks) {                                                                                                                                                          
+    for (const auto& track : tracks) {
       TrackSel.ApplySelections(track);
       if (TrackSel.getMinimalSelection()) {
         TrackPidSel.ApplySelections(track);
-        // TrackTofSel.ApplySelections(track);
-        // TrackTpcTofSel.ApplySelections(track);
         if (TrackPidSel.getAnySelection()) {
           if constexpr (modes::isModeSet(mode, modes::Mode::kANALYSIS)) {
-            ProducedTracks(ProducedCollision.lastIndex(),
-                           track.pt(),
-                           track.eta(),
-                           track.phi());
-            ProducedTrackMasks(TrackSel.getBitmask(),
-                               TrackPidSel.getBitmask());
+            ProducedTracks(ProducedCollision.lastIndex(), track.pt(), track.eta(), track.phi());
+            ProducedTrackMasks(TrackSel.getBitmask(), TrackPidSel.getBitmask());
           }
 
           if constexpr (modes::isModeSet(mode, modes::Mode::kQA)) {
-            ProducedTrackDCAs(track.dcaXY(),
-                              track.dcaZ());
+            ProducedTrackDCAs(track.dcaXY(), track.dcaZ());
             ProducedTrackExtras(track.sign(),
                                 track.isPVContributor(),
                                 track.itsNCls(),
@@ -328,6 +287,13 @@ struct femtounitedProducer {
                                 track.tpcNClsShared(),
                                 track.beta());
             ProducedTrackPids(
+              track.itsNSigmaEl(),
+              track.itsNSigmaPi(),
+              track.itsNSigmaKa(),
+              track.itsNSigmaPr(),
+              track.itsNSigmaDe(),
+              track.itsNSigmaTr(),
+              track.itsNSigmaHe(),
               track.tpcNSigmaEl(),
               track.tpcNSigmaPi(),
               track.tpcNSigmaKa(),
@@ -343,27 +309,29 @@ struct femtounitedProducer {
               track.tofNSigmaTr(),
               track.tofNSigmaHe());
           }
+          map.emplace_back(track.globalIndex(), ProducedTracks.lastIndex());
         }
       }
     }
   }
 
   template <modes::Mode mode, typename T1, typename T2>
-  void fillV0s(T1 const& v0s, T2 const& tracks)
+  void fillV0s(T1 const& v0s, T2 const& tracks, std::vector<std::pair<int64_t, int64_t>> map)
   {
     for (const auto& v0 : v0s) {
       VzeroSel.ApplySelections(v0, tracks);
-      if (VzeroSel.getMinimalSelection()) {
+      if (VzeroSel.checkKaonMassLimit(v0) && VzeroSel.getMinimalSelection()) {
+        auto posDaughter = v0.template posTrack_as<T2>();
+        auto negDaughter = v0.template negTrack_as<T2>();
         if constexpr (modes::isModeSet(mode, modes::Mode::kANALYSIS)) {
           ProducedVzeros(ProducedCollision.lastIndex(),
                          v0.pt(),
                          v0.eta(),
                          v0.phi(),
                          VzeroSel.getMass());
-          auto posDaughter = v0.template posTrack_as<Tracks>();
-          auto negDaughter = v0.template negTrack_as<Tracks>();
-          ProducedVzeroDaus(1, posDaughter.pt(), posDaughter.eta(), posDaughter.phi(), 1, negDaughter.pt(), negDaughter.eta(), negDaughter.phi());
           ProducedVzeroMasks(VzeroSel.getBitmask());
+          ProducedVzeroDaus(utils::getDaughterIndex(posDaughter.globalIndex(), map), posDaughter.pt(), posDaughter.eta(), posDaughter.phi(),
+                            utils::getDaughterIndex(negDaughter.globalIndex(), map), negDaughter.pt(), negDaughter.eta(), negDaughter.phi());
         }
         if constexpr (modes::isModeSet(mode, modes::Mode::kQA)) {
           ProducedVzeroExtras(
@@ -372,7 +340,10 @@ struct femtounitedProducer {
             v0.x(),
             v0.y(),
             v0.z(),
-            v0.v0radius());
+            v0.v0radius(),
+            v0.mK0Short());
+          ProducedVzeroDauExts(posDaughter.tpcNClsFound(), posDaughter.dcaXY(), posDaughter.dcaZ(), VzeroSel.getPosDaughterTpcNsigma(),
+                               negDaughter.tpcNClsFound(), negDaughter.dcaXY(), negDaughter.dcaZ(), VzeroSel.getNegDaughterTpcNsigma());
         }
       }
     }
@@ -398,6 +369,8 @@ struct femtounitedProducer {
     TrackSel.addSelection(ConfTrackBits.TpcSharedClustersMax.value, trackselection::kTPCsClsMax, limits::kUpperLimit, true);
     TrackSel.addSelection(ConfTrackBits.ItsClustersMin.value, trackselection::kITSnClsMin, limits::kLowerLimit, true);
     TrackSel.addSelection(ConfTrackBits.ItsIbClustersMin.value, trackselection::kITSnClsIbMin, limits::kLowerLimit, true);
+    TrackSel.addSelection(ConfTrackBits.DcaxyMax.name, ConfTrackFilters.PtMin.value, ConfTrackFilters.PtMax.value, ConfTrackBits.DcaxyMax.value, trackselection::kDCAxyMax, limits::kAbsUpperLimit, true);
+    TrackSel.addSelection(ConfTrackBits.DcazMax.name, ConfTrackFilters.PtMin.value, ConfTrackFilters.PtMax.value, ConfTrackBits.DcazMax.value, trackselection::kDCAzMax, limits::kAbsUpperLimit, true);
 
     /// init track pid selections
     TrackPidSel.setCheckMinimalSelection(false);
@@ -434,36 +407,6 @@ struct femtounitedProducer {
     TrackPidSel.addSelection(ConfTrackPidBits.TpctofTriton.value, trackpidselection::kTpctofTriton, limits::kAbsUpperLimit, false);
     TrackPidSel.addSelection(ConfTrackPidBits.TpctofHelium.value, trackpidselection::kTpctofHelium, limits::kAbsUpperLimit, false);
 
-    /// init track tpc selections
-    // TrackTpcSel.setCheckMinimalSelection(false);
-    // TrackTpcSel.addSelection(ConfTrackTPCBits.Electron.value, tracktpcselection::kElectron, limits::kAbsUpperLimit, false);
-    // TrackTpcSel.addSelection(ConfTrackTPCBits.Pion.value, tracktpcselection::kPion, limits::kAbsUpperLimit, false);
-    // TrackTpcSel.addSelection(ConfTrackTPCBits.Kaon.value, tracktpcselection::kKaon, limits::kAbsUpperLimit, false);
-    // TrackTpcSel.addSelection(ConfTrackTPCBits.Proton.value, tracktpcselection::kProton, limits::kAbsUpperLimit, false);
-    // TrackTpcSel.addSelection(ConfTrackTPCBits.Deuteron.value, tracktpcselection::kDeuteron, limits::kAbsUpperLimit, false);
-    // TrackTpcSel.addSelection(ConfTrackTPCBits.Triton.value, tracktpcselection::kTriton, limits::kAbsUpperLimit, false);
-    // TrackTpcSel.addSelection(ConfTrackTPCBits.Helium.value, tracktpcselection::kHelium, limits::kAbsUpperLimit, false);
-    //
-    // /// init track tof selections
-    // TrackTofSel.setCheckMinimalSelection(false);
-    // TrackTofSel.addSelection(ConfTrackTOFBits.Electron.value, tracktofselection::kElectron, limits::kAbsUpperLimit, false);
-    // TrackTofSel.addSelection(ConfTrackTOFBits.Pion.value, tracktofselection::kPion, limits::kAbsUpperLimit, false);
-    // TrackTofSel.addSelection(ConfTrackTOFBits.Kaon.value, tracktofselection::kKaon, limits::kAbsUpperLimit, false);
-    // TrackTofSel.addSelection(ConfTrackTOFBits.Proton.value, tracktofselection::kProton, limits::kAbsUpperLimit, false);
-    // TrackTofSel.addSelection(ConfTrackTOFBits.Deuteron.value, tracktofselection::kDeuteron, limits::kAbsUpperLimit, false);
-    // TrackTofSel.addSelection(ConfTrackTOFBits.Triton.value, tracktofselection::kTriton, limits::kAbsUpperLimit, false);
-    // TrackTofSel.addSelection(ConfTrackTOFBits.Helium.value, tracktofselection::kHelium, limits::kAbsUpperLimit, false);
-    //
-    // /// init track tpc+tof selections
-    // TrackTpcTofSel.setCheckMinimalSelection(false);
-    // TrackTpcTofSel.addSelection(ConfTrackTPCTOFBits.Electron.value, tracktpctofselection::kElectron, limits::kAbsUpperLimit, false);
-    // TrackTpcTofSel.addSelection(ConfTrackTPCTOFBits.Pion.value, tracktpctofselection::kPion, limits::kAbsUpperLimit, false);
-    // TrackTpcTofSel.addSelection(ConfTrackTPCTOFBits.Kaon.value, tracktpctofselection::kKaon, limits::kAbsUpperLimit, false);
-    // TrackTpcTofSel.addSelection(ConfTrackTPCTOFBits.Proton.value, tracktpctofselection::kProton, limits::kAbsUpperLimit, false);
-    // TrackTpcTofSel.addSelection(ConfTrackTPCTOFBits.Deuteron.value, tracktpctofselection::kDeuteron, limits::kAbsUpperLimit, false);
-    // TrackTpcTofSel.addSelection(ConfTrackTPCTOFBits.Triton.value, tracktpctofselection::kTriton, limits::kAbsUpperLimit, false);
-    // TrackTpcTofSel.addSelection(ConfTrackTPCTOFBits.Helium.value, tracktpctofselection::kHelium, limits::kAbsUpperLimit, false);
-
     /// init vzero selections
     VzeroSel.setCheckMinimalSelection(true);
     VzeroSel.addSelection(ConfVzeroBits.Sign.value, vzeroselection::kSign, limits::kEqual, false);
@@ -471,117 +414,99 @@ struct femtounitedProducer {
     VzeroSel.addSelection(ConfVzeroBits.CpaMin.value, vzeroselection::kCpaMin, limits::kLowerLimit, true);
     VzeroSel.addSelection(ConfVzeroBits.TransRadMin.value, vzeroselection::kTransRadMin, limits::kLowerLimit, true);
     VzeroSel.addSelection(ConfVzeroBits.TransRadMax.value, vzeroselection::kTransRadMax, limits::kUpperLimit, true);
-    // positive daughter selections
-    VzeroSel.addSelection(ConfVzeroDaughterBits.DcaMin.value, vzeroselection::kPosDauDcaMin, limits::kAbsLowerLimit, true);
+    // vzero positiv daughter selections
+    VzeroSel.addSelection(ConfVzeroDaughterBits.DcaMin.value, vzeroselection::kPosDauDcaMin, limits::kLowerLimit, true);
     VzeroSel.addSelection(ConfVzeroDaughterBits.TpcClustersMin.value, vzeroselection::kPosDauTpcClsMin, limits::kLowerLimit, true);
     VzeroSel.addSelection(ConfVzeroDaughterBits.TpcNsigmaMax.value, vzeroselection::kPosDauTpcNsigmaMax, limits::kAbsUpperLimit, true);
-    // positive daughter selections
-    VzeroSel.addSelection(ConfVzeroDaughterBits.DcaMin.value, vzeroselection::kNegDauDcaMin, limits::kAbsLowerLimit, true);
+    // vzero negative daughter selections
+    VzeroSel.setCheckMinimalSelection(true);
+    VzeroSel.addSelection(ConfVzeroDaughterBits.DcaMin.value, vzeroselection::kNegDauDcaMin, limits::kLowerLimit, true);
     VzeroSel.addSelection(ConfVzeroDaughterBits.TpcClustersMin.value, vzeroselection::kNegDauTpcClsMin, limits::kLowerLimit, true);
     VzeroSel.addSelection(ConfVzeroDaughterBits.TpcNsigmaMax.value, vzeroselection::kNegDauTpcNsigmaMax, limits::kAbsUpperLimit, true);
+    // kaon mass limits
+    VzeroSel.setKaonMassLimits(ConfVzeroBits.KaonMassRejecionLow.value, ConfVzeroBits.KaonMassRejecionHigh.value);
   }
 
   // proccess functions
   // produce tracks for analysis
   void processTracksRun3pp(Filtered<consumedData::Run3PpCollisions>::iterator const& col,
                            BCsWithTimestamps const&,
-                           Filtered<consumedData::Run3PpTracks> const& tracks)
+                           Filtered<consumedData::Run3Tracks> const& tracks)
   {
     if (!CollisionSel.isSelected<modes::System::kPP_Run3>(col)) {
       return;
     }
     initFromCcdb(col.bc_as<BCsWithTimestamps>());
+
+    // its pid information is generated dynamically, so we need to add it here
+    auto tracksWithItsPid = o2::soa::Attach<consumedData::Run3Tracks, pidits::ITSNSigmaEl, pidits::ITSNSigmaPi,
+                                            pidits::ITSNSigmaKa, pidits::ITSNSigmaPr, pidits::ITSNSigmaDe, pidits::ITSNSigmaTr, pidits::ITSNSigmaHe>(tracks);
+
     fillCollision<modes::System::kPP_Run3>(col, tracks);
-    fillTracks<modes::Mode::kANALYSIS>(tracks);
+    indexMap.clear();
+    fillTracks<modes::Mode::kANALYSIS>(tracksWithItsPid, indexMap);
   }
   PROCESS_SWITCH(femtounitedProducer, processTracksRun3pp, "Provide tracks for Run3 analysis", true);
 
   // produce tracks for analysis (without centrality)
   void proccessTracksRun3ppNoCent(Filtered<consumedData::Run3PpWithoutCentCollisions>::iterator const& col,
                                   BCsWithTimestamps const&,
-                                  Filtered<consumedData::Run3PpTracks> const& tracks)
+                                  Filtered<consumedData::Run3Tracks> const& tracks)
   {
     if (!CollisionSel.isSelected<modes::System::kPP_NoCentCal_Run3>(col)) {
       return;
     }
     initFromCcdb(col.bc_as<BCsWithTimestamps>());
+
+    // its pid information is generated dynamically, so we need to add it here
+    auto tracksWithItsPid = o2::soa::Attach<consumedData::Run3Tracks, pidits::ITSNSigmaEl, pidits::ITSNSigmaPi,
+                                            pidits::ITSNSigmaKa, pidits::ITSNSigmaPr, pidits::ITSNSigmaDe, pidits::ITSNSigmaTr, pidits::ITSNSigmaHe>(tracks);
+
     fillCollision<modes::System::kPP_NoCentCal_Run3>(col, tracks);
-    fillTracks<modes::Mode::kANALYSIS>(tracks);
+    indexMap.clear();
+    fillTracks<modes::Mode::kANALYSIS>(tracksWithItsPid, indexMap);
   }
   PROCESS_SWITCH(femtounitedProducer, proccessTracksRun3ppNoCent, "Provide tracks for Run3 analysis (use when no centrality calibration is available)", false);
-
-  // produce v0s for analysis
-  void processVzerosRun3pp(Filtered<consumedData::Run3PpCollisions>::iterator const& col,
-                           BCsWithTimestamps const&,
-                           Filtered<consumedData::Run3PpTracks> const& tracks,
-                           Filtered<consumedData::Run3PpVzeros> const& v0s)
-  {
-    if (!CollisionSel.isSelected<modes::System::kPP_Run3>(col)) {
-      return;
-    }
-    initFromCcdb(col.bc_as<BCsWithTimestamps>());
-    fillCollision<modes::System::kPP_Run3>(col, tracks);
-    fillV0s<modes::Mode::kANALYSIS>(v0s, tracks);
-  }
-  PROCESS_SWITCH(femtounitedProducer, processVzerosRun3pp, "Provide V0s for Run3 analysis", false);
-
-  // produce v0s for analysis (without centrality)
-  void processVzerosRun3ppNoCent(Filtered<consumedData::Run3PpWithoutCentCollisions>::iterator const& col,
-                                 BCsWithTimestamps const&,
-                                 Filtered<consumedData::Run3PpTracks> const& tracks,
-                                 Filtered<consumedData::Run3PpVzeros> const& v0s)
-  {
-    if (!CollisionSel.isSelected<modes::System::kPP_NoCentCal_Run3>(col)) {
-      return;
-    }
-    initFromCcdb(col.bc_as<BCsWithTimestamps>());
-    fillCollision<modes::System::kPP_NoCentCal_Run3>(col, tracks);
-    fillV0s<modes::Mode::kANALYSIS>(v0s, tracks);
-  }
-  PROCESS_SWITCH(femtounitedProducer, processVzerosRun3ppNoCent, "Provide V0s for Run3 analysis (no centrality calibration)", false);
 
   // produce tracks for QA (without centrality)
   void proccessQaTracksRun3ppNoCent(Filtered<consumedData::Run3PpWithoutCentCollisions>::iterator const& col,
                                     BCsWithTimestamps const&,
-                                    Filtered<consumedData::Run3PpQaFullPidTracks> const& tracks)
+                                    Filtered<consumedData::Run3TracksFullPid> const& tracks)
   {
     if (!CollisionSel.isSelected<modes::System::kPP_NoCentCal_Run3>(col)) {
       return;
     }
     initFromCcdb(col.bc_as<BCsWithTimestamps>());
+
+    // its pid information is generated dynamically, so we need to add it here
+    auto tracksWithItsPid = o2::soa::Attach<consumedData::Run3TracksFullPid, pidits::ITSNSigmaEl, pidits::ITSNSigmaPi,
+                                            pidits::ITSNSigmaKa, pidits::ITSNSigmaPr, pidits::ITSNSigmaDe, pidits::ITSNSigmaTr, pidits::ITSNSigmaHe>(tracks);
+
     fillCollision<modes::System::kPP_NoCentCal_Run3>(col, tracks);
-    fillTracks<modes::Mode::kANALYSIS_QA>(tracks);
+    indexMap.clear();
+    fillTracks<modes::Mode::kANALYSIS_QA>(tracksWithItsPid, indexMap);
   }
   PROCESS_SWITCH(femtounitedProducer, proccessQaTracksRun3ppNoCent, "Provide tracks for Run2 with QA", false);
-
-  // produce v0s for QA (without centrality)
-  void processQaVzerosRun3ppNoCent(Filtered<consumedData::Run3PpWithoutCentCollisions>::iterator const& col,
-                                   BCsWithTimestamps const&,
-                                   Filtered<consumedData::Run3PpTracks> const& tracks,
-                                   Filtered<consumedData::Run3PpVzeros> const& v0s)
-  {
-    if (!CollisionSel.isSelected<modes::System::kPP_NoCentCal_Run3>(col)) {
-      return;
-    }
-    initFromCcdb(col.bc_as<BCsWithTimestamps>());
-    fillCollision<modes::System::kPP_NoCentCal_Run3>(col, tracks);
-    fillV0s<modes::Mode::kANALYSIS_QA>(v0s, tracks);
-  }
-  PROCESS_SWITCH(femtounitedProducer, processQaVzerosRun3ppNoCent, "Provide V0s for Run3 with QA (no centrality calibration)", false);
 
   // produce tracks and v0s for QA (without centrality)
   void processQaTracksVzerosRun3ppNoCent(Filtered<consumedData::Run3PpWithoutCentCollisions>::iterator const& col,
                                          BCsWithTimestamps const&,
-                                         Filtered<consumedData::Run3PpQaFullPidTracks> const& tracks,
+                                         Filtered<consumedData::Run3TracksFullPid> const& tracks,
                                          Filtered<consumedData::Run3PpVzeros> const& v0s)
   {
     if (!CollisionSel.isSelected<modes::System::kPP_NoCentCal_Run3>(col)) {
       return;
     }
     initFromCcdb(col.bc_as<BCsWithTimestamps>());
+
+    // its pid information is generated dynamically, so we need to add it here
+    auto tracksWithItsPid = Attach<consumedData::Run3TracksFullPid, pidits::ITSNSigmaEl, pidits::ITSNSigmaPi,
+                                   pidits::ITSNSigmaKa, pidits::ITSNSigmaPr, pidits::ITSNSigmaDe, pidits::ITSNSigmaTr, pidits::ITSNSigmaHe>(tracks);
+
     fillCollision<modes::System::kPP_NoCentCal_Run3>(col, tracks);
-    fillTracks<modes::Mode::kANALYSIS_QA>(tracks);
-    fillV0s<modes::Mode::kANALYSIS_QA>(v0s, tracks);
+    indexMap.clear();
+    fillTracks<modes::Mode::kANALYSIS_QA>(tracksWithItsPid, indexMap);
+    fillV0s<modes::Mode::kANALYSIS_QA>(v0s, tracks, indexMap);
   }
   PROCESS_SWITCH(femtounitedProducer, processQaTracksVzerosRun3ppNoCent, "Provide Tracks and V0s for Run3 with QA (no centrality calibration)", false);
 };

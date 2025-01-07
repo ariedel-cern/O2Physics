@@ -88,7 +88,9 @@ struct VzeroQa {
     Configurable<float> etaMax{"etaMax", 10.f, "Maximum eta"};
     Configurable<float> phiMin{"phiMin", 0.f, "Minimum eta"};
     Configurable<float> phiMax{"phiMax", 1.f * o2::constants::math::TwoPI, "Maximum phi"};
-    Configurable<femtodatatypes::TrackMaskType> mask{"mask", 1, "Bitmask for track selection"};
+    Configurable<float> massMin{"massMin", 1.f, "Minimum invariant mass"};
+    Configurable<float> massMax{"massMax", 1.2f, "Maximum invariant mass"};
+    Configurable<femtodatatypes::VzeroMaskType> mask{"mask", 1, "Bitmask for V0 selection"};
   } VzeroSelection;
 
   struct : ConfigurableGroup {
@@ -103,7 +105,7 @@ struct VzeroQa {
 
   SliceCache cache;
 
-  using V0s = o2::soa::Join<FUVzeros, FUVzeroMasks, FUVzeroDaus, FUVzeroExtras>;
+  using V0s = o2::soa::Join<FUVzeros, FUVzeroMasks, FUVzeroDaus, FUVzeroExtras, FUVzeroDauExts>;
 
   Partition<V0s> VzeroPartition =
     (femtobase::pt > VzeroSelection.ptMin) &&
@@ -112,6 +114,8 @@ struct VzeroQa {
     (femtobase::eta < VzeroSelection.etaMax) &&
     (femtobase::phi > VzeroSelection.phiMin) &&
     (femtobase::phi < VzeroSelection.phiMax) &&
+    (femtovzeros::vzeroMass > VzeroSelection.massMin) &&
+    (femtovzeros::vzeroMass < VzeroSelection.massMax) &&
     (femtovzeros::posDauPt > VzeroDaughterSelection.ptMin) &&
     (femtovzeros::posDauPt < VzeroDaughterSelection.ptMax) &&
     (femtovzeros::posDauEta > VzeroDaughterSelection.etaMin) &&
@@ -134,13 +138,20 @@ struct VzeroQa {
     ConfigurableAxis eta{"eta", {{300, -1.5, 1.5}}, "Eta"};
     ConfigurableAxis phi{"phi", {{720, 0, 1.f * o2::constants::math::TwoPI}}, "Phi"};
     ConfigurableAxis mass{"mass", {{200, 1.0, 1.2}}, "Mass"};
-    ConfigurableAxis dauPt{"dauPt", {{600, 0, 6}}, "Positive daughter pt"};
-    ConfigurableAxis dauEta{"dauEta", {{300, -1.5, 1.5}}, "Positive daugher eta"};
-    ConfigurableAxis dauPhi{"dauPhi", {{720, 0., 1.f * o2::constants::math::TwoPI}}, "Positive daughter phi"};
+    ConfigurableAxis dauPt{"dauPt", {{600, 0, 6}}, "daughter pt"};
+    ConfigurableAxis dauEta{"dauEta", {{300, -1.5, 1.5}}, "daugher eta"};
+    ConfigurableAxis dauPhi{"dauPhi", {{720, 0., 1.f * o2::constants::math::TwoPI}}, "daughter phi"};
     ConfigurableAxis sign{"sign", {{3, -1.5, 1.5}}, "Sign"};
-    ConfigurableAxis dauDca{"dauDca", {{300, -1.5, 1.5}}, "Daughter DCA"};
+    ConfigurableAxis dauDcaAtDecay{"dauDcaAtDecay", {{150, 0, 1.5}}, "Daughter DCA at decay vertex"};
     ConfigurableAxis decayVertex{"decayVertex", {{100, 0, 100}}, "Decay vertex"};
     ConfigurableAxis transRadius{"transRadius", {{100, 0, 100}}, "Transverse radius"};
+    ConfigurableAxis kaonMass{"kaonMass", {{100, 0.45, 0.55}}, "Mass for kaon hypothesis"};
+    ConfigurableAxis dauTpcCluster{"dauTpcCluster", {{153, -0.5, 152.5}}, "TPC cluster of daughters"};
+    ConfigurableAxis dauP{"dauP", {{600, 0, 6}}, "Momentum binning for TPC Nsigma of daughters"};
+    ConfigurableAxis dauDcaxy{"dauDcaxy", {{300, -1.5, 1.5}}, "DCAxy for daughters"};
+    ConfigurableAxis dauDcaz{"dauDcaz", {{300, -1.5, 1.5}}, "Dcaz for daughters"};
+    ConfigurableAxis dauDca{"dauDca", {{150, 0, 0.3}}, "Dca for daughters"};
+    ConfigurableAxis dauTpcNsigma{"dauTpcNsigma", {{600, -6, 6}}, "TPC Nsigma for daughters"};
   } VzeroBinning;
 
   HistogramRegistry hRegistry{"TrackQA", {}, OutputObjHandlingPolicy::AnalysisObject};
@@ -175,14 +186,25 @@ struct VzeroQa {
       {vzerohistmanager::kNegDauEta, {VzeroBinning.dauEta}},
       {vzerohistmanager::kNegDauPhi, {VzeroBinning.dauPhi}},
       {vzerohistmanager::kSign, {VzeroBinning.sign}},
-      {vzerohistmanager::kDauDca, {VzeroBinning.dauDca}},
+      {vzerohistmanager::kDecayDauDca, {VzeroBinning.dauDca}},
       {vzerohistmanager::kDecayVtxX, {VzeroBinning.decayVertex}},
       {vzerohistmanager::kDecayVtxY, {VzeroBinning.decayVertex}},
       {vzerohistmanager::kDecayVtxZ, {VzeroBinning.decayVertex}},
       {vzerohistmanager::kTransRadius, {VzeroBinning.transRadius}},
+      {vzerohistmanager::kKaonMass, {VzeroBinning.kaonMass}},
       {vzerohistmanager::kPtVsEta, {VzeroBinning.pt, VzeroBinning.eta}},
       {vzerohistmanager::kPtVsPhi, {VzeroBinning.pt, VzeroBinning.phi}},
       {vzerohistmanager::kPhiVsEta, {VzeroBinning.phi, VzeroBinning.eta}},
+      {vzerohistmanager::kPosDaughTpcCluster, {VzeroBinning.dauTpcCluster}},
+      {vzerohistmanager::kPosDaughPtVsDcaxy, {VzeroBinning.dauPt, VzeroBinning.dauDcaxy}},
+      {vzerohistmanager::kPosDaughPtVsDcaz, {VzeroBinning.dauPt, VzeroBinning.dauDcaz}},
+      {vzerohistmanager::kPosDaughPtVsDca, {VzeroBinning.dauPt, VzeroBinning.dauDca}},
+      {vzerohistmanager::kPosDaughTpcNsigma, {VzeroBinning.dauP, VzeroBinning.dauTpcNsigma}},
+      {vzerohistmanager::kNegDaughTpcCluster, {VzeroBinning.dauTpcCluster}},
+      {vzerohistmanager::kNegDaughPtVsDcaxy, {VzeroBinning.dauPt, VzeroBinning.dauDcaxy}},
+      {vzerohistmanager::kNegDaughPtVsDcaz, {VzeroBinning.dauPt, VzeroBinning.dauDcaz}},
+      {vzerohistmanager::kNegDaughPtVsDca, {VzeroBinning.dauPt, VzeroBinning.dauDca}},
+      {vzerohistmanager::kNegDaughTpcNsigma, {VzeroBinning.dauP, VzeroBinning.dauTpcNsigma}},
     };
 
     vzeroHistManager.init<modes::Mode::kANALYSIS_QA>(&hRegistry, vzeroHistSpec);

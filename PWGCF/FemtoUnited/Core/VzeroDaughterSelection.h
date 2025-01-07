@@ -27,28 +27,51 @@ namespace vzerodaughterselection
 {
 /// The different selections this task is capable of doing
 enum VzeroDaughterSels {
-  kDcaMin,      ///< Min. DCA of the daughers at primary vertex
-  kTpcClsMin,   ///< Min. transverse radius
-  kDecayVtxMax, ///< Max. distance of decay vertex
-  kVzeroSelsMax
+  kDcaMin,    ///< Min. DCA of the daughers at primary vertex
+  kTpcClsMin, ///< Min. transverse radius
+  kPid,       ///< Max. |nsigma tpc| for proton/pion pid for positive/negative daugher of V0/anti-V0
+  kVzerosDaughterSelMax
 };
 
 /// \class FemtoDreamTrackCuts
 /// \brief Cut class to contain and execute all cuts applied to tracks
-class VzeroDaughterSelection : public BaseSelection<float, o2::aod::femtodatatypes::VzeroDauTrackMaskType, VzeroDaughterSels::kVzeroSelsMax>
+class VzeroDaughterSelection : public BaseSelection<float, o2::aod::femtodatatypes::VzeroDaughterMaskType, VzeroDaughterSels::kVzerosDaughterSelMax>
 {
  public:
   VzeroDaughterSelection() {}
   virtual ~VzeroDaughterSelection() = default;
-  // template <class V0>
-  // void ApplySelections(V0 v0) {
-  // this->resetMinimalSelection();
-  // this->setBitmaskForObservable(VzeroSels::kDcaDaughMax, v0.dcaV0daughters());
-  // this->setBitmaskForObservable(VzeroSels::kCpaMin, v0.v0cosPA());
-  // this->setBitmaskForObservable(VzeroSels::kTransRadMin, v0.v0radius());
-  // this->setBitmaskForObservable(VzeroSels::kTransRadMax, v0.v0radius());
-  // this->assembleBismask();
-  // };
+  template <class track>
+  void ApplySelections(track const& Track, int signVzero, int signDaughter)
+  {
+    this->resetMinimalSelection();
+    this->setBitmaskForObservable(VzeroDaughterSels::kDcaMin, Track.dcaXY());
+    this->setBitmaskForObservable(VzeroDaughterSels::kTpcClsMin, Track.tpcNClsFound());
+
+    // PID for daugher
+    switch (signVzero) {
+      case 1:
+        if (signDaughter == 1) {
+          this->setBitmaskForObservable(VzeroDaughterSels::kPid, Track.tpcNSigmaPr());
+        }
+        if (signDaughter == -1) {
+          this->setBitmaskForObservable(VzeroDaughterSels::kPid, Track.tpcNSigmaPi());
+        }
+        break;
+      case -1:
+        // PID for daughter of anti-V0
+        if (signDaughter == -1) {
+          this->setBitmaskForObservable(VzeroDaughterSels::kPid, Track.tpcNSigmaPr());
+        }
+        if (signDaughter == 1) {
+          this->setBitmaskForObservable(VzeroDaughterSels::kPid, Track.tpcNSigmaPi());
+        }
+        break;
+      default:
+        this->setBitmaskForObservable(VzeroDaughterSels::kPid, -999);
+    }
+
+    this->assembleBismask();
+  };
 };
 } // namespace vzerodaughterselection
 } // namespace o2::analysis::femtounited

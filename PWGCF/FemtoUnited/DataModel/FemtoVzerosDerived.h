@@ -44,15 +44,29 @@ DECLARE_SOA_INDEX_COLUMN_FULL(PosDau, posDau, int, FUTracks, "_Pos"); //!
 DECLARE_SOA_COLUMN(PosDauPt, posDauPt, float);                        //! Positive daughter pt
 DECLARE_SOA_COLUMN(PosDauEta, posDauEta, float);                      //! Positive daughter eta
 DECLARE_SOA_COLUMN(PosDauPhi, posDauPhi, float);                      //! Positive daughter phi
-// DECLARE_SOA_COLUMN(PosDauTrackMask, posDauTrackMask, femtodatatypes::VzeroDauTrackMaskType); //! Positive daughter bitmask for track selections
-// DECLARE_SOA_COLUMN(PosDauTPCMask, posDauTPCMask, femtodatatypes::VzeroDauTPCMaskType);       //! Positive daughter bitmaks for PID TPC selection
+DECLARE_SOA_DYNAMIC_COLUMN(PosDauP, posDauP,                          //! Momentum
+                           [](float pt, float eta) -> float {
+                             return pt * std::cosh(eta);
+                           });
 
 DECLARE_SOA_INDEX_COLUMN_FULL(NegDau, negDau, int, FUTracks, "_Neg"); //!
 DECLARE_SOA_COLUMN(NegDauPt, negDauPt, float);                        //! Negative daughter pt
 DECLARE_SOA_COLUMN(NegDauEta, negDauEta, float);                      //! Negative daughter eta
 DECLARE_SOA_COLUMN(NegDauPhi, negDauPhi, float);                      //! Negative daughter phi
-// DECLARE_SOA_COLUMN(NegDauTrackMask, negDauTrackMask, femtodatatypes::VzeroDauTrackMaskType); //! Negative daughter bitmask for track selections
-// DECLARE_SOA_COLUMN(NegDauTPCMask, negDauTPCMask, femtodatatypes::VzeroDauTPCMaskType);       //! Negative daughter bitmaks for PID TPC selection
+DECLARE_SOA_DYNAMIC_COLUMN(NegDauP, negDauP,                          //! Momentum
+                           [](float pt, float eta) -> float {
+                             return pt * std::cosh(eta);
+                           });
+
+// columns for Vzero daughter debug information
+DECLARE_SOA_COLUMN(PosDauTpcNclsFound, posDauTpcNclsFound, uint8_t); //!
+DECLARE_SOA_COLUMN(PosDauDcaxy, posDauDcaxy, float);                 //!
+DECLARE_SOA_COLUMN(PosDauDcaz, posDauDcaz, float);                   //!
+DECLARE_SOA_COLUMN(PosDauTpcNsigma, posDauTpcNsigma, float);         //!
+DECLARE_SOA_COLUMN(NegDauTpcNclsFound, negDauTpcNclsFound, uint8_t); //!
+DECLARE_SOA_COLUMN(NegDauTpcNsigma, negDauTpcNsigma, float);         //!
+DECLARE_SOA_COLUMN(NegDauDcaxy, negDauDcaxy, float);                 //!
+DECLARE_SOA_COLUMN(NegDauDcaz, negDauDcaz, float);                   //!
 
 } // namespace femtovzeros
 
@@ -81,7 +95,8 @@ DECLARE_SOA_TABLE_STAGED_VERSIONED(FUVzeroExtras_001, "FUVZEROEXTRAS", 1,
                                    femtovzeros::DecayVtxX,
                                    femtovzeros::DecayVtxY,
                                    femtovzeros::DecayVtxZ,
-                                   femtovzeros::TransRadius);
+                                   femtovzeros::TransRadius,
+                                   femtovzeros::KaonMass);
 using FUVzeroExtras = FUVzeroExtras_001;
 
 DECLARE_SOA_TABLE_STAGED_VERSIONED(FUVzeroDaus_001, "FUVZERODAUS", 1,
@@ -89,15 +104,25 @@ DECLARE_SOA_TABLE_STAGED_VERSIONED(FUVzeroDaus_001, "FUVZERODAUS", 1,
                                    femtovzeros::PosDauPt,
                                    femtovzeros::PosDauEta,
                                    femtovzeros::PosDauPhi,
-                                   // femtovzeros::PosDauTrackMask,
-                                   // femtovzeros::PosDauTPCMask,
                                    femtovzeros::NegDauId,
                                    femtovzeros::NegDauPt,
                                    femtovzeros::NegDauEta,
-                                   femtovzeros::NegDauPhi);
-// femtovzeros::NegDauTrackMask,
-// femtovzeros::NegDauTPCMask);
+                                   femtovzeros::NegDauPhi,
+                                   femtovzeros::PosDauP<femtovzeros::PosDauPt, femtovzeros::PosDauEta>,
+                                   femtovzeros::NegDauP<femtovzeros::NegDauPt, femtovzeros::NegDauEta>);
 using FUVzeroDaus = FUVzeroDaus_001;
+
+DECLARE_SOA_TABLE_STAGED_VERSIONED(FUVzeroDauExts_001, "FUVZERODAUEXTS", 1,
+                                   femtovzeros::PosDauTpcNclsFound,
+                                   femtovzeros::PosDauDcaxy,
+                                   femtovzeros::PosDauDcaz,
+                                   femtovzeros::PosDauTpcNsigma,
+                                   femtovzeros::NegDauTpcNclsFound,
+                                   femtovzeros::NegDauDcaxy,
+                                   femtovzeros::NegDauDcaz,
+                                   femtovzeros::NegDauTpcNsigma);
+using FUVzeroDauExts = FUVzeroDauExts_001;
+
 } // namespace o2::aod
 
 #endif // PWGCF_FEMTOUNITED_DATAMODEL_FEMTOVZEROSDERIVED_H_

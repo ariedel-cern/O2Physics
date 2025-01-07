@@ -55,7 +55,29 @@ class BaseSelection
     mSelections.at(Observable) = SelectionContainer<T>(configSelections, limitType, SkipLastBit);
   }
 
-  void resetMinimalSelection() { mMinimalSelected = true; }
+  /// Pass the Configurable of selection values in the analysis task to the selection class
+  /// \param configSelection Vector from configurable containing the values employed for the selection
+  /// \param observableType Observable to be employed for the selection
+  /// \param limitType Type of the selection limit
+  void addSelection(std::string baseName, T lowerLimit, T upperLimit, std::vector<std::string>& configSelections, int Observable, limits::LimitType limitType, bool SkipLastBit)
+  {
+    if (static_cast<size_t>(Observable) >= NObservables) {
+      LOG(fatal) << "Observable is not valid. Observable (index) has to be smaller than " << NObservables;
+    }
+    mNSelections += configSelections.size();
+    if (mNSelections >= 8 * sizeof(BitmaskType)) {
+      LOG(fatal) << "Too many selections. At most " << 8 * sizeof(BitmaskType) << " are supported";
+    }
+    mSelections.at(Observable) = SelectionContainer<T>(baseName, lowerLimit, upperLimit, configSelections, limitType, SkipLastBit);
+  }
+
+  void updateLimits(int observable, T value) { mSelections.at(observable).updateLimits(value); }
+
+  void reset()
+  {
+    mBitmask.reset();
+    mMinimalSelected = true;
+  }
 
   void setCheckMinimalSelection(bool checkMinimalSelection) { mCheckMinimalSelection = checkMinimalSelection; }
 
@@ -64,7 +86,11 @@ class BaseSelection
   /// \param value Value of the observable
   void setBitmaskForObservable(int observable, T value)
   {
-    // if any object did not pass minimal selections, there is no point in setting bitmask for other observables
+    // if there are no values set, bail out
+    if (mSelections.at(observable).empty()) {
+      return;
+    }
+    // if any previous observable did not pass minimal selections, there is no point in setting bitmask for other observables
     // minimal selection for each observable is computed after adding it
     // can be deactivate by setting mCheckMinimalSelection to false
     if (mCheckMinimalSelection == true && mMinimalSelected == false) {
@@ -80,7 +106,11 @@ class BaseSelection
   }
 
   /// check if minimal Selections are passed
-  bool getMinimalSelection() { return mMinimalSelected; }
+  bool
+    getMinimalSelection()
+  {
+    return mMinimalSelected;
+  }
 
   /// check if any Selections are passed
   bool getAnySelection()
@@ -96,9 +126,11 @@ class BaseSelection
     // if minimal selections are not passed, just set bitmask to 0
     if (mCheckMinimalSelection == true && mMinimalSelected == false) {
       mBitmask.reset();
+      return;
     }
 
     // to assemble bitmask, convert all bitmask into integers
+    // shift the current one and add the new bits
     uint64_t result = 0u;
     int shift = 0;
     uint64_t value = 0u;

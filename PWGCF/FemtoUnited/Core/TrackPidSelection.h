@@ -17,6 +17,7 @@
 #define PWGCF_FEMTOUNITED_CORE_TRACKPIDSELECTION_H_
 
 #include <cmath>
+
 #include "PWGCF/FemtoUnited/Core/BaseSelection.h"
 #include "PWGCF/FemtoUnited/Core/DataTypes.h"
 #include "PWGCF/FemtoUnited/Utils/FemtoUtils.h"
@@ -73,6 +74,8 @@ class TrackPidSelection : public BaseSelection<float, o2::aod::femtodatatypes::T
   template <class track>
   void ApplySelections(track const& Track)
   {
+    this->reset();
+
     // its pid
     this->setBitmaskForObservable(TrackPidSels::kItsElectron, Track.itsNSigmaEl());
     this->setBitmaskForObservable(TrackPidSels::kItsPion, Track.itsNSigmaPi());
