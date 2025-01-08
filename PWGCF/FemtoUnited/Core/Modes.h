@@ -9,6 +9,10 @@
 // granted to it by virtue of its status as an Intergovernmental Organization
 // or submit itself to any jurisdiction.
 
+/// \file Modes.h
+/// \brief common modes
+/// \author anton.riedel@tum.de, TU München, anton.riedel@tum.de
+
 #ifndef PWGCF_FEMTOUNITED_CORE_MODES_H_
 #define PWGCF_FEMTOUNITED_CORE_MODES_H_
 
@@ -43,7 +47,7 @@ enum class System : uint32_t {
   kNoCentCal = 0x20,
   kPP_Run3 = kPP | kRun3,
   kPP_Run2 = kPP | kRun2,
-  kPP_NoCentCal_Run3 = kPP | kRun3| kNoCentCal ,
+  kPP_NoCentCal_Run3 = kPP | kRun3 | kNoCentCal,
   kPbPb_Run3 = kPbPb | kRun3,
   kPbPb_Run2 = kPbPb | kRun2,
 };

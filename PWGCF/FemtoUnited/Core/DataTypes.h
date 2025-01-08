@@ -9,6 +9,10 @@
 // granted to it by virtue of its status as an Intergovernmental Organization
 // or submit itself to any jurisdiction.
 
+/// \file DataTypes.h
+/// \brief datatypes for bitmasks
+/// \author anton.riedel@tum.de, TU München, anton.riedel@tum.de
+
 #ifndef PWGCF_FEMTOUNITED_CORE_DATATYPES_H_
 #define PWGCF_FEMTOUNITED_CORE_DATATYPES_H_
 
@@ -31,10 +35,10 @@ using VzeroMaskType = uint32_t;
 
 // Bitmaks for cascades, vzero daughter and bachelor
 using CascadeMaskType = uint32_t;
-// using CascadeBachelorMaskType = uint16_t;
-// using CascadeBachelorTPCMaskType = uint16_t;
-// using VzeroDauTrackMaskType = uint8_t;
-// using VzeroDauTPCMaskType = uint8_t;
+using CascadeBachelorMaskType = uint16_t;
+using CascadeBachelorTPCMaskType = uint16_t;
+using VzeroDauTrackMaskType = uint8_t;
+using VzeroDauTPCMaskType = uint8_t;
 
 } // namespace femtodatatypes
 

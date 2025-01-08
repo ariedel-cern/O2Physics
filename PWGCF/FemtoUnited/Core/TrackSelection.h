@@ -9,17 +9,17 @@
 // granted to it by virtue of its status as an Intergovernmental Organization
 // or submit itself to any jurisdiction.
 
-/// \file FemtoDreamTrackCuts.h
-/// \brief Definition of the FemtoDreamTrackCuts
-/// \author Andi Mathis, TU München, andreas.mathis@ph.tum.de
-/// \author Luca Barioglio, TU München, luca.barioglio@cern.ch
+/// \file TrackSelection.h
+/// \brief Definition of track selections
+/// \author Anton Riedel, TU München, anton.riedel@cern.ch
 
 #ifndef PWGCF_FEMTOUNITED_CORE_TRACKSELECTION_H_
 #define PWGCF_FEMTOUNITED_CORE_TRACKSELECTION_H_
 
 #include <cmath>
+#include "Framework/Configurable.h"
 #include "PWGCF/FemtoUnited/Core/BaseSelection.h"
-#include "PWGCF/FemtoUnited//Core/DataTypes.h"
+#include "PWGCF/FemtoUnited/Core/DataTypes.h"
 
 namespace o2::analysis::femtounited
 {
@@ -27,7 +27,6 @@ namespace trackselection
 {
 /// The different selections this task is capable of doing
 enum TrackSels {
-  kSign,         ///< Sign of the track
   kTPCnClsMin,   ///< Min. number of TPC clusters
   kTPCcRowsMin,  ///< Min. number of crossed TPC rows
   kTPCsClsMax,   ///< Max. number of shared TPC clusters
@@ -35,6 +34,12 @@ enum TrackSels {
   kITSnClsIbMin, ///< Min. number of ITS clusters in the inner barrel
   kDCAxyMax,     ///< Max. DCA_xy (cm) as a function of pT
   kDCAzMax,      ///< Max. DCA_z (cm) as a function of pT
+  kSign,         ///< Sign of the charg of the track
+                 /// IMPORTANT: Always let the sign be the last bit
+                 /// Like this the sign will be added last to the bit and ends up on the least significant bits this means we can always get the charge by checking
+                 ///  XXXXXX01 <- track has negative charge
+                 ///  XXXXXX10 <- track has positive charge
+                 ///  this only holds as long as +1 and -1 are selected in the producer
   kTrackselMax
 };
 
@@ -46,7 +51,7 @@ class TrackSelection : public BaseSelection<float, o2::aod::femtodatatypes::Trac
   TrackSelection() {}
   virtual ~TrackSelection() = default;
   template <class track>
-  void ApplySelections(track const& Track)
+  void applySelections(track const& Track)
   {
     this->reset();
     this->setBitmaskForObservable(TrackSels::kSign, Track.sign());
@@ -65,7 +70,7 @@ class TrackSelection : public BaseSelection<float, o2::aod::femtodatatypes::Trac
 
     this->assembleBismask();
   };
-}; // namespace femtoDream
+};
 }; // namespace trackselection
 }; // namespace o2::analysis::femtounited
 

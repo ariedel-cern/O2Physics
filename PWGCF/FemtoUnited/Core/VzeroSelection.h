@@ -19,6 +19,7 @@
 #include <algorithm>
 #include <cmath>
 
+#include "Framework/Configurable.h"
 #include "CommonConstants/PhysicsConstants.h"
 
 #include "PWGCF/FemtoUnited/Core/DataTypes.h"
@@ -31,7 +32,6 @@ namespace vzeroselection
 {
 /// The different selections this task is capable of doing
 enum VzeroSels {
-  kSign,               ///< +1 for particle, -1 for antiparticle
   kDcaDaughMax,        ///< Max. DCA of the daughers at decay vertex
   kCpaMin,             ///< Min. CPA (cosine pointing angle)
   kTransRadMin,        ///< Min. transverse radius
@@ -43,6 +43,11 @@ enum VzeroSels {
   kNegDauDcaMin,       ///< Min. DCA of the positive daughers at primary vertex
   kNegDauTpcClsMin,    ///< Min. number of TPC clusters of positive daughter
   kNegDauTpcNsigmaMax, ///< Max. |nsigma| TPC of the positive daughter
+  kSign,               ///< +1 for particle, -1 for antiparticle
+                       /// IMPORTANT: Always let the sign be the last bit
+                       /// Like this the sign will be added last to the bit and ends up on the least significant bits this means we can always select v0/antiv0 very easily
+                       ///  XXXXXX01 <- antivzero
+                       ///  XXXXXX10 <- v0
   kVzeroSelsMax
 };
 
@@ -140,13 +145,13 @@ class VzeroSelection : public BaseSelection<float, o2::aod::femtodatatypes::Vzer
     }
   };
 
-  int getSign() { return mSign; };
-  float getMass() { return mMass; };
-  float getPosDaughterTpcNsigma() { return mPosDaughterTpcNsigma; };
-  float getNegDaughterTpcNsigma() { return mNegDaughterTpcNsigma; };
+  int getSign() { return mSign; }
+  float getMass() { return mMass; }
+  float getPosDaughterTpcNsigma() { return mPosDaughterTpcNsigma; }
+  float getNegDaughterTpcNsigma() { return mNegDaughterTpcNsigma; }
 
   template <class V0, class Tracks>
-  void ApplySelections(V0 const& v0, Tracks const& tracks)
+  void applySelections(V0 const& v0, Tracks const& tracks)
   {
     // reset variables
     mMass = 0.f;
@@ -167,12 +172,12 @@ class VzeroSelection : public BaseSelection<float, o2::aod::femtodatatypes::Vzer
 
     // positive daughter selections
     auto posDaughter = v0.template posTrack_as<Tracks>();
-    this->setBitmaskForObservable(VzeroSels::kPosDauDcaMin, utils::Dca(posDaughter.dcaXY(), posDaughter.dcaZ()));
+    this->setBitmaskForObservable(VzeroSels::kPosDauDcaMin, utils::dca(posDaughter.dcaXY(), posDaughter.dcaZ()));
     this->setBitmaskForObservable(VzeroSels::kPosDauTpcClsMin, posDaughter.tpcNClsFound());
 
     // positive daughter selections
     auto negDaughter = v0.template negTrack_as<Tracks>();
-    this->setBitmaskForObservable(VzeroSels::kNegDauDcaMin, utils::Dca(negDaughter.dcaXY(), negDaughter.dcaZ()));
+    this->setBitmaskForObservable(VzeroSels::kNegDauDcaMin, utils::dca(negDaughter.dcaXY(), negDaughter.dcaZ()));
     this->setBitmaskForObservable(VzeroSels::kNegDauTpcClsMin, negDaughter.tpcNClsFound());
 
     // now we need to figure out if the v0 is a lambda or antilambda

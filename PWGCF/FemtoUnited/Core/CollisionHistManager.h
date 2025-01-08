@@ -9,8 +9,9 @@
 // granted to it by virtue of its status as an Intergovernmental Organization
 // or submit itself to any jurisdiction.
 
-/// \file ColHistManager.h
-/// \brief Femtounited collision histograms
+/// \file CollisionHistManager.h
+/// \brief collision histograms
+/// \author anton.riedel@tum.de, TU München, anton.riedel@tum.de
 
 #ifndef PWGCF_FEMTOUNITED_CORE_COLLISIONHISTMANAGER_H_
 #define PWGCF_FEMTOUNITED_CORE_COLLISIONHISTMANAGER_H_
@@ -21,12 +22,11 @@
 #include <array>
 #include <map>
 
+#include "Framework/Configurable.h"
 #include "Framework/HistogramRegistry.h"
 
 #include "PWGCF/FemtoUnited/Core/HistManager.h"
 #include "PWGCF/FemtoUnited/Core/Modes.h"
-
-using namespace o2::framework;
 
 namespace o2::analysis::femtounited
 {
@@ -51,19 +51,28 @@ enum ColHist {
 constexpr std::string_view ColAnalysisDir = "CollisionHistograms/Analysis/";
 constexpr std::string_view ColQaDir = "CollisionHistograms/QA/";
 
-constexpr std::array<Histmanager::HistInfo<ColHist>, kColHistLast> HistTable = {
+constexpr std::array<histmanager::HistInfo<ColHist>, kColHistLast> HistTable = {
   {
-    {kPosz, kTH1F, "hPosz", "Vertex Z; V_{Z} (cm); Entries"},
-    {kMult, kTH1F, "hMult", "Multiplicity; Multiplicity; Entries"},
-    {kCent, kTH1F, "hCent", "Centrality; Centrality (%); Entries"},
-    {kMagField, kTH1F, "hMagField", "Magnetic Field; B (T); Entries"},
-    {kSphericity, kTH1F, "hSphericity", "Sphericity; Sphericity; Entries"},
-    {kPoszVsMult, kTH2F, "hPoszVsMult", "Vertex Z vs Multiplicity; V_{Z} (cm); Multiplicity"},
-    {kPoszVsCent, kTH2F, "hPoszVsCent", "Vertex Z vs Centrality; V_{Z} (cm); Centrality (%)"},
-    {kCentVsMult, kTH2F, "kCentVsMult", "Centrality vs Multiplicity; Centrality (%); Multiplicity"},
-    {kMultVsSphericity, kTH2F, "hMultVsSphericity", "Multiplicity vs Sphericity; Multiplicity; Sphericity"},
-    {kCentVsSphericity, kTH2F, "kCentVsSphericity", "Centrality vs Sphericity; Centrality (%); Sphericity"},
+    {kPosz, o2::framework::kTH1F, "hPosz", "Vertex Z; V_{Z} (cm); Entries"},
+    {kMult, o2::framework::kTH1F, "hMult", "Multiplicity; Multiplicity; Entries"},
+    {kCent, o2::framework::kTH1F, "hCent", "Centrality; Centrality (%); Entries"},
+    {kMagField, o2::framework::kTH1F, "hMagField", "Magnetic Field; B (T); Entries"},
+    {kSphericity, o2::framework::kTH1F, "hSphericity", "Sphericity; Sphericity; Entries"},
+    {kPoszVsMult, o2::framework::kTH2F, "hPoszVsMult", "Vertex Z vs Multiplicity; V_{Z} (cm); Multiplicity"},
+    {kPoszVsCent, o2::framework::kTH2F, "hPoszVsCent", "Vertex Z vs Centrality; V_{Z} (cm); Centrality (%)"},
+    {kCentVsMult, o2::framework::kTH2F, "hCentVsMult", "Centrality vs Multiplicity; Centrality (%); Multiplicity"},
+    {kMultVsSphericity, o2::framework::kTH2F, "hMultVsSphericity", "Multiplicity vs Sphericity; Multiplicity; Sphericity"},
+    {kCentVsSphericity, o2::framework::kTH2F, "hCentVsSphericity", "Centrality vs Sphericity; Centrality (%); Sphericity"},
   }};
+
+struct ConfCollisionBinning : o2::framework::ConfigurableGroup {
+  std::string prefix = std::string("CollisionBinning");
+  o2::framework::ConfigurableAxis vtZ{"vtZ", {200, -10, 10}, "Vertex Z binning"};
+  o2::framework::ConfigurableAxis mult{"mult", {200, 0, 200}, "Multiplicity binning"};
+  o2::framework::ConfigurableAxis cent{"cent", {100, 0.0f, 100.0f}, "Centrality (multiplicity percentile) binning"};
+  o2::framework::ConfigurableAxis spher{"spher", {200, 0.0f, 2.0f}, "Sphericity binning"};
+  o2::framework::ConfigurableAxis magField{"magField", {2, -1, 1}, "Magnetic field binning"};
+};
 
 /// \class FemtoDreamEventHisto
 /// \brief Class for histogramming event properties
@@ -75,7 +84,7 @@ class CollisionHistManager
   /// Initializes histograms for the task
   /// \param registry Histogram registry to be passed
   template <modes::Mode mode>
-  void init(HistogramRegistry* registry, std::map<ColHist, std::vector<o2::framework::AxisSpec>> Specs)
+  void init(o2::framework::HistogramRegistry* registry, std::map<ColHist, std::vector<o2::framework::AxisSpec>> Specs)
   {
     mHistogramRegistry = registry;
     if constexpr (isModeSet(mode, modes::Mode::kANALYSIS)) {
@@ -119,7 +128,7 @@ class CollisionHistManager
   }
 
  private:
-  HistogramRegistry* mHistogramRegistry;
+  o2::framework::HistogramRegistry* mHistogramRegistry;
 }; // namespace femtounitedcolhistmanager
 }; // namespace colhistmanager
 }; // namespace o2::analysis::femtounited

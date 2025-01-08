@@ -9,14 +9,15 @@
 // granted to it by virtue of its status as an Intergovernmental Organization
 // or submit itself to any jurisdiction.
 
-/// \file FemtoDreamObjectSelection.h
-/// \brief FemtoDreamObjectSelection - Parent class of all selections
+/// \file BaseSelection.h
+/// \brief Definition of the BaseSelection class
 /// \author Anton Riedel, TU München, anton.riedel@tum.de
 
 #ifndef PWGCF_FEMTOUNITED_CORE_BASESELECTION_H_
 #define PWGCF_FEMTOUNITED_CORE_BASESELECTION_H_
 
 #include <algorithm>
+#include <string>
 #include <vector>
 
 #include "fairlogger/Logger.h"
@@ -134,7 +135,7 @@ class BaseSelection
     uint64_t result = 0u;
     int shift = 0;
     uint64_t value = 0u;
-    for (auto& selection : mSelections) {
+    for (auto const& selection : mSelections) {
       // if there are no selections for a certain observable, skip
       if (selection.empty()) {
         continue;

@@ -27,6 +27,7 @@
 #include "PWGCF/FemtoUnited/Core/Modes.h"
 
 #include "PWGCF/FemtoUnited/Core/CollisionHistManager.h"
+#include "PWGCF/FemtoUnited/Core/CollisionSelection.h"
 #include "PWGCF/FemtoUnited/Core/TrackHistManager.h"
 
 using namespace o2;
@@ -43,25 +44,12 @@ struct TrackQa {
     Configurable<bool> correlatedPlots{"correlatedPlots", false, "Enable multidimensional histogramms. High memory consumption."};
   } Options;
 
-  struct : ConfigurableGroup {
-    std::string prefix = std::string("CollisionSelection");
-    Configurable<float> vtxZMin{"vtxZMin", -10., "Minimum vertex Z position (cm)"};
-    Configurable<float> vtxZMax{"vtxZMax", 10., "Maximum vertex Z position (cm)"};
-    Configurable<float> multMin{"multMin", 0, "Minimum multiplicity"};
-    Configurable<float> multMax{"multMax", 200, "Maximum multiplicity"};
-    Configurable<float> centMin{"centMin", 0.0f, "Minimum centrality (multiplicity percentile)"};
-    Configurable<float> centMax{"centMax", 100.0f, "Maximum centrality (multiplicity percentile)"};
-    Configurable<float> spherMin{"spherMin", 0.0f, "Minimum centrality (multiplicity percentile)"};
-    Configurable<float> spherMax{"spherMax", 2.0f, "Maximum centrality (multiplicity percentile)"};
-    Configurable<float> magFieldMin{"magFieldMin", -1.0f, "Minimum magnetic field strength (T)"};
-    Configurable<float> magFieldMax{"magFieldMax", 1.0f, "Maximum magnetic field strength (T)"};
-  } CollisionSelection;
-
-  Filter filterVtxz = femtocollisions::posZ >= CollisionSelection.vtxZMin && femtocollisions::posZ <= CollisionSelection.vtxZMax;
-  Filter filterMult = femtocollisions::mult >= CollisionSelection.multMin && femtocollisions::mult <= CollisionSelection.multMax;
-  Filter filterCent = femtocollisions::cent >= CollisionSelection.centMin && femtocollisions::cent <= CollisionSelection.centMax;
-  Filter filterSpher = femtocollisions::sphericity >= CollisionSelection.centMin && femtocollisions::sphericity <= CollisionSelection.centMax;
-  Filter filterMagField = femtocollisions::magField >= CollisionSelection.magFieldMin && femtocollisions::magField <= CollisionSelection.magFieldMax;
+  collisionselection::ConfCollisionSelection collisionSelection;
+  Filter filterVtxz = femtocollisions::posZ >= collisionSelection.vtxZMin && femtocollisions::posZ <= collisionSelection.vtxZMax;
+  Filter filterMult = femtocollisions::mult >= collisionSelection.multMin && femtocollisions::mult <= collisionSelection.multMax;
+  Filter filterCent = femtocollisions::cent >= collisionSelection.centMin && femtocollisions::cent <= collisionSelection.centMax;
+  Filter filterSpher = femtocollisions::sphericity >= collisionSelection.centMin && femtocollisions::sphericity <= collisionSelection.centMax;
+  Filter filterMagField = femtocollisions::magField >= collisionSelection.magFieldMin && femtocollisions::magField <= collisionSelection.magFieldMax;
 
   // using Collisions = o2::soa::Join<FUCols, FUColPos, FUColMults, FUColCents>;
   using Collisions = FUCols;
@@ -70,33 +58,26 @@ struct TrackQa {
   using FilteredCollisions = o2::soa::Filtered<Collisions>;
   using FilteredCollision = FilteredCollisions::iterator;
 
-  struct : ConfigurableGroup {
-    std::string prefix = std::string("CollisionBinning");
-    ConfigurableAxis vtZ{"vtZ", {200, -10, 10}, "Vertex Z binning"};
-    ConfigurableAxis mult{"mult", {200, 0, 200}, "Multiplicity binning"};
-    ConfigurableAxis cent{"cent", {100, 0.0f, 100.0f}, "Centrality (multiplicity percentile) binning"};
-    ConfigurableAxis spher{"spher", {200, 0.0f, 2.0f}, "Sphericity binning"};
-    ConfigurableAxis magField{"magField", {2, -1, 1}, "Magnetic field binning"};
-  } CollisionBinning;
+  colhistmanager::ConfCollisionBinning collisionBinning;
 
-  struct : ConfigurableGroup {
+  SliceCache cache;
+
+  using Tracks = o2::soa::Join<FUTracks, FUTrackMasks, FUTrackDCAs, FUTrackExtras, FUTrackPids>;
+
+  struct : o2::framework::ConfigurableGroup {
     std::string prefix = std::string("TrackSelection");
-    // Configurable<int> pdgCode{"pdgCode", 2212, "Track PDG code"};
+    Configurable<int> pdgCode{"pdgCode", 2212, "Track PDG code"};
     Configurable<float> ptMin{"ptMin", 0.f, "Minimum pT (GeV/c)"};
     Configurable<float> ptMax{"ptMax", 999.f, "Maximum pT (GeV/c)"};
     Configurable<float> etaMin{"etaMin", -10.f, "Minimum eta"};
     Configurable<float> etaMax{"etaMax", 10.f, "Maximum eta"};
     Configurable<float> phiMin{"phiMin", 0.f, "Minimum phi"};
     Configurable<float> phiMax{"phiMax", 1.f * o2::constants::math::TwoPI, "Maximum phi"};
-    Configurable<femtodatatypes::TrackMaskType> mask{"mask", 0, "Bitmask for track selection"};
-    Configurable<femtodatatypes::TrackPidMaskType> pidMaskLowMomentum{"pidMaskLowMomentum", 1, "Bitmask for PID selection below momentum threshold"};
-    Configurable<femtodatatypes::TrackPidMaskType> pidMaskHighMomentum{"pidMaskHighMomentum", 2, "Bitmask for PID selection above momentum threshold"};
+    Configurable<o2::aod::femtodatatypes::TrackMaskType> mask{"mask", 0, "Bitmask for track selection"};
+    Configurable<o2::aod::femtodatatypes::TrackPidMaskType> pidMaskLowMomentum{"pidMaskLowMomentum", 1, "Bitmask for PID selection below momentum threshold"};
+    Configurable<o2::aod::femtodatatypes::TrackPidMaskType> pidMaskHighMomentum{"pidMaskHighMomentum", 2, "Bitmask for PID selection above momentum threshold"};
     Configurable<float> pidThres{"pidThres", 1.f, "Momentum threshold for using TPCTOF/TOF pid for tracks with large momentum (GeV/c)"};
   } TrackSelections;
-
-  SliceCache cache;
-
-  using Tracks = o2::soa::Join<FUTracks, FUTrackMasks, FUTrackDCAs, FUTrackExtras, FUTrackPids>;
 
   Partition<Tracks> TrackPartition =
     (femtobase::pt > TrackSelections.ptMin) &&
@@ -164,22 +145,22 @@ struct TrackQa {
 
   HistogramRegistry hRegistry{"TrackQA", {}, OutputObjHandlingPolicy::AnalysisObject};
   colhistmanager::CollisionHistManager colHistManager;
-  trackhistmanager::TrackHistManager trackHistManager;
+  trackhistmanager::TrackHistManager<trackhistmanager::PrefixTrackQa> trackHistManager;
 
   void init(InitContext&)
   {
     // create a map for histogram specs
     std::map<colhistmanager::ColHist, std::vector<framework::AxisSpec>> colHistSpec = {
-      {colhistmanager::kPosz, {CollisionBinning.vtZ}},
-      {colhistmanager::kMult, {CollisionBinning.mult}},
-      {colhistmanager::kCent, {CollisionBinning.cent}},
-      {colhistmanager::kSphericity, {CollisionBinning.spher}},
-      {colhistmanager::kMagField, {CollisionBinning.magField}},
-      {colhistmanager::kPoszVsMult, {CollisionBinning.vtZ, CollisionBinning.mult}},
-      {colhistmanager::kPoszVsCent, {CollisionBinning.vtZ, CollisionBinning.cent}},
-      {colhistmanager::kCentVsMult, {CollisionBinning.cent, CollisionBinning.mult}},
-      {colhistmanager::kMultVsSphericity, {CollisionBinning.mult, CollisionBinning.spher}},
-      {colhistmanager::kCentVsSphericity, {CollisionBinning.cent, CollisionBinning.spher}}};
+      {colhistmanager::kPosz, {collisionBinning.vtZ}},
+      {colhistmanager::kMult, {collisionBinning.mult}},
+      {colhistmanager::kCent, {collisionBinning.cent}},
+      {colhistmanager::kSphericity, {collisionBinning.spher}},
+      {colhistmanager::kMagField, {collisionBinning.magField}},
+      {colhistmanager::kPoszVsMult, {collisionBinning.vtZ, collisionBinning.mult}},
+      {colhistmanager::kPoszVsCent, {collisionBinning.vtZ, collisionBinning.cent}},
+      {colhistmanager::kCentVsMult, {collisionBinning.cent, collisionBinning.mult}},
+      {colhistmanager::kMultVsSphericity, {collisionBinning.mult, collisionBinning.spher}},
+      {colhistmanager::kCentVsSphericity, {collisionBinning.cent, collisionBinning.spher}}};
     colHistManager.init<modes::Mode::kANALYSIS_QA>(&hRegistry, colHistSpec);
 
     std::map<trackhistmanager::TrackHist, std::vector<framework::AxisSpec>> trackHistSpec = {

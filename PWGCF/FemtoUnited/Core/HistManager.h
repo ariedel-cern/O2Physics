@@ -9,8 +9,9 @@
 // granted to it by virtue of its status as an Intergovernmental Organization
 // or submit itself to any jurisdiction.
 
-/// \file Histmanager.h
-/// \brief Femtounited collision histograms
+/// \file HistManager.h
+/// \brief common structs for histogram managers
+/// \author anton.riedel@tum.de, TU München, anton.riedel@tum.de
 
 #ifndef PWGCF_FEMTOUNITED_CORE_HISTMANAGER_H_
 #define PWGCF_FEMTOUNITED_CORE_HISTMANAGER_H_
@@ -20,7 +21,7 @@
 
 namespace o2::analysis::femtounited
 {
-namespace Histmanager
+namespace histmanager
 {
 
 template <typename Hist>
@@ -74,7 +75,6 @@ constexpr const char* GetHistDesc(EnumType variable, const ArrayType& array)
   }
   return ""; // Return an empty string or a default description if not found
 }
-
-} // namespace Histmanager
+} // namespace histmanager
 } // namespace o2::analysis::femtounited
 #endif // PWGCF_FEMTOUNITED_CORE_HISTMANAGER_H_

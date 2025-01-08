@@ -9,8 +9,8 @@
 // granted to it by virtue of its status as an Intergovernmental Organization
 // or submit itself to any jurisdiction.
 
-/// \file TrackQa.cxx
-/// \brief Tasks that reads the particle tables and fills QA histograms for tracks
+/// \file VzeroQa.cxx
+/// \brief Tasks that reads the particle tables and fills QA histograms for vzeros
 /// \author Anton Riedel, TU München, anton.riedel@cern.ch
 
 #include "Framework/Configurable.h"
@@ -28,7 +28,9 @@
 #include "PWGCF/FemtoUnited/Core/Modes.h"
 
 #include "PWGCF/FemtoUnited/Core/CollisionHistManager.h"
+#include "PWGCF/FemtoUnited/Core/CollisionSelection.h"
 #include "PWGCF/FemtoUnited/Core/VzeroHistManager.h"
+#include "PWGCF/FemtoUnited/Core/VzeroSelection.h"
 
 using namespace o2;
 using namespace o2::aod;
@@ -44,25 +46,12 @@ struct VzeroQa {
     Configurable<bool> correlatedPlots{"correlatedPlots", false, "Enable multidimensional histogramms. High memory consumption."};
   } Options;
 
-  struct : ConfigurableGroup {
-    std::string prefix = std::string("CollisionSelection");
-    Configurable<float> vtxZMin{"vtxZMin", -10., "Minimum vertex Z position (cm)"};
-    Configurable<float> vtxZMax{"vtxZMax", 10., "Maximum vertex Z position (cm)"};
-    Configurable<float> multMin{"multMin", 0, "Minimum multiplicity"};
-    Configurable<float> multMax{"multMax", 200, "Maximum multiplicity"};
-    Configurable<float> centMin{"centMin", 0.0f, "Minimum centrality (multiplicity percentile)"};
-    Configurable<float> centMax{"centMax", 100.0f, "Maximum centrality (multiplicity percentile)"};
-    Configurable<float> spherMin{"spherMin", 0.0f, "Minimum centrality (multiplicity percentile)"};
-    Configurable<float> spherMax{"spherMax", 2.0f, "Maximum centrality (multiplicity percentile)"};
-    Configurable<float> magFieldMin{"magFieldMin", -1.0f, "Minimum magnetic field strength (T)"};
-    Configurable<float> magFieldMax{"magFieldMax", 1.0f, "Maximum magnetic field strength (T)"};
-  } CollisionSelection;
-
-  Filter filterVtxz = femtocollisions::posZ >= CollisionSelection.vtxZMin && femtocollisions::posZ <= CollisionSelection.vtxZMax;
-  Filter filterMult = femtocollisions::mult >= CollisionSelection.multMin && femtocollisions::mult <= CollisionSelection.multMax;
-  Filter filterCent = femtocollisions::cent >= CollisionSelection.centMin && femtocollisions::cent <= CollisionSelection.centMax;
-  Filter filterSpher = femtocollisions::sphericity >= CollisionSelection.centMin && femtocollisions::sphericity <= CollisionSelection.centMax;
-  Filter filterMagField = femtocollisions::magField >= CollisionSelection.magFieldMin && femtocollisions::magField <= CollisionSelection.magFieldMax;
+  collisionselection::ConfCollisionSelection collisionSelection;
+  Filter filterVtxz = femtocollisions::posZ >= collisionSelection.vtxZMin && femtocollisions::posZ <= collisionSelection.vtxZMax;
+  Filter filterMult = femtocollisions::mult >= collisionSelection.multMin && femtocollisions::mult <= collisionSelection.multMax;
+  Filter filterCent = femtocollisions::cent >= collisionSelection.centMin && femtocollisions::cent <= collisionSelection.centMax;
+  Filter filterSpher = femtocollisions::sphericity >= collisionSelection.centMin && femtocollisions::sphericity <= collisionSelection.centMax;
+  Filter filterMagField = femtocollisions::magField >= collisionSelection.magFieldMin && femtocollisions::magField <= collisionSelection.magFieldMax;
 
   // using Collisions = o2::soa::Join<FUCols, FUColPos, FUColMults, FUColCents>;
   using Collisions = FUCols;
@@ -71,14 +60,11 @@ struct VzeroQa {
   using FilteredCollisions = o2::soa::Filtered<Collisions>;
   using FilteredCollision = FilteredCollisions::iterator;
 
-  struct : ConfigurableGroup {
-    std::string prefix = std::string("CollisionBinning");
-    ConfigurableAxis vtZ{"vtZ", {200, -10, 10}, "Vertex Z binning"};
-    ConfigurableAxis mult{"mult", {200, 0, 200}, "Multiplicity binning"};
-    ConfigurableAxis cent{"cent", {100, 0.0f, 100.0f}, "Centrality (multiplicity percentile) binning"};
-    ConfigurableAxis spher{"spher", {200, 0.0f, 2.0f}, "Sphericity binning"};
-    ConfigurableAxis magField{"magField", {2, -1, 1}, "Magnetic field binning"};
-  } CollisionBinning;
+  colhistmanager::ConfCollisionBinning collisionBinning;
+
+  using V0s = o2::soa::Join<FUVzeros, FUVzeroMasks, FUVzeroDaus, FUVzeroExtras, FUVzeroDauExts>;
+
+  SliceCache cache;
 
   struct : ConfigurableGroup {
     std::string prefix = std::string("VzeroSelection");
@@ -90,7 +76,7 @@ struct VzeroQa {
     Configurable<float> phiMax{"phiMax", 1.f * o2::constants::math::TwoPI, "Maximum phi"};
     Configurable<float> massMin{"massMin", 1.f, "Minimum invariant mass"};
     Configurable<float> massMax{"massMax", 1.2f, "Maximum invariant mass"};
-    Configurable<femtodatatypes::VzeroMaskType> mask{"mask", 1, "Bitmask for V0 selection"};
+    Configurable<o2::aod::femtodatatypes::VzeroMaskType> mask{"mask", 1, "Bitmask for V0 selection"};
   } VzeroSelection;
 
   struct : ConfigurableGroup {
@@ -102,10 +88,6 @@ struct VzeroQa {
     Configurable<float> phiMin{"phiMin", 0.f, "Minimum eta"};
     Configurable<float> phiMax{"phiMax", 1.f * o2::constants::math::TwoPI, "Maximum phi"};
   } VzeroDaughterSelection;
-
-  SliceCache cache;
-
-  using V0s = o2::soa::Join<FUVzeros, FUVzeroMasks, FUVzeroDaus, FUVzeroExtras, FUVzeroDauExts>;
 
   Partition<V0s> VzeroPartition =
     (femtobase::pt > VzeroSelection.ptMin) &&
@@ -129,7 +111,6 @@ struct VzeroQa {
     (femtovzeros::negDauPhi > VzeroDaughterSelection.phiMin) &&
     (femtovzeros::negDauPhi < VzeroDaughterSelection.phiMax) &&
     ncheckbit(femtovzeros::vzeroMask, VzeroSelection.mask);
-
   Preslice<V0s> perColReco = aod::femtobase::collisionId;
 
   struct : ConfigurableGroup {
@@ -162,16 +143,16 @@ struct VzeroQa {
   {
     // create a map for histogram specs
     std::map<colhistmanager::ColHist, std::vector<framework::AxisSpec>> colHistSpec = {
-      {colhistmanager::kPosz, {CollisionBinning.vtZ}},
-      {colhistmanager::kMult, {CollisionBinning.mult}},
-      {colhistmanager::kCent, {CollisionBinning.cent}},
-      {colhistmanager::kSphericity, {CollisionBinning.spher}},
-      {colhistmanager::kMagField, {CollisionBinning.magField}},
-      {colhistmanager::kPoszVsMult, {CollisionBinning.vtZ, CollisionBinning.mult}},
-      {colhistmanager::kPoszVsCent, {CollisionBinning.vtZ, CollisionBinning.cent}},
-      {colhistmanager::kCentVsMult, {CollisionBinning.cent, CollisionBinning.mult}},
-      {colhistmanager::kMultVsSphericity, {CollisionBinning.mult, CollisionBinning.spher}},
-      {colhistmanager::kCentVsSphericity, {CollisionBinning.cent, CollisionBinning.spher}}};
+      {colhistmanager::kPosz, {collisionBinning.vtZ}},
+      {colhistmanager::kMult, {collisionBinning.mult}},
+      {colhistmanager::kCent, {collisionBinning.cent}},
+      {colhistmanager::kSphericity, {collisionBinning.spher}},
+      {colhistmanager::kMagField, {collisionBinning.magField}},
+      {colhistmanager::kPoszVsMult, {collisionBinning.vtZ, collisionBinning.mult}},
+      {colhistmanager::kPoszVsCent, {collisionBinning.vtZ, collisionBinning.cent}},
+      {colhistmanager::kCentVsMult, {collisionBinning.cent, collisionBinning.mult}},
+      {colhistmanager::kMultVsSphericity, {collisionBinning.mult, collisionBinning.spher}},
+      {colhistmanager::kCentVsSphericity, {collisionBinning.cent, collisionBinning.spher}}};
     colHistManager.init<modes::Mode::kANALYSIS_QA>(&hRegistry, colHistSpec);
 
     std::map<vzerohistmanager::VzeroHist, std::vector<framework::AxisSpec>> vzeroHistSpec = {

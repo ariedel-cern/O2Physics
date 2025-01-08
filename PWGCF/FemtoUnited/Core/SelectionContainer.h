@@ -20,8 +20,9 @@
 #include <bitset>
 #include <vector>
 #include <algorithm>
+#include <string>
 
-#include <TF1.h>
+#include "TF1.h"
 
 #include "fairlogger/Logger.h"
 #include "CommonConstants/MathConstants.h"
@@ -42,7 +43,7 @@ enum LimitType { kUpperLimit,            ///< simple upper limit for the value, 
                  kLowerFunctionLimit,    ///< simple upper limit of a function value, e.g. DCA_xy > f(pt)
                  kAbsLowerFunctionLimit  ///< upper limit of an absolute value given by a function, e.g. |DCA_xy| > f(pt)
 };
-}
+} // namespace limits
 // bitsets need number of bits at compile time. Set reasonable limit here
 // This limits the number of selections for ONE observable
 constexpr size_t BitmaskMaxSize = 16;
@@ -153,6 +154,7 @@ class SelectionContainer
     for (size_t i = 0; i < mValues.size(); i++) {
       switch (mLimitType) {
         case (limits::kUpperLimit):
+        case (limits::kUpperFunctionLimit):
           if (variable <= mValues.at(i)) {
             mBitmask.set(i);
           } else {
@@ -160,6 +162,7 @@ class SelectionContainer
           }
           break;
         case (limits::kAbsUpperLimit):
+        case (limits::kAbsUpperFunctionLimit):
           if (std::abs(variable) <= mValues.at(i)) {
             mBitmask.set(i);
           } else {
@@ -167,6 +170,7 @@ class SelectionContainer
           }
           break;
         case (limits::kLowerLimit):
+        case (limits::kLowerFunctionLimit):
           if (variable >= mValues.at(i)) {
             mBitmask.set(i);
           } else {
@@ -174,6 +178,7 @@ class SelectionContainer
           }
           break;
         case (limits::kAbsLowerLimit):
+        case (limits::kAbsLowerFunctionLimit):
           if (std::abs(variable) >= mValues.at(i)) {
             mBitmask.set(i);
           } else {
@@ -197,13 +202,12 @@ class SelectionContainer
 
   /// Return the bitmask of the selections
   /// \return bitmask
-  std::bitset<BitmaskMaxSize> getBitmask()
+  std::bitset<BitmaskMaxSize> getBitmask() const
   {
     // if we do not skip the last bit, return full bitmask
     if (mSkipLastBit == false) {
       return mBitmask;
     }
-
     // if we do, we also need to check for kEqual first
     if (limits::kEqual == mLimitType) {
       // if the limit is equal, return all the bits
@@ -216,18 +220,18 @@ class SelectionContainer
 
   /// Check whether the minimal selection is fulfilled or not
   /// \return Whether the selection is fulfilled or not
-  bool getMinimalSelection() { return mBitmask.any(); }
+  bool getMinimalSelection() const { return mBitmask.any(); }
 
   /// Return loosest selection value
   ///  The values are ordered, the loosest value will be the first one
   /// \return loosest selection
-  T getLoosestSelection() { return mValues.at(0); }
+  T getLoosestSelection() const { return mValues.at(0); }
 
   /// Check whether selections are empty
-  bool empty() { return mValues.empty(); }
+  bool empty() const { return mValues.empty(); }
 
   /// Get shift for final bitmask
-  int getShift()
+  int getShift() const
   {
     if (mValues.empty()) {
       return 0;

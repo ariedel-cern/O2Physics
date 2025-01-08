@@ -9,6 +9,10 @@
 // granted to it by virtue of its status as an Intergovernmental Organization
 // or submit itself to any jurisdiction.
 
+/// \file FemtoCascadesDerived.h
+/// \brief cascades tables tables
+/// \author Anton Riedel, TU München, anton.riedel@cern.ch
+
 #ifndef PWGCF_FEMTOUNITED_DATAMODEL_FEMTOCASCADESDERIVED_H_
 #define PWGCF_FEMTOUNITED_DATAMODEL_FEMTOCASCADESDERIVED_H_
 
@@ -25,15 +29,15 @@ namespace femtocascades
 {
 // columns for Vzero
 DECLARE_SOA_COLUMN(CascadeMass, cascadeMass, float);                           //! Mass of Vzero
-DECLARE_SOA_COLUMN(CascaseMask, cascadeMask, femtodatatypes::CascadeMaskType); //! Bitmask for Vzero selections
+DECLARE_SOA_COLUMN(CascadeMask, cascadeMask, femtodatatypes::CascadeMaskType); //! Bitmask for Vzero selections
 
 // columns for bachelor particles
-DECLARE_SOA_INDEX_COLUMN_FULL(Bachelor, bachelor, int, FUTracks, "_Bachelor");             //!
-DECLARE_SOA_COLUMN(BachelorPt, bachelorPt, float);                                         //!
-DECLARE_SOA_COLUMN(BachelorEta, bachelorEta, float);                                       //!
-DECLARE_SOA_COLUMN(BachelorPhi, bachelorPhi, float);                                       //!
-DECLARE_SOA_COLUMN(BachelorMask, bachelorMask, femtodatatypes::CascadeBachelorMaskType);   //!
-DECLARE_SOA_COLUMN(BachelorTPCMask, bachelorTPC, femtodatatypes::CascadeBachelorMaskType); //!
+DECLARE_SOA_INDEX_COLUMN_FULL(Bachelor, bachelor, int, FUTracks, "_Bachelor");                 //!
+DECLARE_SOA_COLUMN(BachelorPt, bachelorPt, float);                                             //!
+DECLARE_SOA_COLUMN(BachelorEta, bachelorEta, float);                                           //!
+DECLARE_SOA_COLUMN(BachelorPhi, bachelorPhi, float);                                           //!
+DECLARE_SOA_COLUMN(BachelorMask, bachelorMask, femtodatatypes::CascadeBachelorMaskType);       //!
+DECLARE_SOA_COLUMN(BachelorTpcMask, bachelorTpcMask, femtodatatypes::CascadeBachelorMaskType); //!
 
 // columns for daughter vzero
 DECLARE_SOA_INDEX_COLUMN_FULL(Vzero, vzero, int, FUVzeros, "_V0"); //!
@@ -65,7 +69,7 @@ DECLARE_SOA_TABLE_STAGED_VERSIONED(FUCasBacs_001, "FUCASBACS", 1,
                                    femtocascades::BachelorEta,
                                    femtocascades::BachelorPhi,
                                    femtocascades::BachelorMask,
-                                   femtocascades::BachelorTPCMask,
+                                   femtocascades::BachelorTpcMask,
                                    femtobase::Theta<femtobase::Eta>,
                                    femtobase::Px<femtobase::Pt, femtobase::Eta>,
                                    femtobase::Py<femtobase::Pt, femtobase::Eta>,

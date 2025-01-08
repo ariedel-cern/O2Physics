@@ -9,8 +9,8 @@
 // granted to it by virtue of its status as an Intergovernmental Organization
 // or submit itself to any jurisdiction.
 
-/// \file FemtoDreamTrackCuts.h
-/// \brief Definition of the FemtoDreamTrackCuts
+/// \file TrackPidSelection.h
+/// \brief track pid selection
 /// \author anton.riedel@tum.de, TU München, anton.riedel@tum.de
 
 #ifndef PWGCF_FEMTOUNITED_CORE_TRACKPIDSELECTION_H_
@@ -72,7 +72,7 @@ class TrackPidSelection : public BaseSelection<float, o2::aod::femtodatatypes::T
   TrackPidSelection() {}
   virtual ~TrackPidSelection() = default;
   template <class track>
-  void ApplySelections(track const& Track)
+  void applySelections(track const& Track)
   {
     this->reset();
 

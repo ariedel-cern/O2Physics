@@ -9,8 +9,9 @@
 // granted to it by virtue of its status as an Intergovernmental Organization
 // or submit itself to any jurisdiction.
 
-/// \file VzeroHistmanager.h
-/// \brief Femtounited collision histograms
+/// \file VzeroHistManager.h
+/// \brief histogram manager for vzero histograms
+/// \author Anton Riedel, TU München, anton.riedel@cern.ch
 
 #ifndef PWGCF_FEMTOUNITED_CORE_VZEROHISTMANAGER_H_
 #define PWGCF_FEMTOUNITED_CORE_VZEROHISTMANAGER_H_
@@ -24,8 +25,6 @@
 #include "PWGCF/FemtoUnited/Core/HistManager.h"
 #include "PWGCF/FemtoUnited/Core/Modes.h"
 #include "PWGCF/FemtoUnited/Utils/FemtoUtils.h"
-
-using namespace ::o2::framework;
 
 namespace o2::analysis::femtounited
 {
@@ -76,37 +75,37 @@ constexpr std::string_view PidDir = "VzeroHistograms/Daughters/";
 
 // must be in sync with enum TrackVariables
 // the enum gives the correct index in the array
-constexpr std::array<Histmanager::HistInfo<VzeroHist>, kVeroHistLast> HistTable = {
-  {{kPt, kTH1F, "hPt", "Transverse Momentum; p_{T} (GeV/#it{c}); Entries"},
-   {kEta, kTH1F, "hEta", "Pseudorapdity; #eta; Entries"},
-   {kPhi, kTH1F, "hPhi", "Azimuthal angle; #varphi; Entries"},
-   {kMass, kTH1F, "hMass", "Invariant mass; m_{Inv} (GeV/#it{c}^{2}; Entries"},
-   {kPosDauPt, kTH1F, "hPosDauPt", "Transverse Momentum of positive daughter; p_{T} (GeV/#it{c}); Entries"},
-   {kPosDauEta, kTH1F, "hPosDauEta", "Pseudorapdity of positive daughter; #eta; Entries"},
-   {kPosDauPhi, kTH1F, "hPosDauPhi", "Azimuthal angle of positive daughter; #varphi; Entries"},
-   {kNegDauPt, kTH1F, "hNegDauPt", "Transverse Momentum of negative daughter; p_{T} (GeV/#it{c}); Entries"},
-   {kNegDauEta, kTH1F, "hNegDauEta", "Pseudorapdity of negative daughter; #eta; Entries"},
-   {kNegDauPhi, kTH1F, "hNegDauPhi", "Azimuthal angle of negative daughter; #varphi; Entries"},
-   {kSign, kTH1F, "hSign", "Sign (+1 particle/-1 antiparticle) ; Sign; Entries"},
-   {kDecayDauDca, kTH1F, "hDauDca", "Daughter DCA at decay vertex ; DCA_{Decay vertex} (cm); Entries"},
-   {kDecayVtxX, kTH1F, "hDecayVtxX", "X coordinate of decay vertex ; DV_{X} (cm); Entries"},
-   {kDecayVtxY, kTH1F, "hDecayVtxY", "Y coordinate of decay vertex ; DV_{Y} (cm); Entries"},
-   {kDecayVtxZ, kTH1F, "hDecayVtxZ", "Z coordinate of decay vertex ; DV_{Z} (cm); Entries"},
-   {kTransRadius, kTH1F, "hTransRadius", "Tranverse radius ; r_{xy} (cm); Entries"},
-   {kKaonMass, kTH1F, "hKaonMass", "Kaon mass hypothesis ; m_{K} (GeV/#it{c}^{2}); Entries"},
-   {kPtVsEta, kTH2F, "hPtVsEta", "p_{T} vs #eta; p_{T} (GeV/#it{c}) ; #eta"},
-   {kPtVsPhi, kTH2F, "hPtVsPhi", "p_{T} vs #varphi; p_{T} (GeV/#it{c}) ; #varphi"},
-   {kPhiVsEta, kTH2F, "hPhiVsEta", "#varphi vs #eta; #varphi ; #eta"},
-   {kPosDaughTpcCluster, kTH1F, "hPosDaughTpcCluster", "TPC cluster found (daughter^{+}) ; TPC cluster found, Entries"},
-   {kPosDaughPtVsDcaxy, kTH2F, "hPosDauPtVsDcaxy", "p_{T} vs DCA_{XY} (daughter +) ; p_{T} (GeV/#it{c}) ; DCA_{XY} (cm)"},
-   {kPosDaughPtVsDcaz, kTH2F, "hPosDauPtVsDcaz", "p_{T} vs DCA_{Z} (daughter +) ; p_{T} (GeV/#it{c}) ; DCA_{Z}"},
-   {kPosDaughPtVsDca, kTH2F, "hPosDauPtVsDca", "p_{T} vs DCA (daughter +) ; p_{T} (GeV/#it{c}) ; DCA"},
-   {kPosDaughTpcNsigma, kTH2F, "hPosDauTpcNsigma", "TPC PID (daughter +) ; p (GeV/#it{c}) ; n#sigma_{TPC}"},
-   {kNegDaughTpcCluster, kTH1F, "hNegDAugTpcCluster", "TPC cluster found (daughter -) ; TPC cluster found; Entries"},
-   {kNegDaughPtVsDcaxy, kTH2F, "hNegDauPtVsDcaxy", "p_{T} vs DCA_{XY} (daughter -) ; p_{T} (GeV/#it{c}) ; DCA_{XY} (cm)"},
-   {kNegDaughPtVsDcaz, kTH2F, "hNegDauPtVsDcaz", "p_{T} vs DCA_{Z} (daughter -) ; p_{T} (GeV/#it{c}) ; DCA_{Z}"},
-   {kNegDaughPtVsDca, kTH2F, "hNegDauPtVsDca", "p_{T} vs DCA (daughter -) ; p_{T} (GeV/#it{c}) ; DCA"},
-   {kNegDaughTpcNsigma, kTH2F, "hNegDaughTpcNsigma", "TPC PID (daughter -) ; p (GeV/#it{c}) ; n#sigma_{TPC}"}}};
+constexpr std::array<histmanager::HistInfo<VzeroHist>, kVeroHistLast> HistTable = {
+  {{kPt, o2::framework::kTH1F, "hPt", "Transverse Momentum; p_{T} (GeV/#it{c}); Entries"},
+   {kEta, o2::framework::kTH1F, "hEta", "Pseudorapdity; #eta; Entries"},
+   {kPhi, o2::framework::kTH1F, "hPhi", "Azimuthal angle; #varphi; Entries"},
+   {kMass, o2::framework::kTH1F, "hMass", "Invariant mass; m_{Inv} (GeV/#it{c}^{2}; Entries"},
+   {kPosDauPt, o2::framework::kTH1F, "hPosDauPt", "Transverse Momentum of positive daughter; p_{T} (GeV/#it{c}); Entries"},
+   {kPosDauEta, o2::framework::kTH1F, "hPosDauEta", "Pseudorapdity of positive daughter; #eta; Entries"},
+   {kPosDauPhi, o2::framework::kTH1F, "hPosDauPhi", "Azimuthal angle of positive daughter; #varphi; Entries"},
+   {kNegDauPt, o2::framework::kTH1F, "hNegDauPt", "Transverse Momentum of negative daughter; p_{T} (GeV/#it{c}); Entries"},
+   {kNegDauEta, o2::framework::kTH1F, "hNegDauEta", "Pseudorapdity of negative daughter; #eta; Entries"},
+   {kNegDauPhi, o2::framework::kTH1F, "hNegDauPhi", "Azimuthal angle of negative daughter; #varphi; Entries"},
+   {kSign, o2::framework::kTH1F, "hSign", "Sign (+1 particle/-1 antiparticle) ; Sign; Entries"},
+   {kDecayDauDca, o2::framework::kTH1F, "hDauDca", "Daughter DCA at decay vertex ; DCA_{Decay vertex} (cm); Entries"},
+   {kDecayVtxX, o2::framework::kTH1F, "hDecayVtxX", "X coordinate of decay vertex ; DV_{X} (cm); Entries"},
+   {kDecayVtxY, o2::framework::kTH1F, "hDecayVtxY", "Y coordinate of decay vertex ; DV_{Y} (cm); Entries"},
+   {kDecayVtxZ, o2::framework::kTH1F, "hDecayVtxZ", "Z coordinate of decay vertex ; DV_{Z} (cm); Entries"},
+   {kTransRadius, o2::framework::kTH1F, "hTransRadius", "Tranverse radius ; r_{xy} (cm); Entries"},
+   {kKaonMass, o2::framework::kTH1F, "hKaonMass", "Kaon mass hypothesis ; m_{K} (GeV/#it{c}^{2}); Entries"},
+   {kPtVsEta, o2::framework::kTH2F, "hPtVsEta", "p_{T} vs #eta; p_{T} (GeV/#it{c}) ; #eta"},
+   {kPtVsPhi, o2::framework::kTH2F, "hPtVsPhi", "p_{T} vs #varphi; p_{T} (GeV/#it{c}) ; #varphi"},
+   {kPhiVsEta, o2::framework::kTH2F, "hPhiVsEta", "#varphi vs #eta; #varphi ; #eta"},
+   {kPosDaughTpcCluster, o2::framework::kTH1F, "hPosDaughTpcCluster", "TPC cluster found (daughter^{+}) ; TPC cluster found, Entries"},
+   {kPosDaughPtVsDcaxy, o2::framework::kTH2F, "hPosDauPtVsDcaxy", "p_{T} vs DCA_{XY} (daughter +) ; p_{T} (GeV/#it{c}) ; DCA_{XY} (cm)"},
+   {kPosDaughPtVsDcaz, o2::framework::kTH2F, "hPosDauPtVsDcaz", "p_{T} vs DCA_{Z} (daughter +) ; p_{T} (GeV/#it{c}) ; DCA_{Z}"},
+   {kPosDaughPtVsDca, o2::framework::kTH2F, "hPosDauPtVsDca", "p_{T} vs DCA (daughter +) ; p_{T} (GeV/#it{c}) ; DCA"},
+   {kPosDaughTpcNsigma, o2::framework::kTH2F, "hPosDauTpcNsigma", "TPC PID (daughter +) ; p (GeV/#it{c}) ; n#sigma_{TPC}"},
+   {kNegDaughTpcCluster, o2::framework::kTH1F, "hNegDAugTpcCluster", "TPC cluster found (daughter -) ; TPC cluster found; Entries"},
+   {kNegDaughPtVsDcaxy, o2::framework::kTH2F, "hNegDauPtVsDcaxy", "p_{T} vs DCA_{XY} (daughter -) ; p_{T} (GeV/#it{c}) ; DCA_{XY} (cm)"},
+   {kNegDaughPtVsDcaz, o2::framework::kTH2F, "hNegDauPtVsDcaz", "p_{T} vs DCA_{Z} (daughter -) ; p_{T} (GeV/#it{c}) ; DCA_{Z}"},
+   {kNegDaughPtVsDca, o2::framework::kTH2F, "hNegDauPtVsDca", "p_{T} vs DCA (daughter -) ; p_{T} (GeV/#it{c}) ; DCA"},
+   {kNegDaughTpcNsigma, o2::framework::kTH2F, "hNegDaughTpcNsigma", "TPC PID (daughter -) ; p (GeV/#it{c}) ; n#sigma_{TPC}"}}};
 
 /// \class FemtoDreamEventHisto
 /// \brief Class for histogramming event properties
@@ -120,7 +119,7 @@ class VzeroHistManager
   /// \param registry Histogram registry to be passed
   ///
   template <modes::Mode mode>
-  void init(HistogramRegistry* registry, std::map<VzeroHist, std::vector<o2::framework::AxisSpec>> Specs)
+  void init(o2::framework::HistogramRegistry* registry, std::map<VzeroHist, std::vector<o2::framework::AxisSpec>> Specs)
   {
     mHistogramRegistry = registry;
 
@@ -217,8 +216,8 @@ class VzeroHistManager
   }
 
  private:
-  HistogramRegistry* mHistogramRegistry;
-}; // namespace femtounitedcolhistmanager
+  o2::framework::HistogramRegistry* mHistogramRegistry;
+};
 }; // namespace vzerohistmanager
 }; // namespace o2::analysis::femtounited
-#endif // PWGCF_FEMTOUNITED_CORE_TRACKHISTMANAGER_H_
+#endif // PWGCF_FEMTOUNITED_CORE_VZEROHISTMANAGER_H_
