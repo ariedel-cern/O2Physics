@@ -28,17 +28,17 @@ namespace o2::aod
 namespace femtotracks
 {
 
+// column for base tabel
+DECLARE_SOA_COLUMN(HasPositiveCharge, hasPositiveCharge, bool); //! true if track is postively charged
+
 // columns for track selections
 DECLARE_SOA_COLUMN(TrackMask, trackMask, femtodatatypes::TrackMaskType);          //! Bitmask for track selections
 DECLARE_SOA_COLUMN(TrackPidMask, trackPidMask, femtodatatypes::TrackPidMaskType); //! Bitmask for track selections
-// DECLARE_SOA_COLUMN(TpcMask, tpcMask, femtodatatypes::TrackTPCMaskType);          //! Bitmask for TPC PID selections
-// DECLARE_SOA_COLUMN(TofMask, tofMask, femtodatatypes::TrackTOFMaskType);          //! Bitmask for TOF PID selections
-// DECLARE_SOA_COLUMN(TpctofMask, tpctofMask, femtodatatypes::TrackTPCTOFMaskType); //! Bitmask for combined TPC+TOF PID selections
 
 // columns for DCA
-DECLARE_SOA_COLUMN(DcaXY, dcaXY, float);                                                                                       //! Dca in XY plane
-DECLARE_SOA_COLUMN(DcaZ, dcaZ, float);                                                                                         //! Dca in Z direction
-DECLARE_SOA_DYNAMIC_COLUMN(Dca, dca, [](float dcaXY, float dcaZ) -> float { return std::sqrt(dcaXY * dcaXY + dcaZ * dcaZ); }); //! Dca
+DECLARE_SOA_COLUMN(DcaXY, dcaXY, float);                                                                        //! Dca in XY plane
+DECLARE_SOA_COLUMN(DcaZ, dcaZ, float);                                                                          //! Dca in Z direction
+DECLARE_SOA_DYNAMIC_COLUMN(Dca, dca, [](float dcaXY, float dcaZ) -> float { return std::hypot(dcaXY, dcaZ); }); //! Dca
 
 // columns for track debug information
 DECLARE_SOA_COLUMN(Sign, sign, int8_t); //! Sign (charge)
@@ -56,7 +56,7 @@ DECLARE_SOA_COLUMN(TpcInnerParam, tpcInnerParam, bool);                      //!
 DECLARE_SOA_COLUMN(TpcNClsFound, tpcNClsFound, uint8_t);                     //! Number of Tpc clusters
 DECLARE_SOA_COLUMN(TpcNClsCrossedRows, tpcNClsCrossedRows, uint8_t);         //! Number of Tpc crossed rows
 DECLARE_SOA_DYNAMIC_COLUMN(TpcCrossedRowsOverFound, tpcCrossedRowsOverFound, //! Number of crossed rows over found Tpc clusters
-                           [](uint8_t tpcNClsFindable, uint8_t tpcNClsCrossedRows) -> float { return (float)tpcNClsCrossedRows / (float)tpcNClsFindable; });
+                           [](uint8_t tpcNClsFindable, uint8_t tpcNClsCrossedRows) -> float { return static_cast<float>(tpcNClsCrossedRows) / static_cast<float>(tpcNClsFindable); });
 DECLARE_SOA_COLUMN(TpcNClsShared, tpcNClsShared, uint8_t); //! Number of shared Tpc clusters
 DECLARE_SOA_COLUMN(TpcChi2NCl, tpcChi2NCl, float);         //! Tpc chi2 / findable clusters
 
@@ -90,13 +90,13 @@ DECLARE_SOA_COLUMN(TofNSigmaDe, tofNSigmaDe, float); //! Nsigma separation with 
 DECLARE_SOA_COLUMN(TofNSigmaTr, tofNSigmaTr, float); //! Nsigma separation with the Tof detector for triton
 DECLARE_SOA_COLUMN(TofNSigmaHe, tofNSigmaHe, float); //! Nsigma separation with the Tof detector for helium3
 
-DECLARE_SOA_DYNAMIC_COLUMN(TpctofNSigmaEl, tpctofNSigmaEl, [](float tpc, float tof) -> float { return o2::analysis::femtounited::utils::geometricMean(tpc, tof); }); //!
-DECLARE_SOA_DYNAMIC_COLUMN(TpctofNSigmaPi, tpctofNSigmaPi, [](float tpc, float tof) -> float { return o2::analysis::femtounited::utils::geometricMean(tpc, tof); }); //!
-DECLARE_SOA_DYNAMIC_COLUMN(TpctofNSigmaKa, tpctofNSigmaKa, [](float tpc, float tof) -> float { return o2::analysis::femtounited::utils::geometricMean(tpc, tof); }); //!
-DECLARE_SOA_DYNAMIC_COLUMN(TpctofNSigmaPr, tpctofNSigmaPr, [](float tpc, float tof) -> float { return o2::analysis::femtounited::utils::geometricMean(tpc, tof); }); //!
-DECLARE_SOA_DYNAMIC_COLUMN(TpctofNSigmaDe, tpctofNSigmaDe, [](float tpc, float tof) -> float { return o2::analysis::femtounited::utils::geometricMean(tpc, tof); }); //!
-DECLARE_SOA_DYNAMIC_COLUMN(TpctofNSigmaTr, tpctofNSigmaTr, [](float tpc, float tof) -> float { return o2::analysis::femtounited::utils::geometricMean(tpc, tof); }); //!
-DECLARE_SOA_DYNAMIC_COLUMN(TpctofNSigmaHe, tpctofNSigmaHe, [](float tpc, float tof) -> float { return o2::analysis::femtounited::utils::geometricMean(tpc, tof); }); //!
+DECLARE_SOA_DYNAMIC_COLUMN(TpctofNSigmaEl, tpctofNSigmaEl, [](float tpc, float tof) -> float { return std::hypot(tpc, tof); }); //!
+DECLARE_SOA_DYNAMIC_COLUMN(TpctofNSigmaPi, tpctofNSigmaPi, [](float tpc, float tof) -> float { return std::hypot(tpc, tof); }); //!
+DECLARE_SOA_DYNAMIC_COLUMN(TpctofNSigmaKa, tpctofNSigmaKa, [](float tpc, float tof) -> float { return std::hypot(tpc, tof); }); //!
+DECLARE_SOA_DYNAMIC_COLUMN(TpctofNSigmaPr, tpctofNSigmaPr, [](float tpc, float tof) -> float { return std::hypot(tpc, tof); }); //!
+DECLARE_SOA_DYNAMIC_COLUMN(TpctofNSigmaDe, tpctofNSigmaDe, [](float tpc, float tof) -> float { return std::hypot(tpc, tof); }); //!
+DECLARE_SOA_DYNAMIC_COLUMN(TpctofNSigmaTr, tpctofNSigmaTr, [](float tpc, float tof) -> float { return std::hypot(tpc, tof); }); //!
+DECLARE_SOA_DYNAMIC_COLUMN(TpctofNSigmaHe, tpctofNSigmaHe, [](float tpc, float tof) -> float { return std::hypot(tpc, tof); }); //!
 
 } // namespace femtotracks
 
@@ -107,6 +107,7 @@ DECLARE_SOA_TABLE_STAGED_VERSIONED(FUTracks_001, "FUTRACKS", 1,
                                    femtobase::Pt,
                                    femtobase::Eta,
                                    femtobase::Phi,
+                                   femtotracks::HasPositiveCharge,
                                    femtobase::Theta<femtobase::Eta>,
                                    femtobase::Px<femtobase::Pt, femtobase::Eta>,
                                    femtobase::Py<femtobase::Pt, femtobase::Eta>,
@@ -118,9 +119,6 @@ using FUTracks = FUTracks_001;
 DECLARE_SOA_TABLE_STAGED_VERSIONED(FUTrackMasks_001, "FUTRACKMASKS", 1,
                                    femtotracks::TrackMask,
                                    femtotracks::TrackPidMask);
-// femtotracks::TpcMask,
-// femtotracks::TofMask,
-// femtotracks::TpctofMask);
 using FUTrackMasks = FUTrackMasks_001;
 
 // table for track DCA

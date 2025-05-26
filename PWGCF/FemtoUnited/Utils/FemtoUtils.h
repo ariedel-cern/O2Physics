@@ -18,36 +18,25 @@
 
 #include <cmath>
 #include <cstdint>
-#include <utility>
-#include <vector>
+#include <unordered_map>
 #include "TPDGCode.h"
 #include "CommonConstants/PhysicsConstants.h"
+#include "FairLogger.h"
 
 namespace o2::analysis::femtounited
 {
 namespace utils
 {
 
-inline float geometricMean(float a, float b)
+template <typename I>
+I getDaughterIndex(I daughterIndex, const std::unordered_map<I, I>& map)
 {
-  return std::sqrt(a * a + b * b);
-}
-
-inline float dca(float dcaXY, float dcaZ)
-{
-  return std::sqrt(dcaXY * dcaXY + dcaZ * dcaZ);
-}
-
-template <typename T>
-T getDaughterIndex(T daugherIndex, std::vector<std::pair<T, T>> map)
-{
-  for (const auto& pair : map) {
-    if (pair.first == daugherIndex) {
-      return pair.second; // Return the second element of the found pair
-    }
+  auto it = map.find(daughterIndex);
+  if (it != map.end()) {
+    return it->second;
   }
-  return -1;
-};
+  return static_cast<I>(-1); // or handle differently if T is unsigned
+}
 
 template <typename T>
 float itsSignal(T const& track)

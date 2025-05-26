@@ -34,12 +34,6 @@ enum TrackSels {
   kITSnClsIbMin, ///< Min. number of ITS clusters in the inner barrel
   kDCAxyMax,     ///< Max. DCA_xy (cm) as a function of pT
   kDCAzMax,      ///< Max. DCA_z (cm) as a function of pT
-  kSign,         ///< Sign of the charg of the track
-                 /// IMPORTANT: Always let the sign be the last bit
-                 /// Like this the sign will be added last to the bit and ends up on the least significant bits this means we can always get the charge by checking
-                 ///  XXXXXX01 <- track has negative charge
-                 ///  XXXXXX10 <- track has positive charge
-                 ///  this only holds as long as +1 and -1 are selected in the producer
   kTrackselMax
 };
 
@@ -54,7 +48,6 @@ class TrackSelection : public BaseSelection<float, o2::aod::femtodatatypes::Trac
   void applySelections(track const& Track)
   {
     this->reset();
-    this->setBitmaskForObservable(TrackSels::kSign, Track.sign());
     this->setBitmaskForObservable(TrackSels::kTPCnClsMin, Track.tpcNClsFound());
     this->setBitmaskForObservable(TrackSels::kTPCcRowsMin, Track.tpcNClsCrossedRows());
     this->setBitmaskForObservable(TrackSels::kTPCsClsMax, Track.tpcNClsShared());

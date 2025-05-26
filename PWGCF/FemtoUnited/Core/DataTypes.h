@@ -25,20 +25,20 @@ namespace femtodatatypes
 // Note: Length of the bitmask is the limit of how many selections can be configured
 
 // Bitmaks for tracks
-using TrackMaskType = uint32_t;
+using TrackMaskType = uint16_t;
 using TrackPidMaskType = uint32_t;
 
 // Bitmaks for vzeros and daughters
-using VzeroMaskType = uint32_t;
+using VzeroMaskType = uint16_t;
+using VzeroDauPidMaskType = uint16_t;
 // using VzeroDaughterMaskType = uint8_t;
-// using VzeroDauTPCMaskType = uint8_t;
 
 // Bitmaks for cascades, vzero daughter and bachelor
-using CascadeMaskType = uint32_t;
-using CascadeBachelorMaskType = uint16_t;
-using CascadeBachelorTPCMaskType = uint16_t;
-using VzeroDauTrackMaskType = uint8_t;
-using VzeroDauTPCMaskType = uint8_t;
+// using CascadeMaskType = uint32_t;
+// using CascadeBachelorMaskType = uint16_t;
+// using CascadeBachelorTPCMaskType = uint16_t;
+// using VzeroDauTrackMaskType = uint8_t;
+// using VzeroDauTPCMaskType = uint8_t;
 
 } // namespace femtodatatypes
 

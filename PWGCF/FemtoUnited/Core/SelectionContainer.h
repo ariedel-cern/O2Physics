@@ -44,13 +44,11 @@ enum LimitType { kUpperLimit,            ///< simple upper limit for the value, 
                  kAbsLowerFunctionLimit  ///< upper limit of an absolute value given by a function, e.g. |DCA_xy| > f(pt)
 };
 } // namespace limits
-// bitsets need number of bits at compile time. Set reasonable limit here
-// This limits the number of selections for ONE observable
-constexpr size_t BitmaskMaxSize = 16;
 
 /// Simple class for storing selections of a single observable
-/// \tparam SelDataType Data type used for the selection values (float/int/...)
-template <typename T>
+/// \tparam T Data type used for the selection values (float/int/...)
+/// \tparam BitmaskType Compute number of selections from BitmaskType (should be some unsigned integer)
+template <typename T, typename BitmaskType>
 class SelectionContainer
 {
  public:
@@ -58,16 +56,18 @@ class SelectionContainer
   SelectionContainer() {}
 
   /// Constructor
-  /// \param values Values for the selection
+  /// \param values Vector of values for the selection
   /// \param limitType Type of limit of the selection
+  /// \param SkipLastBit Boolean whether to skip the last bit
   SelectionContainer(std::vector<T>& values, limits::LimitType limitType, bool SkipLastBit)
     : mValues(values),
       mLimitType(limitType),
       mSkipLastBit(SkipLastBit)
   {
-    if (mValues.size() > BitmaskMaxSize) {
-      LOG(fatal) << "Too many selections for single a observable. Current limit is " << BitmaskMaxSize;
+    if (mValues.size() > sizeof(BitmaskType) * CHAR_BIT) {
+      LOG(fatal) << "Too many selections for single a observable. Limit is " << sizeof(BitmaskType) * CHAR_BIT;
     }
+    // if limitTypeBoolean whether to skip the last bits kEqual we can never skip the last bit
     if (limitType == limits::kEqual) {
       mSkipLastBit = false;
     }
@@ -76,13 +76,17 @@ class SelectionContainer
   }
 
   /// Constructor
-  /// \param values Values for the selection
+  /// \param baseName base name for TF1 object
+  /// \param lowerLimit upper limit of the TF1 object
+  /// \param upperLimit lower limit of the TF1 object
+  /// \param function vector of strings for initializing of the TF1 object
   /// \param limitType Type of limit of the selection
+  /// \param SkipLastBit Boolean whether to skip the last bit
   SelectionContainer(std::string baseName, T lowerLimit, T upperLimit, std::vector<std::string>& functions, limits::LimitType limitType, bool SkipLastBit)
     : mLimitType(limitType), mSkipLastBit(SkipLastBit)
   {
-    if (mValues.size() > BitmaskMaxSize) {
-      LOG(fatal) << "Too many selections for single a observable. Current limit is " << BitmaskMaxSize;
+    if (mValues.size() > sizeof(BitmaskType) * CHAR_BIT) {
+      LOG(fatal) << "Too many selections for single a observable. Limit is " << sizeof(BitmaskType) * CHAR_BIT;
     }
     for (std::size_t i = 0; i < functions.size(); i++) {
       mFunctions.emplace_back((baseName + std::to_string(i)).c_str(), functions.at(i).c_str(), lowerLimit, upperLimit);
@@ -90,9 +94,10 @@ class SelectionContainer
     // functions for selection are not necessarily ordered correctly
     // use value at midpoint to order them
     // here we rely on the user that the functions can be ordered like this over the whole interval
-    sortFunctions((lowerLimit + upperLimit) / 2);
+    T midPoint = (lowerLimit + upperLimit) / 2.;
+    sortFunctions(midPoint);
     // initialize the values also to the midpoint
-    this->updateLimits((lowerLimit + upperLimit) / 2);
+    this->updateLimits(midPoint);
   }
 
   /// Destructor
@@ -202,7 +207,7 @@ class SelectionContainer
 
   /// Return the bitmask of the selections
   /// \return bitmask
-  std::bitset<BitmaskMaxSize> getBitmask() const
+  std::bitset<sizeof(BitmaskType) * CHAR_BIT> getBitmask() const
   {
     // if we do not skip the last bit, return full bitmask
     if (mSkipLastBit == false) {
@@ -244,10 +249,10 @@ class SelectionContainer
   }
 
  private:
-  std::vector<T> mValues{};             ///< Values used for the selection
-  std::vector<TF1> mFunctions{};        ///< Values used for the selection
-  limits::LimitType mLimitType;         ///< Limit type of selection
-  std::bitset<BitmaskMaxSize> mBitmask; ///< bitmask for a given observable
+  std::vector<T> mValues{};                             ///< Values used for the selection
+  std::vector<TF1> mFunctions{};                        ///< Values used for the selection
+  limits::LimitType mLimitType;                         ///< Limit type of selection
+  std::bitset<sizeof(BitmaskType) * CHAR_BIT> mBitmask; ///< bitmask for a given observable
   bool mSkipLastBit = false;
 };
 

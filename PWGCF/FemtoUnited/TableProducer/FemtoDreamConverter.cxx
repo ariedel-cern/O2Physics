@@ -55,7 +55,11 @@ struct FemtoDreamConverter {
         // use last index for the collision index
         // the index stored in old format might be different, but it is only about having a
         // unique index for every collision
-        outputTracks(outputCollisions.lastIndex(), part.pt(), part.eta(), part.phi());
+        bool hasPositiveCharge = false;
+        if ((part.cut() & 0b11) == 0b10) {
+          hasPositiveCharge = true;
+        }
+        outputTracks(outputCollisions.lastIndex(), part.pt(), part.eta(), part.phi(), hasPositiveCharge);
         // in old format tpc and tpctof information is stored in the same bitmask
         // so we only fill the TPC mask in the FemtoUnited framework
         // for analysis the bitmask has to be computed with the old tools
@@ -65,7 +69,7 @@ struct FemtoDreamConverter {
         // when Vzeros are filled the daughters will also be filled, so they are skipped in the outer loop
       } else if (part.partType() == femtodreamparticle::ParticleType::kV0) {
         // vzero
-        outputVzeros(outputCollisions.lastIndex(), part.pt(), part.eta(), part.phi(), part.mLambda());
+        outputVzeros(outputCollisions.lastIndex(), part.pt(), part.eta(), part.phi(), part.mLambda(), part.mAntiLambda());
         // vzero daughters
         const auto& posChild = parts.iteratorAt(part.index() - 2);
         const auto& negChild = parts.iteratorAt(part.index() - 1);

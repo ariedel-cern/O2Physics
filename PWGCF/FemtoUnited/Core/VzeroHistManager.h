@@ -24,7 +24,6 @@
 #include "Framework/HistogramRegistry.h"
 #include "PWGCF/FemtoUnited/Core/HistManager.h"
 #include "PWGCF/FemtoUnited/Core/Modes.h"
-#include "PWGCF/FemtoUnited/Utils/FemtoUtils.h"
 
 namespace o2::analysis::femtounited
 {
@@ -44,7 +43,6 @@ enum VzeroHist {
   kNegDauEta,
   kNegDauPhi,
   // qa variables
-  kSign,
   kDecayDauDca,
   kDecayVtxX,
   kDecayVtxY,
@@ -56,16 +54,18 @@ enum VzeroHist {
   kPtVsPhi,
   kPhiVsEta,
   // qa for daughters
-  kPosDaughTpcCluster,
-  kPosDaughPtVsDcaxy,
-  kPosDaughPtVsDcaz,
-  kPosDaughPtVsDca,
-  kPosDaughTpcNsigma,
-  kNegDaughTpcCluster,
-  kNegDaughPtVsDcaxy,
-  kNegDaughPtVsDcaz,
-  kNegDaughPtVsDca,
-  kNegDaughTpcNsigma,
+  kPosDauTpcCluster,
+  kPosDauPtVsDcaxy,
+  kPosDauPtVsDcaz,
+  kPosDauPtVsDca,
+  kPosDauProtonTpcNsigma,
+  kPosDauPionTpcNsigma,
+  kNegDauTpcCluster,
+  kNegDauPtVsDcaxy,
+  kNegDauPtVsDcaz,
+  kNegDauPtVsDca,
+  kNegDauProtonTpcNsigma,
+  kNegDauPionTpcNsigma,
   kVeroHistLast
 };
 
@@ -86,7 +86,6 @@ constexpr std::array<histmanager::HistInfo<VzeroHist>, kVeroHistLast> HistTable 
    {kNegDauPt, o2::framework::kTH1F, "hNegDauPt", "Transverse Momentum of negative daughter; p_{T} (GeV/#it{c}); Entries"},
    {kNegDauEta, o2::framework::kTH1F, "hNegDauEta", "Pseudorapdity of negative daughter; #eta; Entries"},
    {kNegDauPhi, o2::framework::kTH1F, "hNegDauPhi", "Azimuthal angle of negative daughter; #varphi; Entries"},
-   {kSign, o2::framework::kTH1F, "hSign", "Sign (+1 particle/-1 antiparticle) ; Sign; Entries"},
    {kDecayDauDca, o2::framework::kTH1F, "hDauDca", "Daughter DCA at decay vertex ; DCA_{Decay vertex} (cm); Entries"},
    {kDecayVtxX, o2::framework::kTH1F, "hDecayVtxX", "X coordinate of decay vertex ; DV_{X} (cm); Entries"},
    {kDecayVtxY, o2::framework::kTH1F, "hDecayVtxY", "Y coordinate of decay vertex ; DV_{Y} (cm); Entries"},
@@ -96,16 +95,18 @@ constexpr std::array<histmanager::HistInfo<VzeroHist>, kVeroHistLast> HistTable 
    {kPtVsEta, o2::framework::kTH2F, "hPtVsEta", "p_{T} vs #eta; p_{T} (GeV/#it{c}) ; #eta"},
    {kPtVsPhi, o2::framework::kTH2F, "hPtVsPhi", "p_{T} vs #varphi; p_{T} (GeV/#it{c}) ; #varphi"},
    {kPhiVsEta, o2::framework::kTH2F, "hPhiVsEta", "#varphi vs #eta; #varphi ; #eta"},
-   {kPosDaughTpcCluster, o2::framework::kTH1F, "hPosDaughTpcCluster", "TPC cluster found (daughter^{+}) ; TPC cluster found, Entries"},
-   {kPosDaughPtVsDcaxy, o2::framework::kTH2F, "hPosDauPtVsDcaxy", "p_{T} vs DCA_{XY} (daughter +) ; p_{T} (GeV/#it{c}) ; DCA_{XY} (cm)"},
-   {kPosDaughPtVsDcaz, o2::framework::kTH2F, "hPosDauPtVsDcaz", "p_{T} vs DCA_{Z} (daughter +) ; p_{T} (GeV/#it{c}) ; DCA_{Z}"},
-   {kPosDaughPtVsDca, o2::framework::kTH2F, "hPosDauPtVsDca", "p_{T} vs DCA (daughter +) ; p_{T} (GeV/#it{c}) ; DCA"},
-   {kPosDaughTpcNsigma, o2::framework::kTH2F, "hPosDauTpcNsigma", "TPC PID (daughter +) ; p (GeV/#it{c}) ; n#sigma_{TPC}"},
-   {kNegDaughTpcCluster, o2::framework::kTH1F, "hNegDAugTpcCluster", "TPC cluster found (daughter -) ; TPC cluster found; Entries"},
-   {kNegDaughPtVsDcaxy, o2::framework::kTH2F, "hNegDauPtVsDcaxy", "p_{T} vs DCA_{XY} (daughter -) ; p_{T} (GeV/#it{c}) ; DCA_{XY} (cm)"},
-   {kNegDaughPtVsDcaz, o2::framework::kTH2F, "hNegDauPtVsDcaz", "p_{T} vs DCA_{Z} (daughter -) ; p_{T} (GeV/#it{c}) ; DCA_{Z}"},
-   {kNegDaughPtVsDca, o2::framework::kTH2F, "hNegDauPtVsDca", "p_{T} vs DCA (daughter -) ; p_{T} (GeV/#it{c}) ; DCA"},
-   {kNegDaughTpcNsigma, o2::framework::kTH2F, "hNegDaughTpcNsigma", "TPC PID (daughter -) ; p (GeV/#it{c}) ; n#sigma_{TPC}"}}};
+   {kPosDauTpcCluster, o2::framework::kTH1F, "hPosDauTpcCluster", "TPC cluster found (daughter^{+}) ; TPC cluster found, Entries"},
+   {kPosDauPtVsDcaxy, o2::framework::kTH2F, "hPosDauPtVsDcaxy", "p_{T} vs DCA_{XY} (daughter +) ; p_{T} (GeV/#it{c}) ; DCA_{XY} (cm)"},
+   {kPosDauPtVsDcaz, o2::framework::kTH2F, "hPosDauPtVsDcaz", "p_{T} vs DCA_{Z} (daughter +) ; p_{T} (GeV/#it{c}) ; DCA_{Z}"},
+   {kPosDauPtVsDca, o2::framework::kTH2F, "hPosDauPtVsDca", "p_{T} vs DCA (daughter +) ; p_{T} (GeV/#it{c}) ; DCA"},
+   {kPosDauProtonTpcNsigma, o2::framework::kTH2F, "hPosDauProtonTpcNsigma", "TPC Proton PID (daughter +) ; p (GeV/#it{c}) ; n#sigma_{TPC}"},
+   {kPosDauPionTpcNsigma, o2::framework::kTH2F, "hPosDauPionTpcNsigma", "TPC Pion PID (daughter +) ; p (GeV/#it{c}) ; n#sigma_{TPC}"},
+   {kNegDauTpcCluster, o2::framework::kTH1F, "hNegDauTpcCluster", "TPC cluster found (daughter -) ; TPC cluster found; Entries"},
+   {kNegDauPtVsDcaxy, o2::framework::kTH2F, "hNegDauPtVsDcaxy", "p_{T} vs DCA_{XY} (daughter -) ; p_{T} (GeV/#it{c}) ; DCA_{XY} (cm)"},
+   {kNegDauPtVsDcaz, o2::framework::kTH2F, "hNegDauPtVsDcaz", "p_{T} vs DCA_{Z} (daughter -) ; p_{T} (GeV/#it{c}) ; DCA_{Z}"},
+   {kNegDauPtVsDca, o2::framework::kTH2F, "hNegDauPtVsDca", "p_{T} vs DCA (daughter -) ; p_{T} (GeV/#it{c}) ; DCA"},
+   {kNegDauProtonTpcNsigma, o2::framework::kTH2F, "hNegDauProtonTpcNsigma", "TPC Proton PID (daughter -) ; p (GeV/#it{c}) ; n#sigma_{TPC}"},
+   {kNegDauPionTpcNsigma, o2::framework::kTH2F, "hNegDauPionTpcNsigma", "TPC Pion PID (daughter -) ; p (GeV/#it{c}) ; n#sigma_{TPC}"}}};
 
 /// \class FemtoDreamEventHisto
 /// \brief Class for histogramming event properties
@@ -143,7 +144,6 @@ class VzeroHistManager
     if constexpr (isModeSet(mode, modes::Mode::kQA)) {
       std::string qaDir = std::string(QaDir);
 
-      mHistogramRegistry->add(qaDir + GetHistNamev2(kSign, HistTable), GetHistDesc(kSign, HistTable), GetHistType(kSign, HistTable), {Specs[kSign]});
       mHistogramRegistry->add(qaDir + GetHistNamev2(kDecayDauDca, HistTable), GetHistDesc(kDecayDauDca, HistTable), GetHistType(kDecayDauDca, HistTable), {Specs[kDecayDauDca]});
       mHistogramRegistry->add(qaDir + GetHistNamev2(kDecayVtxX, HistTable), GetHistDesc(kDecayVtxX, HistTable), GetHistType(kDecayVtxX, HistTable), {Specs[kDecayVtxX]});
       mHistogramRegistry->add(qaDir + GetHistNamev2(kDecayVtxY, HistTable), GetHistDesc(kDecayVtxY, HistTable), GetHistType(kDecayVtxY, HistTable), {Specs[kDecayVtxY]});
@@ -157,17 +157,19 @@ class VzeroHistManager
       mHistogramRegistry->add(qaDir + GetHistNamev2(kPhiVsEta, HistTable), GetHistDesc(kPhiVsEta, HistTable), GetHistType(kPhiVsEta, HistTable), {Specs[kPhiVsEta]});
 
       // qa daughters
-      mHistogramRegistry->add(qaDir + GetHistNamev2(kPosDaughTpcCluster, HistTable), GetHistDesc(kPosDaughTpcCluster, HistTable), GetHistType(kPosDaughTpcCluster, HistTable), {Specs[kPosDaughTpcCluster]});
-      mHistogramRegistry->add(qaDir + GetHistNamev2(kPosDaughTpcNsigma, HistTable), GetHistDesc(kPosDaughTpcNsigma, HistTable), GetHistType(kPosDaughTpcNsigma, HistTable), {Specs[kPosDaughTpcNsigma]});
-      mHistogramRegistry->add(qaDir + GetHistNamev2(kPosDaughPtVsDcaxy, HistTable), GetHistDesc(kPosDaughPtVsDcaxy, HistTable), GetHistType(kPosDaughPtVsDcaxy, HistTable), {Specs[kPosDaughPtVsDcaxy]});
-      mHistogramRegistry->add(qaDir + GetHistNamev2(kPosDaughPtVsDcaz, HistTable), GetHistDesc(kPosDaughPtVsDcaz, HistTable), GetHistType(kPosDaughPtVsDcaz, HistTable), {Specs[kPosDaughPtVsDcaz]});
-      mHistogramRegistry->add(qaDir + GetHistNamev2(kPosDaughPtVsDca, HistTable), GetHistDesc(kPosDaughPtVsDca, HistTable), GetHistType(kPosDaughPtVsDca, HistTable), {Specs[kPosDaughPtVsDca]});
+      mHistogramRegistry->add(qaDir + GetHistNamev2(kPosDauTpcCluster, HistTable), GetHistDesc(kPosDauTpcCluster, HistTable), GetHistType(kPosDauTpcCluster, HistTable), {Specs[kPosDauTpcCluster]});
+      mHistogramRegistry->add(qaDir + GetHistNamev2(kPosDauProtonTpcNsigma, HistTable), GetHistDesc(kPosDauProtonTpcNsigma, HistTable), GetHistType(kPosDauProtonTpcNsigma, HistTable), {Specs[kPosDauProtonTpcNsigma]});
+      mHistogramRegistry->add(qaDir + GetHistNamev2(kPosDauPionTpcNsigma, HistTable), GetHistDesc(kPosDauPionTpcNsigma, HistTable), GetHistType(kPosDauPionTpcNsigma, HistTable), {Specs[kPosDauPionTpcNsigma]});
+      mHistogramRegistry->add(qaDir + GetHistNamev2(kPosDauPtVsDcaxy, HistTable), GetHistDesc(kPosDauPtVsDcaxy, HistTable), GetHistType(kPosDauPtVsDcaxy, HistTable), {Specs[kPosDauPtVsDcaxy]});
+      mHistogramRegistry->add(qaDir + GetHistNamev2(kPosDauPtVsDcaz, HistTable), GetHistDesc(kPosDauPtVsDcaz, HistTable), GetHistType(kPosDauPtVsDcaz, HistTable), {Specs[kPosDauPtVsDcaz]});
+      mHistogramRegistry->add(qaDir + GetHistNamev2(kPosDauPtVsDca, HistTable), GetHistDesc(kPosDauPtVsDca, HistTable), GetHistType(kPosDauPtVsDca, HistTable), {Specs[kPosDauPtVsDca]});
 
-      mHistogramRegistry->add(qaDir + GetHistNamev2(kNegDaughTpcCluster, HistTable), GetHistDesc(kNegDaughTpcCluster, HistTable), GetHistType(kNegDaughTpcCluster, HistTable), {Specs[kNegDaughTpcCluster]});
-      mHistogramRegistry->add(qaDir + GetHistNamev2(kNegDaughPtVsDcaxy, HistTable), GetHistDesc(kNegDaughPtVsDcaxy, HistTable), GetHistType(kNegDaughPtVsDcaxy, HistTable), {Specs[kNegDaughPtVsDcaxy]});
-      mHistogramRegistry->add(qaDir + GetHistNamev2(kNegDaughPtVsDcaz, HistTable), GetHistDesc(kNegDaughPtVsDcaz, HistTable), GetHistType(kNegDaughPtVsDcaz, HistTable), {Specs[kNegDaughPtVsDcaz]});
-      mHistogramRegistry->add(qaDir + GetHistNamev2(kNegDaughPtVsDca, HistTable), GetHistDesc(kNegDaughPtVsDca, HistTable), GetHistType(kNegDaughPtVsDca, HistTable), {Specs[kNegDaughPtVsDca]});
-      mHistogramRegistry->add(qaDir + GetHistNamev2(kNegDaughTpcNsigma, HistTable), GetHistDesc(kNegDaughTpcNsigma, HistTable), GetHistType(kNegDaughTpcNsigma, HistTable), {Specs[kNegDaughTpcNsigma]});
+      mHistogramRegistry->add(qaDir + GetHistNamev2(kNegDauTpcCluster, HistTable), GetHistDesc(kNegDauTpcCluster, HistTable), GetHistType(kNegDauTpcCluster, HistTable), {Specs[kNegDauTpcCluster]});
+      mHistogramRegistry->add(qaDir + GetHistNamev2(kNegDauPtVsDcaxy, HistTable), GetHistDesc(kNegDauPtVsDcaxy, HistTable), GetHistType(kNegDauPtVsDcaxy, HistTable), {Specs[kNegDauPtVsDcaxy]});
+      mHistogramRegistry->add(qaDir + GetHistNamev2(kNegDauPtVsDcaz, HistTable), GetHistDesc(kNegDauPtVsDcaz, HistTable), GetHistType(kNegDauPtVsDcaz, HistTable), {Specs[kNegDauPtVsDcaz]});
+      mHistogramRegistry->add(qaDir + GetHistNamev2(kNegDauPtVsDca, HistTable), GetHistDesc(kNegDauPtVsDca, HistTable), GetHistType(kNegDauPtVsDca, HistTable), {Specs[kNegDauPtVsDca]});
+      mHistogramRegistry->add(qaDir + GetHistNamev2(kNegDauProtonTpcNsigma, HistTable), GetHistDesc(kNegDauProtonTpcNsigma, HistTable), GetHistType(kNegDauProtonTpcNsigma, HistTable), {Specs[kNegDauProtonTpcNsigma]});
+      mHistogramRegistry->add(qaDir + GetHistNamev2(kNegDauPionTpcNsigma, HistTable), GetHistDesc(kNegDauPionTpcNsigma, HistTable), GetHistType(kNegDauPionTpcNsigma, HistTable), {Specs[kNegDauPionTpcNsigma]});
     }
   }
 
@@ -190,7 +192,6 @@ class VzeroHistManager
     }
 
     if constexpr (isModeSet(mode, modes::Mode::kQA)) {
-      mHistogramRegistry->fill(HIST(QaDir) + HIST(GetHistName(kSign, HistTable)), static_cast<float>(v0.sign()));
       mHistogramRegistry->fill(HIST(QaDir) + HIST(GetHistName(kDecayDauDca, HistTable)), v0.dauDCA());
       mHistogramRegistry->fill(HIST(QaDir) + HIST(GetHistName(kDecayVtxX, HistTable)), v0.decayVtxX());
       mHistogramRegistry->fill(HIST(QaDir) + HIST(GetHistName(kDecayVtxY, HistTable)), v0.decayVtxY());
@@ -202,16 +203,18 @@ class VzeroHistManager
       mHistogramRegistry->fill(HIST(QaDir) + HIST(GetHistName(kPtVsPhi, HistTable)), v0.pt(), v0.phi());
       mHistogramRegistry->fill(HIST(QaDir) + HIST(GetHistName(kPhiVsEta, HistTable)), v0.phi(), v0.eta());
 
-      mHistogramRegistry->fill(HIST(QaDir) + HIST(GetHistName(kPosDaughTpcCluster, HistTable)), v0.posDauTpcNclsFound());
-      mHistogramRegistry->fill(HIST(QaDir) + HIST(GetHistName(kPosDaughPtVsDcaxy, HistTable)), v0.posDauPt(), v0.posDauDcaxy());
-      mHistogramRegistry->fill(HIST(QaDir) + HIST(GetHistName(kPosDaughPtVsDcaz, HistTable)), v0.posDauPt(), v0.posDauDcaz());
-      mHistogramRegistry->fill(HIST(QaDir) + HIST(GetHistName(kPosDaughPtVsDca, HistTable)), v0.posDauP(), utils::geometricMean(v0.posDauDcaxy(), v0.posDauDcaz()));
-      mHistogramRegistry->fill(HIST(QaDir) + HIST(GetHistName(kPosDaughTpcNsigma, HistTable)), v0.posDauP(), v0.posDauTpcNsigma());
-      mHistogramRegistry->fill(HIST(QaDir) + HIST(GetHistName(kNegDaughTpcCluster, HistTable)), v0.negDauTpcNclsFound());
-      mHistogramRegistry->fill(HIST(QaDir) + HIST(GetHistName(kNegDaughPtVsDcaxy, HistTable)), v0.negDauPt(), v0.negDauDcaxy());
-      mHistogramRegistry->fill(HIST(QaDir) + HIST(GetHistName(kNegDaughPtVsDcaz, HistTable)), v0.negDauPt(), v0.negDauDcaz());
-      mHistogramRegistry->fill(HIST(QaDir) + HIST(GetHistName(kNegDaughPtVsDca, HistTable)), v0.negDauP(), utils::geometricMean(v0.negDauDcaxy(), v0.negDauDcaz()));
-      mHistogramRegistry->fill(HIST(QaDir) + HIST(GetHistName(kNegDaughTpcNsigma, HistTable)), v0.negDauP(), v0.negDauTpcNsigma());
+      mHistogramRegistry->fill(HIST(QaDir) + HIST(GetHistName(kPosDauTpcCluster, HistTable)), v0.posDauTpcNclsFound());
+      mHistogramRegistry->fill(HIST(QaDir) + HIST(GetHistName(kPosDauPtVsDcaxy, HistTable)), v0.posDauPt(), v0.posDauDcaxy());
+      mHistogramRegistry->fill(HIST(QaDir) + HIST(GetHistName(kPosDauPtVsDcaz, HistTable)), v0.posDauPt(), v0.posDauDcaz());
+      mHistogramRegistry->fill(HIST(QaDir) + HIST(GetHistName(kPosDauPtVsDca, HistTable)), v0.posDauP(), std::hypot(v0.posDauDcaxy(), v0.posDauDcaz()));
+      mHistogramRegistry->fill(HIST(QaDir) + HIST(GetHistName(kPosDauProtonTpcNsigma, HistTable)), v0.posDauP(), v0.posDauProtonTpcNsigma());
+      mHistogramRegistry->fill(HIST(QaDir) + HIST(GetHistName(kPosDauPionTpcNsigma, HistTable)), v0.posDauP(), v0.posDauPionTpcNsigma());
+      mHistogramRegistry->fill(HIST(QaDir) + HIST(GetHistName(kNegDauTpcCluster, HistTable)), v0.negDauTpcNclsFound());
+      mHistogramRegistry->fill(HIST(QaDir) + HIST(GetHistName(kNegDauPtVsDcaxy, HistTable)), v0.negDauPt(), v0.negDauDcaxy());
+      mHistogramRegistry->fill(HIST(QaDir) + HIST(GetHistName(kNegDauPtVsDcaz, HistTable)), v0.negDauPt(), v0.negDauDcaz());
+      mHistogramRegistry->fill(HIST(QaDir) + HIST(GetHistName(kNegDauPtVsDca, HistTable)), v0.negDauP(), std::hypot(v0.negDauDcaxy(), v0.negDauDcaz()));
+      mHistogramRegistry->fill(HIST(QaDir) + HIST(GetHistName(kNegDauProtonTpcNsigma, HistTable)), v0.negDauP(), v0.negDauProtonTpcNsigma());
+      mHistogramRegistry->fill(HIST(QaDir) + HIST(GetHistName(kNegDauPionTpcNsigma, HistTable)), v0.negDauP(), v0.negDauPionTpcNsigma());
     }
   }
 

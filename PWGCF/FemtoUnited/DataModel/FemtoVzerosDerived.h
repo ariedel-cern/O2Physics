@@ -27,11 +27,14 @@ namespace o2::aod
 namespace femtovzeros
 {
 // columns for Vzero
-DECLARE_SOA_COLUMN(VzeroMass, vzeroMass, float);                         //! Mass of Vzero
-DECLARE_SOA_COLUMN(VzeroMask, vzeroMask, femtodatatypes::VzeroMaskType); //! Bitmask for Vzero selections
+DECLARE_SOA_COLUMN(VzeroMass, vzeroMass, float);         //! Mass of Vzero
+DECLARE_SOA_COLUMN(AntiVzeroMass, antiVzeroMass, float); //! Mass of Vzero
+
+// columns for Vzero bit masks
+DECLARE_SOA_COLUMN(VzeroMask, vzeroMask, femtodatatypes::VzeroMaskType);                   //! Bitmask for Vzero selections
+DECLARE_SOA_COLUMN(VzeroDauPidMask, vzeroDauPidMask, femtodatatypes::VzeroDauPidMaskType); //! Bitmask for Vzero selections
 
 // columns for Vzero debug information
-DECLARE_SOA_COLUMN(Sign, sign, int8_t);              //! Vzero sign +1 for lambda and -1 for antilambda
 DECLARE_SOA_COLUMN(DauDCA, dauDCA, float);           //! Vzero daughter DCA at decay vertex
 DECLARE_SOA_COLUMN(TransRadius, transRadius, float); //! Vzero transvers radius
 DECLARE_SOA_COLUMN(DecayVtxX, decayVtxX, float);     //! x coordinate of Vzero decay vertex
@@ -59,14 +62,16 @@ DECLARE_SOA_DYNAMIC_COLUMN(NegDauP, negDauP,                          //! Moment
                            });
 
 // columns for Vzero daughter debug information
-DECLARE_SOA_COLUMN(PosDauTpcNclsFound, posDauTpcNclsFound, uint8_t); //!
-DECLARE_SOA_COLUMN(PosDauDcaxy, posDauDcaxy, float);                 //!
-DECLARE_SOA_COLUMN(PosDauDcaz, posDauDcaz, float);                   //!
-DECLARE_SOA_COLUMN(PosDauTpcNsigma, posDauTpcNsigma, float);         //!
-DECLARE_SOA_COLUMN(NegDauTpcNclsFound, negDauTpcNclsFound, uint8_t); //!
-DECLARE_SOA_COLUMN(NegDauTpcNsigma, negDauTpcNsigma, float);         //!
-DECLARE_SOA_COLUMN(NegDauDcaxy, negDauDcaxy, float);                 //!
-DECLARE_SOA_COLUMN(NegDauDcaz, negDauDcaz, float);                   //!
+DECLARE_SOA_COLUMN(PosDauTpcNclsFound, posDauTpcNclsFound, uint8_t);     //!
+DECLARE_SOA_COLUMN(PosDauDcaxy, posDauDcaxy, float);                     //!
+DECLARE_SOA_COLUMN(PosDauDcaz, posDauDcaz, float);                       //!
+DECLARE_SOA_COLUMN(PosDauProtonTpcNsigma, posDauProtonTpcNsigma, float); //!
+DECLARE_SOA_COLUMN(PosDauPionTpcNsigma, posDauPionTpcNsigma, float);     //!
+DECLARE_SOA_COLUMN(NegDauTpcNclsFound, negDauTpcNclsFound, uint8_t);     //!
+DECLARE_SOA_COLUMN(NegDauDcaxy, negDauDcaxy, float);                     //!
+DECLARE_SOA_COLUMN(NegDauDcaz, negDauDcaz, float);                       //!
+DECLARE_SOA_COLUMN(NegDauProtonTpcNsigma, negDauProtonTpcNsigma, float); //!
+DECLARE_SOA_COLUMN(NegDauPionTpcNsigma, negDauPionTpcNsigma, float);     //!
 
 } // namespace femtovzeros
 
@@ -78,6 +83,7 @@ DECLARE_SOA_TABLE_STAGED_VERSIONED(FUVzeros_001, "FUVZEROS", 1,
                                    femtobase::Eta,
                                    femtobase::Phi,
                                    femtovzeros::VzeroMass,
+                                   femtovzeros::AntiVzeroMass,
                                    femtobase::Theta<femtobase::Eta>,
                                    femtobase::Px<femtobase::Pt, femtobase::Eta>,
                                    femtobase::Py<femtobase::Pt, femtobase::Eta>,
@@ -86,11 +92,11 @@ DECLARE_SOA_TABLE_STAGED_VERSIONED(FUVzeros_001, "FUVZEROS", 1,
 using FUVzeros = FUVzeros_001;
 
 DECLARE_SOA_TABLE_STAGED_VERSIONED(FUVzeroMasks_001, "FUVZEROMASKS", 1,
-                                   femtovzeros::VzeroMask);
+                                   femtovzeros::VzeroMask,
+                                   femtovzeros::VzeroDauPidMask);
 using FUVzeroMasks = FUVzeroMasks_001;
 
 DECLARE_SOA_TABLE_STAGED_VERSIONED(FUVzeroExtras_001, "FUVZEROEXTRAS", 1,
-                                   femtovzeros::Sign,
                                    femtovzeros::DauDCA,
                                    femtovzeros::DecayVtxX,
                                    femtovzeros::DecayVtxY,
@@ -116,11 +122,13 @@ DECLARE_SOA_TABLE_STAGED_VERSIONED(FUVzeroDauExts_001, "FUVZERODAUEXTS", 1,
                                    femtovzeros::PosDauTpcNclsFound,
                                    femtovzeros::PosDauDcaxy,
                                    femtovzeros::PosDauDcaz,
-                                   femtovzeros::PosDauTpcNsigma,
+                                   femtovzeros::PosDauProtonTpcNsigma,
+                                   femtovzeros::PosDauPionTpcNsigma,
                                    femtovzeros::NegDauTpcNclsFound,
                                    femtovzeros::NegDauDcaxy,
                                    femtovzeros::NegDauDcaz,
-                                   femtovzeros::NegDauTpcNsigma);
+                                   femtovzeros::NegDauProtonTpcNsigma,
+                                   femtovzeros::NegDauPionTpcNsigma);
 using FUVzeroDauExts = FUVzeroDauExts_001;
 
 } // namespace o2::aod

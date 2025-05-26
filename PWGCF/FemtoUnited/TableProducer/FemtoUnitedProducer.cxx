@@ -9,7 +9,7 @@
 // granted to it by virtue of its status as an Intergovernmental Organization
 // or submit itself to any jurisdiction.
 
-/// \file Producer.cxx
+/// \file FemtoUnitedProducer.cxx
 /// \brief Tasks that produces the track tables used for the pairing
 /// \author Anton Riedel, TU München, anton.riedel@tum.de
 
@@ -43,12 +43,9 @@
 
 #include "PWGCF/FemtoUnited/Core/CollisionSelection.h"
 #include "PWGCF/FemtoUnited/Core/TrackSelection.h"
-// #include "PWGCF/FemtoUnited/Core/TrackTPCSelection.h"
-// #include "PWGCF/FemtoUnited/Core/TrackTOFSelection.h"
-// #include "PWGCF/FemtoUnited/Core/TrackTPCTOFSelection.h"
 #include "PWGCF/FemtoUnited/Core/TrackPidSelection.h"
 #include "PWGCF/FemtoUnited/Core/VzeroSelection.h"
-// #include "PWGCF/FemtoUnited/Core/VzeroDaughterSelection.h"
+#include "PWGCF/FemtoUnited/Core/VzeroDaughterPidSelection.h"
 
 #include "PWGCF/FemtoUnited/Utils/FemtoUtils.h"
 
@@ -80,7 +77,7 @@ using Run3PpVzeros = V0Datas;
 } // namespace consumeddata
 } // namespace o2::analysis::femtounited
 
-struct FemtounitedProducer {
+struct FemtoUnitedProducer {
 
   // produced objectes
   Produces<FUCols> producedCollision;
@@ -130,7 +127,8 @@ struct FemtounitedProducer {
   // track bits
   struct : ConfigurableGroup {
     std::string prefix = std::string("TrackBits");
-    Configurable<std::vector<float>> sign{"sign", {1, -1}, "Sign (|Charge|) of the track. In some parts of the framework it is assumed that always particles and antiparticles are produced. Be wary of chaning the default."};
+    Configurable<bool> fillPositiveTracks{"fillPositiveTracks", true, "Fill if track if it has postivie charge"};
+    Configurable<bool> fillNegativeTracks{"fillNegativeTracks", true, "Fill if track if it has negative charge"};
     Configurable<std::vector<float>> tpcClustersMin{"tpcClustersMin", {80}, "Minimum number of clusters in TPC"};
     Configurable<std::vector<float>> tpcCrossedRowsMin{"tpcCrossedRowsMin", {70}, "Minimum number of crossed rows in TPC"};
     Configurable<std::vector<float>> tpcSharedClustersMax{"tpcSharedClustersMax", {2}, "Maximum number of shared clusters in TPC"};
@@ -196,7 +194,6 @@ struct FemtounitedProducer {
   // v0 bits
   struct : ConfigurableGroup {
     std::string prefix = std::string("V0Bits");
-    Configurable<std::vector<float>> sign{"sign", {-1, 1}, "+1 for particle and -1 for antiparticle"};
     Configurable<std::vector<float>> dcaDaughMax{"dcaDaughMax", {1.5}, "Maximum DCA between the daughters at decay vertex (cm)"};
     Configurable<std::vector<float>> cpaMin{"cpaMin", {0.99}, "Minimum cosine of pointing angle"};
     Configurable<std::vector<float>> transRadMin{"transRadMin", {0.2}, "Minimum transverse radius (cm)"};
@@ -209,9 +206,13 @@ struct FemtounitedProducer {
     std::string prefix = std::string("V0DaughterBits");
     Configurable<std::vector<float>> dcaMin{"dcaMin", {0.05}, "Minimum DCA of the daughters from primary vertex (cm)"};
     Configurable<std::vector<float>> tpcClustersMin{"tpcClustersMin", {70}, "Minimum number of TPC clusters for daughter tracks"};
-    Configurable<std::vector<float>> tpcNsigmaMax{"tpcNsigmaMax", {5}, "Maximum |nsimga| TPC for daughter tracks"};
+    Configurable<std::vector<float>> posDaughProtonNsigmaMax{"posDaughProtonNsigmaMax", {5}, "Maximum |nsimga_Proton| TPC for positive daughter tracks"};
+    Configurable<std::vector<float>> posDaughPionNsigmaMax{"posDaughPionNsigmaMax", {5}, "Maximum |nsimga_Pion| TPC for positive daughter tracks"};
+    Configurable<std::vector<float>> negDaughProtonNsigmaMax{"negDaughProtonNsigmaMax", {5}, "Maximum |nsimga_Proton| TPC negative for daughter tracks"};
+    Configurable<std::vector<float>> negDaughPionNsigmaMax{"negDaughPionNsigmaMax", {5}, "Maximum |nsimga_Pion| TPC for negative daughter tracks"};
   } ConfVzeroDaughterBits;
   vzeroselection::VzeroSelection vzeroSel;
+  vzerodaughterpidselection::VzeroDaughterPidSelection vzeroDaugherPidSel;
 
   // histogramming
   HistogramRegistry hRegistry{"Producer", {}, OutputObjHandlingPolicy::AnalysisObject};
@@ -219,8 +220,8 @@ struct FemtounitedProducer {
   // data members
   int runNumber = -1;
   float magField = 0.f;
-  Service<o2::ccdb::BasicCCDBManager> ccdb;          /// Accessing the CCDB
-  std::vector<std::pair<int64_t, int64_t>> indexMap; // for mapping tracks to vzeros and more
+  Service<o2::ccdb::BasicCCDBManager> ccdb;      /// Accessing the CCDB
+  std::unordered_map<int64_t, int64_t> indexMap; // for mapping tracks to vzeros and more
 
   // functions
   void initFromCcdb(o2::aod::BCsWithTimestamps::iterator const bc)
@@ -259,8 +260,8 @@ struct FemtounitedProducer {
     }
   }
 
-  template <modes::Mode mode, typename T>
-  void fillTracks(T const& tracks, std::vector<std::pair<int64_t, int64_t>>& map)
+  template <modes::Mode mode, typename T, typename I>
+  void fillTracks(T const& tracks, std::unordered_map<I, I>& map)
   {
     for (const auto& track : tracks) {
       trackSel.applySelections(track);
@@ -268,8 +269,11 @@ struct FemtounitedProducer {
         trackPidSel.applySelections(track);
         if (trackPidSel.getAnySelection()) {
           if constexpr (modes::isModeSet(mode, modes::Mode::kANALYSIS)) {
-            producedTracks(producedCollision.lastIndex(), track.pt(), track.eta(), track.phi());
-            producedTrackMasks(trackSel.getBitmask(), trackPidSel.getBitmask());
+            bool hasPositiveCharge = track.sign() > 0;
+            if ((ConfTrackBits.fillPositiveTracks && hasPositiveCharge) || (ConfTrackBits.fillNegativeTracks && !hasPositiveCharge)) {
+              producedTracks(producedCollision.lastIndex(), track.pt(), track.eta(), track.phi(), hasPositiveCharge);
+              producedTrackMasks(trackSel.getBitmask(), trackPidSel.getBitmask());
+            }
           }
 
           if constexpr (modes::isModeSet(mode, modes::Mode::kQA)) {
@@ -309,41 +313,47 @@ struct FemtounitedProducer {
               track.tofNSigmaTr(),
               track.tofNSigmaHe());
           }
-          map.emplace_back(track.globalIndex(), producedTracks.lastIndex());
+          // map.emplace_back(track.globalIndex(), producedTracks.lastIndex());
+          map[track.globalIndex()] = producedTracks.lastIndex();
         }
       }
     }
   }
 
-  template <modes::Mode mode, typename T1, typename T2>
-  void fillV0s(T1 const& v0s, T2 const& tracks, std::vector<std::pair<int64_t, int64_t>> map)
+  template <modes::Mode mode, typename V, typename T, typename I>
+  void fillV0s(V const& v0s, T const& tracks, std::unordered_map<I, I>& map)
   {
     for (const auto& v0 : v0s) {
       vzeroSel.applySelections(v0, tracks);
       if (vzeroSel.checkKaonMassLimit(v0) && vzeroSel.getMinimalSelection()) {
-        auto posDaughter = v0.template posTrack_as<T2>();
-        auto negDaughter = v0.template negTrack_as<T2>();
-        if constexpr (modes::isModeSet(mode, modes::Mode::kANALYSIS)) {
-          producedVzeros(producedCollision.lastIndex(),
-                         v0.pt(),
-                         v0.eta(),
-                         v0.phi(),
-                         vzeroSel.getMass());
-          producedVzeroMasks(vzeroSel.getBitmask());
-          producedVzeroDaus(utils::getDaughterIndex(posDaughter.globalIndex(), map), posDaughter.pt(), posDaughter.eta(), posDaughter.phi(),
-                            utils::getDaughterIndex(negDaughter.globalIndex(), map), negDaughter.pt(), negDaughter.eta(), negDaughter.phi());
-        }
-        if constexpr (modes::isModeSet(mode, modes::Mode::kQA)) {
-          producedVzeroExtras(
-            vzeroSel.getSign(),
-            v0.dcaV0daughters(),
-            v0.x(),
-            v0.y(),
-            v0.z(),
-            v0.v0radius(),
-            v0.mK0Short());
-          producedVzeroDauExts(posDaughter.tpcNClsFound(), posDaughter.dcaXY(), posDaughter.dcaZ(), vzeroSel.getPosDaughterTpcNsigma(),
-                               negDaughter.tpcNClsFound(), negDaughter.dcaXY(), negDaughter.dcaZ(), vzeroSel.getNegDaughterTpcNsigma());
+        auto posDaughter = v0.template posTrack_as<T>();
+        auto negDaughter = v0.template negTrack_as<T>();
+
+        vzeroDaugherPidSel.applySelections(posDaughter, negDaughter);
+
+        if (vzeroDaugherPidSel.isLambda() || vzeroDaugherPidSel.isAntiLambda()) {
+          if constexpr (modes::isModeSet(mode, modes::Mode::kANALYSIS)) {
+            producedVzeros(producedCollision.lastIndex(),
+                           v0.pt(),
+                           v0.eta(),
+                           v0.phi(),
+                           v0.mLambda(),
+                           v0.mAntiLambda());
+            producedVzeroMasks(vzeroSel.getBitmask(), vzeroDaugherPidSel.getBitmask());
+            producedVzeroDaus(utils::getDaughterIndex(posDaughter.globalIndex(), map), posDaughter.pt(), posDaughter.eta(), posDaughter.phi(),
+                              utils::getDaughterIndex(negDaughter.globalIndex(), map), negDaughter.pt(), negDaughter.eta(), negDaughter.phi());
+          }
+          if constexpr (modes::isModeSet(mode, modes::Mode::kQA)) {
+            producedVzeroExtras(
+              v0.dcaV0daughters(),
+              v0.x(),
+              v0.y(),
+              v0.z(),
+              v0.v0radius(),
+              v0.mK0Short());
+            producedVzeroDauExts(posDaughter.tpcNClsFound(), posDaughter.dcaXY(), posDaughter.dcaZ(), posDaughter.tpcNSigmaPr(), posDaughter.tpcNSigmaPi(),
+                                 negDaughter.tpcNClsFound(), negDaughter.dcaXY(), negDaughter.dcaZ(), negDaughter.tpcNSigmaPr(), negDaughter.tpcNSigmaPi());
+          }
         }
       }
     }
@@ -363,7 +373,6 @@ struct FemtounitedProducer {
 
     /// init track selections
     trackSel.setCheckMinimalSelection(true);
-    trackSel.addSelection(ConfTrackBits.sign.value, trackselection::kSign, limits::kEqual, false);
     trackSel.addSelection(ConfTrackBits.tpcClustersMin.value, trackselection::kTPCnClsMin, limits::kLowerLimit, true);
     trackSel.addSelection(ConfTrackBits.tpcCrossedRowsMin.value, trackselection::kTPCcRowsMin, limits::kLowerLimit, true);
     trackSel.addSelection(ConfTrackBits.tpcSharedClustersMax.value, trackselection::kTPCsClsMax, limits::kUpperLimit, true);
@@ -409,7 +418,6 @@ struct FemtounitedProducer {
 
     /// init vzero selections
     vzeroSel.setCheckMinimalSelection(true);
-    vzeroSel.addSelection(ConfVzeroBits.sign.value, vzeroselection::kSign, limits::kEqual, false);
     vzeroSel.addSelection(ConfVzeroBits.dcaDaughMax.value, vzeroselection::kDcaDaughMax, limits::kAbsUpperLimit, true);
     vzeroSel.addSelection(ConfVzeroBits.cpaMin.value, vzeroselection::kCpaMin, limits::kLowerLimit, true);
     vzeroSel.addSelection(ConfVzeroBits.transRadMin.value, vzeroselection::kTransRadMin, limits::kLowerLimit, true);
@@ -417,14 +425,19 @@ struct FemtounitedProducer {
     // vzero positiv daughter selections
     vzeroSel.addSelection(ConfVzeroDaughterBits.dcaMin.value, vzeroselection::kPosDauDcaMin, limits::kLowerLimit, true);
     vzeroSel.addSelection(ConfVzeroDaughterBits.tpcClustersMin.value, vzeroselection::kPosDauTpcClsMin, limits::kLowerLimit, true);
-    vzeroSel.addSelection(ConfVzeroDaughterBits.tpcNsigmaMax.value, vzeroselection::kPosDauTpcNsigmaMax, limits::kAbsUpperLimit, true);
     // vzero negative daughter selections
     vzeroSel.setCheckMinimalSelection(true);
     vzeroSel.addSelection(ConfVzeroDaughterBits.dcaMin.value, vzeroselection::kNegDauDcaMin, limits::kLowerLimit, true);
     vzeroSel.addSelection(ConfVzeroDaughterBits.tpcClustersMin.value, vzeroselection::kNegDauTpcClsMin, limits::kLowerLimit, true);
-    vzeroSel.addSelection(ConfVzeroDaughterBits.tpcNsigmaMax.value, vzeroselection::kNegDauTpcNsigmaMax, limits::kAbsUpperLimit, true);
     // kaon mass limits
     vzeroSel.setKaonMassLimits(ConfVzeroBits.kaonMassRejectionLow.value, ConfVzeroBits.kaonMassRejectionHigh.value);
+
+    /// init vzero daughter pid selections
+    vzeroDaugherPidSel.setCheckMinimalSelection(false);
+    vzeroDaugherPidSel.addSelection(ConfVzeroDaughterBits.negDaughPionNsigmaMax.value, vzerodaughterpidselection::kNegDaughTpcPion, limits::kAbsUpperLimit, false);
+    vzeroDaugherPidSel.addSelection(ConfVzeroDaughterBits.posDaughProtonNsigmaMax.value, vzerodaughterpidselection::kPosDaughTpcProton, limits::kAbsUpperLimit, false);
+    vzeroDaugherPidSel.addSelection(ConfVzeroDaughterBits.posDaughPionNsigmaMax.value, vzerodaughterpidselection::kPosDaughTpcPion, limits::kAbsUpperLimit, false);
+    vzeroDaugherPidSel.addSelection(ConfVzeroDaughterBits.negDaughProtonNsigmaMax.value, vzerodaughterpidselection::kNegDaughTpcPion, limits::kAbsUpperLimit, false);
   }
 
   // proccess functions
@@ -446,7 +459,7 @@ struct FemtounitedProducer {
     indexMap.clear();
     fillTracks<modes::Mode::kANALYSIS>(tracksWithItsPid, indexMap);
   }
-  PROCESS_SWITCH(FemtounitedProducer, processTracksRun3pp, "Provide tracks for Run3 analysis", true);
+  PROCESS_SWITCH(FemtoUnitedProducer, processTracksRun3pp, "Provide tracks for Run3 analysis", true);
 
   // produce tracks for analysis (without centrality)
   void proccessTracksRun3ppNoCent(Filtered<consumeddata::Run3PpWithoutCentCollisions>::iterator const& col,
@@ -466,7 +479,7 @@ struct FemtounitedProducer {
     indexMap.clear();
     fillTracks<modes::Mode::kANALYSIS>(tracksWithItsPid, indexMap);
   }
-  PROCESS_SWITCH(FemtounitedProducer, proccessTracksRun3ppNoCent, "Provide tracks for Run3 analysis (use when no centrality calibration is available)", false);
+  PROCESS_SWITCH(FemtoUnitedProducer, proccessTracksRun3ppNoCent, "Provide tracks for Run3 analysis (use when no centrality calibration is available)", false);
 
   // produce tracks for QA (without centrality)
   void proccessQaTracksRun3ppNoCent(Filtered<consumeddata::Run3PpWithoutCentCollisions>::iterator const& col,
@@ -486,7 +499,7 @@ struct FemtounitedProducer {
     indexMap.clear();
     fillTracks<modes::Mode::kANALYSIS_QA>(tracksWithItsPid, indexMap);
   }
-  PROCESS_SWITCH(FemtounitedProducer, proccessQaTracksRun3ppNoCent, "Provide tracks for Run2 with QA", false);
+  PROCESS_SWITCH(FemtoUnitedProducer, proccessQaTracksRun3ppNoCent, "Provide tracks for Run2 with QA", false);
 
   // produce tracks and v0s for QA (without centrality)
   void processQaTracksVzerosRun3ppNoCent(Filtered<consumeddata::Run3PpWithoutCentCollisions>::iterator const& col,
@@ -508,11 +521,11 @@ struct FemtounitedProducer {
     fillTracks<modes::Mode::kANALYSIS_QA>(tracksWithItsPid, indexMap);
     fillV0s<modes::Mode::kANALYSIS_QA>(v0s, tracks, indexMap);
   }
-  PROCESS_SWITCH(FemtounitedProducer, processQaTracksVzerosRun3ppNoCent, "Provide Tracks and V0s for Run3 with QA (no centrality calibration)", false);
+  PROCESS_SWITCH(FemtoUnitedProducer, processQaTracksVzerosRun3ppNoCent, "Provide Tracks and V0s for Run3 with QA (no centrality calibration)", false);
 };
 
 WorkflowSpec defineDataProcessing(ConfigContext const& cfgc)
 {
-  WorkflowSpec workflow{adaptAnalysisTask<FemtounitedProducer>(cfgc)};
+  WorkflowSpec workflow{adaptAnalysisTask<FemtoUnitedProducer>(cfgc)};
   return workflow;
 }

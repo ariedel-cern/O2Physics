@@ -20,7 +20,6 @@
 
 #include "PWGCF/FemtoUnited/Core/BaseSelection.h"
 #include "PWGCF/FemtoUnited/Core/DataTypes.h"
-#include "PWGCF/FemtoUnited/Utils/FemtoUtils.h"
 
 namespace o2::analysis::femtounited
 {
@@ -29,37 +28,37 @@ namespace trackpidselection
 /// The different selections this task is capable of doing
 enum TrackPidSels {
 
-  kItsElectron, ///< Electon PID
-  kItsPion,     ///< Pion PID
-  kItsKaon,     ///< Kaon PID
-  kItsProton,   ///< Proton PID
-  kItsDeuteron, ///< Deuteron PID
-  kItsTriton,   ///< Triton PID
-  kItsHelium,   ///< He3 PID
+  kItsElectron, ///< ITS Electon PID
+  kItsPion,     ///< ITS Pion PID
+  kItsKaon,     ///< ITS Kaon PID
+  kItsProton,   ///< ITS Proton PID
+  kItsDeuteron, ///< ITS Deuteron PID
+  kItsTriton,   ///< ITS Triton PID
+  kItsHelium,   ///< ITS He3 PID
 
-  kTpcElectron, ///< Electon PID
-  kTpcPion,     ///< Pion PID
-  kTpcKaon,     ///< Kaon PID
-  kTpcProton,   ///< Proton PID
-  kTpcDeuteron, ///< Deuteron PID
-  kTpcTriton,   ///< Triton PID
-  kTpcHelium,   ///< He3 PID
+  kTpcElectron, ///< TPC Electon PID
+  kTpcPion,     ///< TPC Pion PID
+  kTpcKaon,     ///< TPC Kaon PID
+  kTpcProton,   ///< TPC Proton PID
+  kTpcDeuteron, ///< TPC Deuteron PID
+  kTpcTriton,   ///< TPC Triton PID
+  kTpcHelium,   ///< TPC He3 PID
 
-  kTofElectron, ///< Electon PID
-  kTofPion,     ///< Pion PID
-  kTofKaon,     ///< Kaon PID
-  kTofProton,   ///< Proton PID
-  kTofDeuteron, ///< Deuteron PID
-  kTofTriton,   ///< Triton PID
-  kTofHelium,   ///< He3 PID
+  kTofElectron, ///< TOF Electon PID
+  kTofPion,     ///< TOF Pion PID
+  kTofKaon,     ///< TOF Kaon PID
+  kTofProton,   ///< TOF Proton PID
+  kTofDeuteron, ///< TOF Deuteron PID
+  kTofTriton,   ///< TOF Triton PID
+  kTofHelium,   ///< TOF He3 PID
 
-  kTpctofElectron, ///< Electon PID
-  kTpctofPion,     ///< Pion PID
-  kTpctofKaon,     ///< Kaon PID
-  kTpctofProton,   ///< Proton PID
-  kTpctofDeuteron, ///< Deuteron PID
-  kTpctofTriton,   ///< Triton PID
-  kTpctofHelium,   ///< He3 PID
+  kTpctofElectron, ///< TPC+TOF Electon PID
+  kTpctofPion,     ///< TPC+TOF Pion PID
+  kTpctofKaon,     ///< TPC+TOF Kaon PID
+  kTpctofProton,   ///< TPC+TOF Proton PID
+  kTpctofDeuteron, ///< TPC+TOF Deuteron PID
+  kTpctofTriton,   ///< TPC+TOF Triton PID
+  kTpctofHelium,   ///< TPC+TOF He3 PID
 
   kTrackPidSelMax
 };
@@ -104,13 +103,13 @@ class TrackPidSelection : public BaseSelection<float, o2::aod::femtodatatypes::T
     this->setBitmaskForObservable(TrackPidSels::kTofHelium, Track.tofNSigmaHe());
 
     // combined tpc + tof pid
-    this->setBitmaskForObservable(TrackPidSels::kTpctofElectron, utils::geometricMean(Track.tpcNSigmaEl(), Track.tofNSigmaEl()));
-    this->setBitmaskForObservable(TrackPidSels::kTpctofPion, utils::geometricMean(Track.tpcNSigmaPi(), Track.tofNSigmaPi()));
-    this->setBitmaskForObservable(TrackPidSels::kTpctofKaon, utils::geometricMean(Track.tpcNSigmaKa(), Track.tofNSigmaKa()));
-    this->setBitmaskForObservable(TrackPidSels::kTpctofProton, utils::geometricMean(Track.tpcNSigmaPr(), Track.tofNSigmaPr()));
-    this->setBitmaskForObservable(TrackPidSels::kTpctofDeuteron, utils::geometricMean(Track.tpcNSigmaDe(), Track.tofNSigmaDe()));
-    this->setBitmaskForObservable(TrackPidSels::kTpctofTriton, utils::geometricMean(Track.tpcNSigmaTr(), Track.tofNSigmaTr()));
-    this->setBitmaskForObservable(TrackPidSels::kTpctofHelium, utils::geometricMean(Track.tpcNSigmaHe(), Track.tofNSigmaHe()));
+    this->setBitmaskForObservable(TrackPidSels::kTpctofElectron, std::hypot(Track.tpcNSigmaEl(), Track.tofNSigmaEl()));
+    this->setBitmaskForObservable(TrackPidSels::kTpctofPion, std::hypot(Track.tpcNSigmaPi(), Track.tofNSigmaPi()));
+    this->setBitmaskForObservable(TrackPidSels::kTpctofKaon, std::hypot(Track.tpcNSigmaKa(), Track.tofNSigmaKa()));
+    this->setBitmaskForObservable(TrackPidSels::kTpctofProton, std::hypot(Track.tpcNSigmaPr(), Track.tofNSigmaPr()));
+    this->setBitmaskForObservable(TrackPidSels::kTpctofDeuteron, std::hypot(Track.tpcNSigmaDe(), Track.tofNSigmaDe()));
+    this->setBitmaskForObservable(TrackPidSels::kTpctofTriton, std::hypot(Track.tpcNSigmaTr(), Track.tofNSigmaTr()));
+    this->setBitmaskForObservable(TrackPidSels::kTpctofHelium, std::hypot(Track.tpcNSigmaHe(), Track.tofNSigmaHe()));
 
     this->assembleBismask();
   };

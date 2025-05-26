@@ -74,9 +74,12 @@ struct VzeroQa {
     Configurable<float> etaMax{"etaMax", 10.f, "Maximum eta"};
     Configurable<float> phiMin{"phiMin", 0.f, "Minimum eta"};
     Configurable<float> phiMax{"phiMax", 1.f * o2::constants::math::TwoPI, "Maximum phi"};
-    Configurable<float> massMin{"massMin", 1.f, "Minimum invariant mass"};
-    Configurable<float> massMax{"massMax", 1.2f, "Maximum invariant mass"};
-    Configurable<o2::aod::femtodatatypes::VzeroMaskType> mask{"mask", 1, "Bitmask for V0 selection"};
+    Configurable<float> massMin{"massMin", 1.f, "Minimum invariant mass for Lambda"};
+    Configurable<float> massMax{"massMax", 1.2f, "Maximum invariant mass for Lambda"};
+    Configurable<float> antiMassMin{"antiMassMin", 0, "Minimum invariant mass for AntiLambda"};
+    Configurable<float> antiMassMax{"antiMassMax", 9999, "Maximum invariant mass for AntiLambda"};
+    Configurable<o2::aod::femtodatatypes::VzeroMaskType> mask{"mask", 0, "Bitmask for V0 selection"};
+    Configurable<o2::aod::femtodatatypes::VzeroDauPidMaskType> dauPidMask{"dauPidMask", 6, "Bitmask for V0 selection"};
   } VzeroSelection;
 
   struct : ConfigurableGroup {
@@ -110,7 +113,8 @@ struct VzeroQa {
     (femtovzeros::negDauEta < VzeroDaughterSelection.etaMax) &&
     (femtovzeros::negDauPhi > VzeroDaughterSelection.phiMin) &&
     (femtovzeros::negDauPhi < VzeroDaughterSelection.phiMax) &&
-    ncheckbit(femtovzeros::vzeroMask, VzeroSelection.mask);
+    ncheckbit(femtovzeros::vzeroMask, VzeroSelection.mask) &&
+    ncheckbit(femtovzeros::vzeroDauPidMask, VzeroSelection.dauPidMask);
   Preslice<V0s> perColReco = aod::femtobase::collisionId;
 
   struct : ConfigurableGroup {
@@ -166,7 +170,6 @@ struct VzeroQa {
       {vzerohistmanager::kNegDauPt, {VzeroBinning.dauPt}},
       {vzerohistmanager::kNegDauEta, {VzeroBinning.dauEta}},
       {vzerohistmanager::kNegDauPhi, {VzeroBinning.dauPhi}},
-      {vzerohistmanager::kSign, {VzeroBinning.sign}},
       {vzerohistmanager::kDecayDauDca, {VzeroBinning.dauDca}},
       {vzerohistmanager::kDecayVtxX, {VzeroBinning.decayVertex}},
       {vzerohistmanager::kDecayVtxY, {VzeroBinning.decayVertex}},
@@ -176,16 +179,18 @@ struct VzeroQa {
       {vzerohistmanager::kPtVsEta, {VzeroBinning.pt, VzeroBinning.eta}},
       {vzerohistmanager::kPtVsPhi, {VzeroBinning.pt, VzeroBinning.phi}},
       {vzerohistmanager::kPhiVsEta, {VzeroBinning.phi, VzeroBinning.eta}},
-      {vzerohistmanager::kPosDaughTpcCluster, {VzeroBinning.dauTpcCluster}},
-      {vzerohistmanager::kPosDaughPtVsDcaxy, {VzeroBinning.dauPt, VzeroBinning.dauDcaxy}},
-      {vzerohistmanager::kPosDaughPtVsDcaz, {VzeroBinning.dauPt, VzeroBinning.dauDcaz}},
-      {vzerohistmanager::kPosDaughPtVsDca, {VzeroBinning.dauPt, VzeroBinning.dauDca}},
-      {vzerohistmanager::kPosDaughTpcNsigma, {VzeroBinning.dauP, VzeroBinning.dauTpcNsigma}},
-      {vzerohistmanager::kNegDaughTpcCluster, {VzeroBinning.dauTpcCluster}},
-      {vzerohistmanager::kNegDaughPtVsDcaxy, {VzeroBinning.dauPt, VzeroBinning.dauDcaxy}},
-      {vzerohistmanager::kNegDaughPtVsDcaz, {VzeroBinning.dauPt, VzeroBinning.dauDcaz}},
-      {vzerohistmanager::kNegDaughPtVsDca, {VzeroBinning.dauPt, VzeroBinning.dauDca}},
-      {vzerohistmanager::kNegDaughTpcNsigma, {VzeroBinning.dauP, VzeroBinning.dauTpcNsigma}},
+      {vzerohistmanager::kPosDauTpcCluster, {VzeroBinning.dauTpcCluster}},
+      {vzerohistmanager::kPosDauPtVsDcaxy, {VzeroBinning.dauPt, VzeroBinning.dauDcaxy}},
+      {vzerohistmanager::kPosDauPtVsDcaz, {VzeroBinning.dauPt, VzeroBinning.dauDcaz}},
+      {vzerohistmanager::kPosDauPtVsDca, {VzeroBinning.dauPt, VzeroBinning.dauDca}},
+      {vzerohistmanager::kPosDauProtonTpcNsigma, {VzeroBinning.dauP, VzeroBinning.dauTpcNsigma}},
+      {vzerohistmanager::kPosDauPionTpcNsigma, {VzeroBinning.dauP, VzeroBinning.dauTpcNsigma}},
+      {vzerohistmanager::kNegDauTpcCluster, {VzeroBinning.dauTpcCluster}},
+      {vzerohistmanager::kNegDauPtVsDcaxy, {VzeroBinning.dauPt, VzeroBinning.dauDcaxy}},
+      {vzerohistmanager::kNegDauPtVsDcaz, {VzeroBinning.dauPt, VzeroBinning.dauDcaz}},
+      {vzerohistmanager::kNegDauPtVsDca, {VzeroBinning.dauPt, VzeroBinning.dauDca}},
+      {vzerohistmanager::kNegDauProtonTpcNsigma, {VzeroBinning.dauP, VzeroBinning.dauTpcNsigma}},
+      {vzerohistmanager::kNegDauPionTpcNsigma, {VzeroBinning.dauP, VzeroBinning.dauTpcNsigma}},
     };
 
     vzeroHistManager.init<modes::Mode::kANALYSIS_QA>(&hRegistry, vzeroHistSpec);
