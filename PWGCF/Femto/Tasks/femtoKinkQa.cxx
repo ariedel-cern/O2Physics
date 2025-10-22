@@ -72,7 +72,7 @@ struct FemtoKinkQa {
   kinkbuilder::ConfSigmaSelection1 confSigmaSelection;
 
   Partition<Sigmas> sigmaPartition = MAKE_SIGMA_PARTITION(confSigmaSelection);
-  Preslice<Sigmas> perColSigmas = aod::femtobase::stored::collisionId;
+  Preslice<Sigmas> perColSigmas = aod::femtobase::stored::fColId;
 
   kinkhistmanager::ConfSigmaBinning1 confSigmaBinning;
   kinkhistmanager::ConfSigmaQaBinning1 confSigmaQaBinning;
@@ -104,7 +104,7 @@ struct FemtoKinkQa {
   void processSigma(FilteredCollision const& col, Sigmas const& /*sigmas*/, Tracks const& tracks)
   {
     colHistManager.fill(col);
-    auto sigmaSlice = sigmaPartition->sliceByCached(femtobase::stored::collisionId, col.globalIndex(), cache);
+    auto sigmaSlice = sigmaPartition->sliceByCached(femtobase::stored::fColId, col.globalIndex(), cache);
     for (auto const& sigma : sigmaSlice) {
       sigmaHistManager.fill(sigma, tracks);
     }
