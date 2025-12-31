@@ -407,7 +407,6 @@ class V0HistManager
   }
 
  private:
-
   // for qa
   template <typename T1>
   void enableOptionalHistograms(T1 const& V0ConfBinningQa)
